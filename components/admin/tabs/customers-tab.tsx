@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Plus, User } from "lucide-react"
+import { Search, Filter, Plus, User, Mail } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import CustomerAcquisitionChart from "@/components/admin/charts/customer-acquisition-chart"
 import CustomerRetentionChart from "@/components/admin/charts/customer-retention-chart"
+import { Badge } from "@/components/ui/badge"
 
 export default function CustomersTab() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -295,4 +296,124 @@ export default function CustomersTab() {
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">Teléfono</th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">Ubicación</th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">Pedidos</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">\
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Total Gastado</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Estado</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    id: "1",
+                    firstName: "Juan",
+                    lastName: "Pérez",
+                    email: "juan.perez@email.com",
+                    phone: "+1 (555) 123-4567",
+                    city: "Ciudad de México",
+                    state: "CDMX",
+                    orders: 12,
+                    totalSpent: 1247.85,
+                    status: "active",
+                  },
+                  {
+                    id: "2",
+                    firstName: "María",
+                    lastName: "López",
+                    email: "maria.lopez@email.com",
+                    phone: "+1 (555) 234-5678",
+                    city: "Guadalajara",
+                    state: "Jalisco",
+                    orders: 8,
+                    totalSpent: 892.5,
+                    status: "active",
+                  },
+                  {
+                    id: "3",
+                    firstName: "Carlos",
+                    lastName: "Rodríguez",
+                    email: "carlos.rodriguez@email.com",
+                    phone: "+1 (555) 345-6789",
+                    city: "Monterrey",
+                    state: "Nuevo León",
+                    orders: 15,
+                    totalSpent: 1856.75,
+                    status: "active",
+                  },
+                  {
+                    id: "4",
+                    firstName: "Ana",
+                    lastName: "Martínez",
+                    email: "ana.martinez@email.com",
+                    phone: "+1 (555) 456-7890",
+                    city: "Puebla",
+                    state: "Puebla",
+                    orders: 3,
+                    totalSpent: 245.99,
+                    status: "inactive",
+                  },
+                  {
+                    id: "5",
+                    firstName: "Roberto",
+                    lastName: "Sánchez",
+                    email: "roberto.sanchez@email.com",
+                    phone: "+1 (555) 567-8901",
+                    city: "Tijuana",
+                    state: "Baja California",
+                    orders: 6,
+                    totalSpent: 567.25,
+                    status: "active",
+                  },
+                ].map((customer) => (
+                  <tr key={customer.id} className="border-b border-gray-800">
+                    <td className="py-3 px-4">
+                      <div>
+                        <p className="font-medium">
+                          {customer.firstName} {customer.lastName}
+                        </p>
+                        <p className="text-gray-400 text-sm">ID: {customer.id}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">{customer.email}</td>
+                    <td className="py-3 px-4">{customer.phone}</td>
+                    <td className="py-3 px-4">
+                      {customer.city}, {customer.state}
+                    </td>
+                    <td className="py-3 px-4">{customer.orders}</td>
+                    <td className="py-3 px-4">${customer.totalSpent}</td>
+                    <td className="py-3 px-4">
+                      <Badge
+                        variant="outline"
+                        className={`${
+                          customer.status === "active"
+                            ? "border-green-600 text-green-400"
+                            : "border-red-600 text-red-400"
+                        }`}
+                      >
+                        {customer.status === "active" ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-400 hover:text-white"
+                          onClick={() => handleEditCustomer(customer)}
+                        >
+                          <User className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                          <Mail className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
