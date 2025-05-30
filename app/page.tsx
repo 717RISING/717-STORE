@@ -1,53 +1,54 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Menu, User } from "lucide-react"
+import { User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CartSidebar from "@/components/cart-sidebar"
+import MobileMenu from "@/components/mobile-menu"
 import { products } from "@/lib/products"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation Header */}
-      <header className="relative z-10 px-4 py-6">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
-              INICIO
-            </Link>
-            <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
-              PRODUCTOS
-            </Link>
-            <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
-              CONTACTO
-            </Link>
+      <header className="relative z-10 px-4 py-6 bg-transparent">
+        <nav className="max-w-7xl mx-auto">
+          {/* Top Row - Icons Only */}
+          <div className="flex justify-end items-center mb-4">
+            <div className="flex items-center space-x-4">
+              <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+                <User className="w-6 h-6" />
+              </Link>
+              <CartSidebar />
+            </div>
           </div>
 
           {/* Center Logo */}
-          <Link href="/" className="flex items-center">
-            <div className="w-16 h-16 relative">
-              <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
-            </div>
-          </Link>
-
-          {/* Right Icons */}
-          <div className="flex items-center space-x-4">
-            <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
-              <User className="w-6 h-6" />
+          <div className="flex justify-center mb-6">
+            <Link href="/" className="flex items-center">
+              <div className="w-16 h-16 relative">
+                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
+              </div>
             </Link>
-            <CartSidebar />
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden absolute right-0 flex items-center space-x-2">
-            <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
-              <User className="w-6 h-6" />
-            </Link>
-            <CartSidebar />
-            <Button variant="ghost" size="icon" className="text-white">
-              <Menu className="w-6 h-6" />
-            </Button>
+          {/* Bottom Row - Navigation Links */}
+          <div className="flex justify-center">
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
+                INICIO
+              </Link>
+              <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
+                PRODUCTOS
+              </Link>
+              <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
+                CONTACTO
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <MobileMenu />
+            </div>
           </div>
         </nav>
       </header>
@@ -84,7 +85,7 @@ export default function HomePage() {
           <h2 className="text-4xl font-bold text-center mb-16">PRODUCTOS DESTACADOS</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product) => (
+            {products.slice(0, 6).map((product) => (
               <Link key={product.id} href={`/productos/${product.id}`} className="group cursor-pointer">
                 <div className="relative overflow-hidden bg-gray-900 rounded-lg mb-4">
                   <Image

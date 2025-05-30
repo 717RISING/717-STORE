@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { searchProducts, categories, type Product } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
-import { Menu } from "lucide-react"
+import MobileMenu from "@/components/mobile-menu"
 
 export default function ProductsPage() {
   const searchParams = useSearchParams()
@@ -56,45 +56,45 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <header className="px-4 py-6 border-b border-gray-800">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
-              INICIO
-            </Link>
-            <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
-              PRODUCTOS
-            </Link>
-            <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
-              CONTACTO
-            </Link>
+      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
+        <nav className="max-w-7xl mx-auto">
+          {/* Top Row - Icons Only */}
+          <div className="flex justify-end items-center mb-4">
+            <div className="flex items-center space-x-4">
+              <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+                <User className="w-6 h-6" />
+              </Link>
+              <CartSidebar />
+            </div>
           </div>
 
           {/* Center Logo */}
-          <Link href="/" className="flex items-center">
-            <div className="w-16 h-16 relative">
-              <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
-            </div>
-          </Link>
-
-          {/* Right Icons */}
-          <div className="flex items-center space-x-4">
-            <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
-              <User className="w-6 h-6" />
+          <div className="flex justify-center mb-6">
+            <Link href="/" className="flex items-center">
+              <div className="w-16 h-16 relative">
+                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
+              </div>
             </Link>
-            <CartSidebar />
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden absolute right-0 flex items-center space-x-2">
-            <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
-              <User className="w-6 h-6" />
-            </Link>
-            <CartSidebar />
-            <Button variant="ghost" size="icon" className="text-white">
-              <Menu className="w-6 h-6" />
-            </Button>
+          {/* Bottom Row - Navigation Links */}
+          <div className="flex justify-center">
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
+                INICIO
+              </Link>
+              <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
+                PRODUCTOS
+              </Link>
+              <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
+                CONTACTO
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <MobileMenu />
+            </div>
           </div>
         </nav>
       </header>
