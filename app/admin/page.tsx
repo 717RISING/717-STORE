@@ -13,7 +13,7 @@ export default function AdminPage() {
   // Check if admin is logged in on component mount
   useEffect(() => {
     const adminAuth = localStorage.getItem("adminAuth")
-    if (adminAuth === "true") {
+    if (adminAuth === "authenticated") {
       setIsLoggedIn(true)
     }
     setIsLoading(false)
@@ -21,7 +21,7 @@ export default function AdminPage() {
 
   const handleLogin = (success: boolean) => {
     if (success) {
-      localStorage.setItem("adminAuth", "true")
+      localStorage.setItem("adminAuth", "authenticated")
       setIsLoggedIn(true)
     }
   }

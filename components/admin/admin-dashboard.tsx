@@ -83,7 +83,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   return (
     <div className="min-h-screen bg-black text-white flex">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-gray-900 border-r border-gray-800 p-6">
+      <aside className="hidden md:flex flex-col w-56 bg-gray-900 border-r border-gray-800 p-4">
         <div className="flex items-center mb-8">
           <div className="w-10 h-10 relative mr-3">
             <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" />
@@ -121,7 +121,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       ></div>
 
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-gray-900 border-r border-gray-800 p-6 z-50 md:hidden transform transition-transform duration-200 ${
+        className={`fixed inset-y-0 left-0 w-56 bg-gray-900 border-r border-gray-800 p-4 z-50 md:hidden transform transition-transform duration-200 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -193,7 +193,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <Input
                   type="text"
                   placeholder="Buscar..."
-                  className="pl-9 w-64 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                  className="pl-9 w-48 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
                 />
               </div>
 

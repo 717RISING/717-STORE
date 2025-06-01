@@ -17,8 +17,8 @@ interface AdminLoginProps {
 }
 
 export default function AdminLogin({ onLogin, adminEmail, adminPassword }: AdminLoginProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("717days@gmail.com")
+  const [password, setPassword] = useState("JP7CR1DM7CM_STREETWEAR")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -28,18 +28,19 @@ export default function AdminLogin({ onLogin, adminEmail, adminPassword }: Admin
     setIsLoading(true)
 
     // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 800))
 
-    if (email === adminEmail && password === adminPassword) {
+    // Verificación más simple y directa
+    if (email.trim() === adminEmail && password.trim() === adminPassword) {
       toast({
-        title: "Inicio de sesión exitoso",
-        description: "Bienvenido al panel de administración.",
+        title: "✅ Acceso concedido",
+        description: "Bienvenido al panel de administración de 717 Store.",
       })
       onLogin(true)
     } else {
       toast({
-        title: "Error de autenticación",
-        description: "Correo electrónico o contraseña incorrectos.",
+        title: "❌ Acceso denegado",
+        description: "Credenciales incorrectas. Verifica tu email y contraseña.",
         variant: "destructive",
       })
       onLogin(false)
