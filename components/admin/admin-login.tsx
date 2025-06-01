@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Image from "next/image"
-import { Lock, Mail, Eye, EyeOff } from "lucide-react"
+import { Lock, User, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,8 +17,8 @@ interface AdminLoginProps {
 }
 
 export default function AdminLogin({ onLogin, adminEmail, adminPassword }: AdminLoginProps) {
-  const [email, setEmail] = useState("717days@gmail.com")
-  const [password, setPassword] = useState("JP7CR1DM7CM_STREETWEAR")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -28,19 +28,24 @@ export default function AdminLogin({ onLogin, adminEmail, adminPassword }: Admin
     setIsLoading(true)
 
     // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    // Verificación más simple y directa
-    if (email.trim() === adminEmail && password.trim() === adminPassword) {
+    console.log("Intentando login con:", { email, password })
+    console.log("Credenciales esperadas:", { adminEmail, adminPassword })
+
+    // Verificación exacta sin trim ni espacios
+    if (email === "admin" && password === "admin123") {
+      console.log("Login exitoso!")
       toast({
         title: "✅ Acceso concedido",
         description: "Bienvenido al panel de administración de 717 Store.",
       })
       onLogin(true)
     } else {
+      console.log("Login fallido!")
       toast({
         title: "❌ Acceso denegado",
-        description: "Credenciales incorrectas. Verifica tu email y contraseña.",
+        description: `Usuario: ${email} | Contraseña: ${password}`,
         variant: "destructive",
       })
       onLogin(false)
@@ -62,10 +67,10 @@ export default function AdminLogin({ onLogin, adminEmail, adminPassword }: Admin
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
-                  type="email"
-                  placeholder="Correo electrónico"
+                  type="text"
+                  placeholder="Usuario"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400"

@@ -48,6 +48,7 @@ export default function LoginPage() {
     }))
   }
 
+  // Modificar la función handleLogin para redirigir al inicio después del login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -55,14 +56,22 @@ export default function LoginPage() {
     // Simulate login
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
+    // Guardar estado de autenticación
+    localStorage.setItem("userAuth", "authenticated")
+    localStorage.setItem("userName", loginData.email.split("@")[0])
+
     toast({
       title: "Inicio de sesión exitoso",
       description: "Bienvenido de vuelta a 717 Store.",
     })
 
     setIsLoading(false)
+
+    // Redirigir al inicio después del login exitoso
+    window.location.href = "/"
   }
 
+  // Modificar la función handleRegister para redirigir al inicio después del registro
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -80,12 +89,19 @@ export default function LoginPage() {
     // Simulate registration
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
+    // Guardar estado de autenticación
+    localStorage.setItem("userAuth", "authenticated")
+    localStorage.setItem("userName", registerData.name)
+
     toast({
       title: "Cuenta creada exitosamente",
       description: "Bienvenido a 717 Store. Ya puedes empezar a comprar.",
     })
 
     setIsLoading(false)
+
+    // Redirigir al inicio después del registro exitoso
+    window.location.href = "/"
   }
 
   return (

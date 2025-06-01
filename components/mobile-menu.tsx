@@ -66,12 +66,12 @@ export default function MobileMenu() {
           {/* Bottom Actions */}
           <div className="border-t border-gray-800 pt-6 space-y-4">
             <Link
-              href="/login"
+              href="/cuenta"
               onClick={closeMenu}
               className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
             >
               <User className="w-5 h-5" />
-              <span>INICIAR SESIÓN</span>
+              <span>MI CUENTA</span>
             </Link>
 
             <div className="flex items-center justify-between py-3 px-4">

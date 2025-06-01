@@ -61,7 +61,7 @@ export default function ProductsPage() {
           {/* Top Row - Icons Only */}
           <div className="flex justify-end items-center mb-4">
             <div className="flex items-center space-x-4">
-              <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+              <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
                 <User className="w-6 h-6" />
               </Link>
               <CartSidebar />

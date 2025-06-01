@@ -1,20 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { User, Package, Settings, Heart, MapPin, CreditCard, LogOut, Edit } from "lucide-react"
+import { User, Package, LogOut, Edit, CreditCard, Eye, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
-import ProfileTab from "@/components/dashboard/profile-tab"
-import OrdersTab from "@/components/dashboard/orders-tab"
-import AddressesTab from "@/components/dashboard/addresses-tab"
-import PaymentTab from "@/components/dashboard/payment-tab"
-import WishlistTab from "@/components/dashboard/wishlist-tab"
-import SettingsTab from "@/components/dashboard/settings-tab"
 
 // Mock user data
 const userData = {
@@ -24,20 +19,116 @@ const userData = {
   phone: "+1 (555) 123-4567",
   avatar: "/placeholder.svg?height=100&width=100",
   joinDate: "2023-01-15",
-  totalOrders: 12,
-  totalSpent: 1247.85,
-  loyaltyPoints: 2495,
+  address: "Calle Principal 123, Ciudad, Estado 12345",
+  totalOrders: 8,
+  totalSpent: 847.5,
 }
 
-export default function AccountDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
+// Mock orders data
+const userOrders = [
+  {
+    id: "717001",
+    date: "2024-01-15",
+    status: "delivered",
+    total: 129.99,
+    items: 3,
+    tracking: "717TRK001",
+  },
+  {
+    id: "717002",
+    date: "2024-01-10",
+    status: "shipped",
+    total: 89.98,
+    items: 2,
+    tracking: "717TRK002",
+  },
+  {
+    id: "717003",
+    date: "2024-01-05",
+    status: "processing",
+    total: 64.99,
+    items: 1,
+    tracking: null,
+  },
+  {
+    id: "717004",
+    date: "2023-12-20",
+    status: "delivered",
+    total: 154.99,
+    items: 4,
+    tracking: "717TRK004",
+  },
+  {
+    id: "717005",
+    date: "2023-12-15",
+    status: "delivered",
+    total: 79.99,
+    items: 2,
+    tracking: "717TRK005",
+  },
+]
+
+const statusConfig = {
+  processing: { label: "Procesando", color: "border-yellow-600 text-yellow-400 bg-yellow-900/20" },
+  shipped: { label: "Enviado", color: "border-blue-600 text-blue-400 bg-blue-900/20" },
+  delivered: { label: "Entregado", color: "border-green-600 text-green-400 bg-green-900/20" },
+}
+
+export default function UserAccount() {
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState({
+    name: userData.name,
+    email: userData.email,
+    phone: userData.phone,
+    address: userData.address,
+  })
+
+  // Modificar el useEffect para redirigir al login si no está autenticado
+  useEffect(() => {
+    const userAuth = localStorage.getItem("userAuth")
+    const storedUserName = localStorage.getItem("userName")
+
+    if (userAuth === "authenticated") {
+      setIsAuthenticated(true)
+      if (storedUserName) {
+        setUserName(storedUserName)
+        setEditData((prev) => ({ ...prev, name: storedUserName }))
+      }
+    } else {
+      // Si no está autenticado, redirigir al login
+      window.location.href = "/login"
+    }
+  }, [])
+
+  const handleSaveProfile = () => {
+    // Aquí guardarías los datos en la base de datos
+    localStorage.setItem("userName", editData.name)
+    setUserName(editData.name)
+    setIsEditing(false)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("userAuth")
+    localStorage.removeItem("userName")
+    window.location.href = "/"
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
       <header className="px-4 py-6 bg-transparent border-b border-gray-800">
         <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons Only */}
           <div className="flex justify-end items-center mb-4">
             <div className="flex items-center space-x-4">
               <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
@@ -47,7 +138,6 @@ export default function AccountDashboard() {
             </div>
           </div>
 
-          {/* Center Logo */}
           <div className="flex justify-center mb-6">
             <Link href="/" className="flex items-center">
               <div className="w-16 h-16 relative">
@@ -56,7 +146,6 @@ export default function AccountDashboard() {
             </Link>
           </div>
 
-          {/* Bottom Row - Navigation Links */}
           <div className="flex justify-center">
             <div className="hidden md:flex items-center space-x-8">
               <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
@@ -69,8 +158,6 @@ export default function AccountDashboard() {
                 CONTACTO
               </Link>
             </div>
-
-            {/* Mobile Menu Button */}
             <div className="md:hidden">
               <MobileMenu />
             </div>
@@ -78,7 +165,7 @@ export default function AccountDashboard() {
         </nav>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
@@ -87,27 +174,27 @@ export default function AccountDashboard() {
                 <div className="w-20 h-20 mx-auto mb-4 relative">
                   <Image
                     src={userData.avatar || "/placeholder.svg"}
-                    alt={userData.name}
+                    alt={userName || userData.name}
                     fill
                     className="rounded-full object-cover"
                   />
                 </div>
-                <CardTitle className="text-white">{userData.name}</CardTitle>
-                <p className="text-gray-400 text-sm">{userData.email}</p>
+                <CardTitle className="text-white">{userName || userData.name}</CardTitle>
+                <p className="text-gray-400 text-sm">{editData.email}</p>
                 <Badge variant="outline" className="border-gray-600 text-gray-300 mt-2">
-                  Miembro desde {new Date(userData.joinDate).getFullYear()}
+                  Cliente desde {new Date(userData.joinDate).getFullYear()}
                 </Badge>
               </CardHeader>
               <CardContent>
                 <nav className="space-y-2">
                   <button
-                    onClick={() => setActiveTab("overview")}
+                    onClick={() => setActiveTab("profile")}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      activeTab === "overview" ? "bg-white text-black" : "hover:bg-gray-800"
+                      activeTab === "profile" ? "bg-white text-black" : "hover:bg-gray-800"
                     }`}
                   >
                     <User className="w-5 h-5" />
-                    <span>Resumen</span>
+                    <span>Mi Perfil</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("orders")}
@@ -118,57 +205,13 @@ export default function AccountDashboard() {
                     <Package className="w-5 h-5" />
                     <span>Mis Pedidos</span>
                   </button>
-                  <button
-                    onClick={() => setActiveTab("profile")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      activeTab === "profile" ? "bg-white text-black" : "hover:bg-gray-800"
-                    }`}
-                  >
-                    <Edit className="w-5 h-5" />
-                    <span>Mi Perfil</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("addresses")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      activeTab === "addresses" ? "bg-white text-black" : "hover:bg-gray-800"
-                    }`}
-                  >
-                    <MapPin className="w-5 h-5" />
-                    <span>Direcciones</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("payment")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      activeTab === "payment" ? "bg-white text-black" : "hover:bg-gray-800"
-                    }`}
-                  >
-                    <CreditCard className="w-5 h-5" />
-                    <span>Métodos de Pago</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("wishlist")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      activeTab === "wishlist" ? "bg-white text-black" : "hover:bg-gray-800"
-                    }`}
-                  >
-                    <Heart className="w-5 h-5" />
-                    <span>Lista de Deseos</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("settings")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      activeTab === "settings" ? "bg-white text-black" : "hover:bg-gray-800"
-                    }`}
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span>Configuración</span>
-                  </button>
                 </nav>
 
                 <div className="mt-6 pt-6 border-t border-gray-800">
                   <Button
                     variant="ghost"
                     className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    onClick={handleLogout}
                   >
                     <LogOut className="w-5 h-5 mr-3" />
                     Cerrar Sesión
@@ -180,23 +223,29 @@ export default function AccountDashboard() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {activeTab === "overview" && (
+            {activeTab === "profile" && (
               <div className="space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">Bienvenido, {userData.name.split(" ")[0]}!</h1>
-                  <p className="text-gray-400">Aquí tienes un resumen de tu cuenta</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-2">Mi Perfil</h1>
+                    <p className="text-gray-400">Gestiona tu información personal</p>
+                  </div>
+                  <Button onClick={() => setIsEditing(!isEditing)} className="bg-white text-black hover:bg-gray-200">
+                    <Edit className="w-4 h-4 mr-2" />
+                    {isEditing ? "Cancelar" : "Editar"}
+                  </Button>
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <Card className="bg-gray-900 border-gray-800">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-gray-400 text-sm">Total de Pedidos</p>
-                          <p className="text-2xl font-bold">{userData.totalOrders}</p>
+                          <p className="text-3xl font-bold">{userData.totalOrders}</p>
                         </div>
-                        <Package className="w-8 h-8 text-gray-400" />
+                        <Package className="w-10 h-10 text-gray-400" />
                       </div>
                     </CardContent>
                   </Card>
@@ -206,75 +255,175 @@ export default function AccountDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-gray-400 text-sm">Total Gastado</p>
-                          <p className="text-2xl font-bold">${userData.totalSpent}</p>
+                          <p className="text-3xl font-bold">${userData.totalSpent}</p>
                         </div>
-                        <CreditCard className="w-8 h-8 text-gray-400" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gray-900 border-gray-800">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-gray-400 text-sm">Puntos de Lealtad</p>
-                          <p className="text-2xl font-bold">{userData.loyaltyPoints}</p>
-                        </div>
-                        <Heart className="w-8 h-8 text-gray-400" />
+                        <CreditCard className="w-10 h-10 text-gray-400" />
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Recent Orders */}
+                {/* Profile Information */}
                 <Card className="bg-gray-900 border-gray-800">
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-white">Pedidos Recientes</CardTitle>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setActiveTab("orders")}
-                        className="text-gray-400 hover:text-white"
-                      >
-                        Ver todos
-                      </Button>
-                    </div>
+                    <CardTitle className="text-white">Información Personal</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((order) => (
-                        <div key={order} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
-                              <Package className="w-6 h-6" />
-                            </div>
-                            <div>
-                              <p className="font-semibold">Pedido #717{order.toString().padStart(3, "0")}</p>
-                              <p className="text-gray-400 text-sm">
-                                {new Date(Date.now() - order * 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">${(Math.random() * 200 + 50).toFixed(2)}</p>
-                            <Badge variant="outline" className="border-green-600 text-green-400">
-                              Entregado
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Nombre Completo</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.name}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.name}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.email}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, email: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.email}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.phone}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, phone: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.phone}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Dirección</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.address}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, address: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.address}</p>
+                        )}
+                      </div>
                     </div>
+
+                    {isEditing && (
+                      <div className="flex gap-4 pt-4">
+                        <Button onClick={handleSaveProfile} className="bg-green-600 hover:bg-green-700">
+                          Guardar Cambios
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditing(false)}
+                          className="border-gray-600 text-white hover:bg-gray-800"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
             )}
 
-            {activeTab === "orders" && <OrdersTab />}
-            {activeTab === "profile" && <ProfileTab userData={userData} />}
-            {activeTab === "addresses" && <AddressesTab />}
-            {activeTab === "payment" && <PaymentTab />}
-            {activeTab === "wishlist" && <WishlistTab />}
-            {activeTab === "settings" && <SettingsTab />}
+            {activeTab === "orders" && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold mb-2">Mis Pedidos</h1>
+                  <p className="text-gray-400">Historial completo de tus compras</p>
+                </div>
+
+                <div className="space-y-4">
+                  {userOrders.map((order) => (
+                    <Card key={order.id} className="bg-gray-900 border-gray-800">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
+                              <Package className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">Pedido #{order.id}</h3>
+                              <p className="text-gray-400 text-sm">
+                                {new Date(order.date).toLocaleDateString()} • {order.items} artículo
+                                {order.items > 1 ? "s" : ""}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <Badge
+                              variant="outline"
+                              className={statusConfig[order.status as keyof typeof statusConfig].color}
+                            >
+                              {statusConfig[order.status as keyof typeof statusConfig].label}
+                            </Badge>
+                            <div className="text-right">
+                              <p className="text-xl font-bold">${order.total}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-4 pt-4 border-t border-gray-800">
+                          <Button variant="outline" size="sm" className="border-gray-600 text-white hover:bg-gray-800">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Ver Detalles
+                          </Button>
+                          {order.tracking && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-gray-600 text-white hover:bg-gray-800"
+                            >
+                              <Package className="w-4 h-4 mr-2" />
+                              Rastrear
+                            </Button>
+                          )}
+                          <Button variant="outline" size="sm" className="border-gray-600 text-white hover:bg-gray-800">
+                            <Download className="w-4 h-4 mr-2" />
+                            Factura
+                          </Button>
+                          {order.status === "delivered" && (
+                            <Button size="sm" className="bg-white text-black hover:bg-gray-200">
+                              Comprar de Nuevo
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {userOrders.length === 0 && (
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardContent className="text-center py-12">
+                      <Package className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                      <h3 className="text-xl font-semibold mb-2">No tienes pedidos aún</h3>
+                      <p className="text-gray-400 mb-6">¡Explora nuestros productos y realiza tu primera compra!</p>
+                      <Link href="/productos">
+                        <Button className="bg-white text-black hover:bg-gray-200">Explorar Productos</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

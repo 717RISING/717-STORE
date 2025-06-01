@@ -12,7 +12,9 @@ export default function AdminPage() {
 
   // Check if admin is logged in on component mount
   useEffect(() => {
+    // Verificar autenticación de ADMIN (separada de usuarios normales)
     const adminAuth = localStorage.getItem("adminAuth")
+    console.log("Estado de auth de admin en localStorage:", adminAuth)
     if (adminAuth === "authenticated") {
       setIsLoggedIn(true)
     }
@@ -20,13 +22,18 @@ export default function AdminPage() {
   }, [])
 
   const handleLogin = (success: boolean) => {
+    console.log("handleLogin de admin llamado con:", success)
     if (success) {
+      // Guardar autenticación de ADMIN (separada de usuarios)
       localStorage.setItem("adminAuth", "authenticated")
+      console.log("Auth de admin guardado en localStorage")
       setIsLoggedIn(true)
     }
   }
 
   const handleLogout = () => {
+    console.log("Cerrando sesión de admin...")
+    // Solo remover autenticación de admin, no de usuarios normales
     localStorage.removeItem("adminAuth")
     setIsLoggedIn(false)
   }
@@ -44,7 +51,7 @@ export default function AdminPage() {
       {isLoggedIn ? (
         <AdminDashboard onLogout={handleLogout} />
       ) : (
-        <AdminLogin onLogin={handleLogin} adminEmail="717days@gmail.com" adminPassword="JP7CR1DM7CM_STREETWEAR" />
+        <AdminLogin onLogin={handleLogin} adminEmail="admin" adminPassword="admin123" />
       )}
     </div>
   )
