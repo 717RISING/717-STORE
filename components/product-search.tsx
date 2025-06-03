@@ -34,7 +34,7 @@ export default function ProductSearch() {
       <Button
         type="submit"
         size="sm"
-        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-white text-black hover:bg-gray-200"
+        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
       >
         Buscar
       </Button>

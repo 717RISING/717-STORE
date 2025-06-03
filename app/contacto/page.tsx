@@ -186,7 +186,7 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-[#8B2635] text-white hover:bg-[#9A3444] font-semibold py-3 text-lg"
+                    className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold py-3 text-lg"
                   >
                     {isSubmitting ? (
                       "Enviando..."

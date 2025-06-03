@@ -47,10 +47,10 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --wine-red: #8b2635;
-    --wine-red-light: #a53e52;
-    --wine-red-dark: #6b1e2a;
-    --wine-red-hover: #9a3444;
+    --wine-red: #5d1a1d;
+    --wine-red-light: #7a2428;
+    --wine-red-dark: #4a1518;
+    --wine-red-hover: #6b1e22;
   }
   .dark {
     --background: 0 0% 3.9%;

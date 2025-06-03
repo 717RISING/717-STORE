@@ -216,7 +216,7 @@ export default function PaymentTab() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddPaymentMethod} className="bg-white text-black hover:bg-gray-200">
+            <Button onClick={handleAddPaymentMethod} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
               <Plus className="w-4 h-4 mr-2" />
               Agregar Tarjeta
             </Button>
@@ -316,7 +316,7 @@ export default function PaymentTab() {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button onClick={handleSavePaymentMethod} className="bg-white text-black hover:bg-gray-200">
+                <Button onClick={handleSavePaymentMethod} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
                   {editingMethod ? "Actualizar" : "Agregar"} Tarjeta
                 </Button>
                 <Button
@@ -399,7 +399,7 @@ export default function PaymentTab() {
             <CreditCard className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <h3 className="text-xl font-semibold mb-2">No tienes métodos de pago guardados</h3>
             <p className="text-gray-400 mb-6">Agrega una tarjeta para facilitar tus compras</p>
-            <Button onClick={handleAddPaymentMethod} className="bg-white text-black hover:bg-gray-200">
+            <Button onClick={handleAddPaymentMethod} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
               <Plus className="w-4 h-4 mr-2" />
               Agregar Primera Tarjeta
             </Button>

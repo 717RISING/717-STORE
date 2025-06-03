@@ -1,130 +1,435 @@
-```typescriptreact file="components/cart-sidebar.tsx"
-[v0-no-op-code-block-prefix]"use client"
+"use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react'
+import Link from "next/link"
+import { User, Package, LogOut, Edit, CreditCard, Eye, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useCart } from "@/lib/cart-context"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import CartSidebar from "@/components/cart-sidebar"
+import MobileMenu from "@/components/mobile-menu"
 
-export default function CartSidebar() {
-  const { state, dispatch } = useCart()
-  const [isOpen, setIsOpen] = useState(false)
+// Mock user data
+const userData = {
+  id: "1",
+  name: "Juan Pérez",
+  email: "juan.perez@email.com",
+  phone: "+1 (555) 123-4567",
+  avatar: "/placeholder.svg?height=100&width=100",
+  joinDate: "2023-01-15",
+  address: "Calle Principal 123, Ciudad, Estado 12345",
+  totalOrders: 8,
+  totalSpent: 847.5,
+}
 
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      dispatch({ type: "REMOVE_ITEM", payload: id })
+// Mock orders data
+const userOrders = [
+  {
+    id: "717001",
+    date: "2024-01-15",
+    status: "delivered",
+    total: 129.99,
+    items: 3,
+    tracking: "717TRK001",
+  },
+  {
+    id: "717002",
+    date: "2024-01-10",
+    status: "shipped",
+    total: 89.98,
+    items: 2,
+    tracking: "717TRK002",
+  },
+  {
+    id: "717003",
+    date: "2024-01-05",
+    status: "processing",
+    total: 64.99,
+    items: 1,
+    tracking: null,
+  },
+  {
+    id: "717004",
+    date: "2023-12-20",
+    status: "delivered",
+    total: 154.99,
+    items: 4,
+    tracking: "717TRK004",
+  },
+  {
+    id: "717005",
+    date: "2023-12-15",
+    status: "delivered",
+    total: 79.99,
+    items: 2,
+    tracking: "717TRK005",
+  },
+]
+
+const statusConfig = {
+  processing: { label: "Procesando", color: "border-yellow-600 text-yellow-400 bg-yellow-900/20" },
+  shipped: { label: "Enviado", color: "border-blue-600 text-blue-400 bg-blue-900/20" },
+  delivered: { label: "Entregado", color: "border-green-600 text-green-400 bg-green-900/20" },
+}
+
+export default function UserAccount() {
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState({
+    name: userData.name,
+    email: userData.email,
+    phone: userData.phone,
+    address: userData.address,
+  })
+
+  // Modificar el useEffect para redirigir al login si no está autenticado
+  useEffect(() => {
+    const userAuth = localStorage.getItem("userAuth")
+    const storedUserName = localStorage.getItem("userName")
+
+    if (userAuth === "authenticated") {
+      setIsAuthenticated(true)
+      if (storedUserName) {
+        setUserName(storedUserName)
+        setEditData((prev) => ({ ...prev, name: storedUserName }))
+      }
     } else {
-      dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: newQuantity } })
+      // Si no está autenticado, redirigir al login
+      window.location.href = "/login"
     }
+  }, [])
+
+  const handleSaveProfile = () => {
+    // Aquí guardarías los datos en la base de datos
+    localStorage.setItem("userName", editData.name)
+    setUserName(editData.name)
+    setIsEditing(false)
   }
 
-  const removeItem = (id: string) => {
-    dispatch({ type: "REMOVE_ITEM", payload: id })
+  const handleLogout = () => {
+    localStorage.removeItem("userAuth")
+    localStorage.removeItem("userName")
+    window.location.href = "/"
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    )
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white hover:text-gray-300 relative">
-          <ShoppingBag className="w-5 h-5" />
-          {state.items.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {state.items.reduce((sum, item) => sum + item.quantity, 0)}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
-
-      <SheetContent className="bg-black text-white border-gray-800 w-full sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle className="text-white">Carrito de compras</SheetTitle>
-        </SheetHeader>
-
-        <div className="flex flex-col h-full">
-          {state.items.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-                <p className="text-gray-400">Tu carrito está vacío</p>
-              </div>
+    <div className="min-h-screen bg-black text-white">
+      {/* Navigation */}
+      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
+        <nav className="max-w-7xl mx-auto">
+          <div className="flex justify-end items-center mb-4">
+            <div className="flex items-center space-x-4">
+              <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
+                <User className="w-6 h-6" />
+              </Link>
+              <CartSidebar />
             </div>
-          ) : (
-            <>
-              {/* Cart Items */}
-              <div className="flex-1 overflow-y-auto py-4 space-y-4">
-                {state.items.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-800 rounded-lg">
-                    <div className="relative w-16 h-16 bg-gray-900 rounded-lg overflow-hidden">
-                      <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
-                    </div>
+          </div>
 
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium truncate">{item.name}</h4>
-                      <p className="text-sm text-gray-400">Talla: {item.size}</p>
-                      <p className="font-semibold">${item.price}</p>
-                    </div>
+          <div className="flex justify-center mb-6">
+            <Link href="/" className="flex items-center">
+              <div className="w-16 h-16 relative">
+                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
+              </div>
+            </Link>
+          </div>
 
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 border-gray-600 text-white hover:bg-gray-800"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </Button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 border-gray-600 text-white hover:bg-gray-800"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </Button>
-                    </div>
+          <div className="flex justify-center">
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
+                INICIO
+              </Link>
+              <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
+                PRODUCTOS
+              </Link>
+              <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
+                CONTACTO
+              </Link>
+            </div>
+            <div className="md:hidden">
+              <MobileMenu />
+            </div>
+          </div>
+        </nav>
+      </header>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.id)}
-                      className="text-gray-400 hover:text-red-400"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 mx-auto mb-4 relative">
+                  <Image
+                    src={userData.avatar || "/placeholder.svg"}
+                    alt={userName || userData.name}
+                    fill
+                    className="rounded-full object-cover"
+                  />
+                </div>
+                <CardTitle className="text-white">{userName || userData.name}</CardTitle>
+                <p className="text-gray-400 text-sm">{editData.email}</p>
+                <Badge variant="outline" className="border-gray-600 text-gray-300 mt-2">
+                  Cliente desde {new Date(userData.joinDate).getFullYear()}
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <nav className="space-y-2">
+                  <button
+                    onClick={() => setActiveTab("profile")}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                      activeTab === "profile" ? "bg-[#5D1A1D] text-white" : "hover:bg-gray-800"
+                    }`}
+                  >
+                    <User className="w-5 h-5" />
+                    <span>Mi Perfil</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("orders")}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                      activeTab === "orders" ? "bg-[#5D1A1D] text-white" : "hover:bg-gray-800"
+                    }`}
+                  >
+                    <Package className="w-5 h-5" />
+                    <span>Mis Pedidos</span>
+                  </button>
+                </nav>
+
+                <div className="mt-6 pt-6 border-t border-gray-800">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-5 h-5 mr-3" />
+                    Cerrar Sesión
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {activeTab === "profile" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-2">Mi Perfil</h1>
+                    <p className="text-gray-400">Gestiona tu información personal</p>
                   </div>
-                ))}
-              </div>
-
-              {/* Cart Summary */}
-              <div className="border-t border-gray-800 pt-4 space-y-4">
-                <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total:</span>
-                  <span>${state.total.toFixed(2)}</span>
-                </div>
-
-                <div className="space-y-2">
                   <Button
-                    className="w-full bg-[#8B2635] text-white hover:bg-[#9A3444] font-semibold"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
                   >
-                    PROCEDER AL PAGO
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-800"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    SEGUIR COMPRANDO
+                    <Edit className="w-4 h-4 mr-2" />
+                    {isEditing ? "Cancelar" : "Editar"}
                   </Button>
                 </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-gray-400 text-sm">Total de Pedidos</p>
+                          <p className="text-3xl font-bold">{userData.totalOrders}</p>
+                        </div>
+                        <Package className="w-10 h-10 text-gray-400" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-gray-400 text-sm">Total Gastado</p>
+                          <p className="text-3xl font-bold">${userData.totalSpent}</p>
+                        </div>
+                        <CreditCard className="w-10 h-10 text-gray-400" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Profile Information */}
+                <Card className="bg-gray-900 border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-white">Información Personal</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Nombre Completo</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.name}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.name}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.email}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, email: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.email}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.phone}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, phone: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.phone}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Dirección</label>
+                        {isEditing ? (
+                          <Input
+                            value={editData.address}
+                            onChange={(e) => setEditData((prev) => ({ ...prev, address: e.target.value }))}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        ) : (
+                          <p className="text-white bg-gray-800 px-3 py-2 rounded-md">{editData.address}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {isEditing && (
+                      <div className="flex gap-4 pt-4">
+                        <Button onClick={handleSaveProfile} className="bg-green-600 hover:bg-green-700">
+                          Guardar Cambios
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditing(false)}
+                          className="border-gray-600 text-white hover:bg-gray-800"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
-            </>
-          )}
+            )}
+
+            {activeTab === "orders" && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold mb-2">Mis Pedidos</h1>
+                  <p className="text-gray-400">Historial completo de tus compras</p>
+                </div>
+
+                <div className="space-y-4">
+                  {userOrders.map((order) => (
+                    <Card key={order.id} className="bg-gray-900 border-gray-800">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
+                              <Package className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">Pedido #{order.id}</h3>
+                              <p className="text-gray-400 text-sm">
+                                {new Date(order.date).toLocaleDateString()} • {order.items} artículo
+                                {order.items > 1 ? "s" : ""}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <Badge
+                              variant="outline"
+                              className={statusConfig[order.status as keyof typeof statusConfig].color}
+                            >
+                              {statusConfig[order.status as keyof typeof statusConfig].label}
+                            </Badge>
+                            <div className="text-right">
+                              <p className="text-xl font-bold">${order.total}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-4 pt-4 border-t border-gray-800">
+                          <Button variant="outline" size="sm" className="border-gray-600 text-white hover:bg-gray-800">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Ver Detalles
+                          </Button>
+                          {order.tracking && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-gray-600 text-white hover:bg-gray-800"
+                            >
+                              <Package className="w-4 h-4 mr-2" />
+                              Rastrear
+                            </Button>
+                          )}
+                          <Button variant="outline" size="sm" className="border-gray-600 text-white hover:bg-gray-800">
+                            <Download className="w-4 h-4 mr-2" />
+                            Factura
+                          </Button>
+                          {order.status === "delivered" && (
+                            <Button size="sm" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
+                              Comprar de Nuevo
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {userOrders.length === 0 && (
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardContent className="text-center py-12">
+                      <Package className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                      <h3 className="text-xl font-semibold mb-2">No tienes pedidos aún</h3>
+                      <p className="text-gray-400 mb-6">¡Explora nuestros productos y realiza tu primera compra!</p>
+                      <Link href="/productos">
+                        <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Explorar Productos</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   )
 }

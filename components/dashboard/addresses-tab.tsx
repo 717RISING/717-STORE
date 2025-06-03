@@ -156,7 +156,7 @@ export default function AddressesTab() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddAddress} className="bg-white text-black hover:bg-gray-200">
+            <Button onClick={handleAddAddress} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
               <Plus className="w-4 h-4 mr-2" />
               Agregar Dirección
             </Button>
@@ -292,7 +292,7 @@ export default function AddressesTab() {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button onClick={handleSaveAddress} className="bg-white text-black hover:bg-gray-200">
+                <Button onClick={handleSaveAddress} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
                   {editingAddress ? "Actualizar" : "Agregar"} Dirección
                 </Button>
                 <Button
@@ -373,7 +373,7 @@ export default function AddressesTab() {
             <MapPin className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <h3 className="text-xl font-semibold mb-2">No tienes direcciones guardadas</h3>
             <p className="text-gray-400 mb-6">Agrega una dirección para facilitar tus compras</p>
-            <Button onClick={handleAddAddress} className="bg-white text-black hover:bg-gray-200">
+            <Button onClick={handleAddAddress} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
               <Plus className="w-4 h-4 mr-2" />
               Agregar Primera Dirección
             </Button>

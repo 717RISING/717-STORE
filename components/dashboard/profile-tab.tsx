@@ -79,7 +79,7 @@ export default function ProfileTab({ userData }: ProfileTabProps) {
           <p className="text-gray-400">Gestiona tu información personal</p>
         </div>
         {!isEditing && (
-          <Button onClick={() => setIsEditing(true)} className="bg-white text-black hover:bg-gray-200">
+          <Button onClick={() => setIsEditing(true)} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
             <Edit className="w-4 h-4 mr-2" />
             Editar Perfil
           </Button>
@@ -214,7 +214,11 @@ export default function ProfileTab({ userData }: ProfileTabProps) {
 
               {isEditing && (
                 <div className="flex gap-4 pt-4">
-                  <Button onClick={handleSave} disabled={isLoading} className="bg-white text-black hover:bg-gray-200">
+                  <Button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+                  >
                     <Save className="w-4 h-4 mr-2" />
                     {isLoading ? "Guardando..." : "Guardar Cambios"}
                   </Button>

@@ -72,7 +72,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setIsMobileMenuOpen(false)
       }}
       className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-        activeTab === id ? "bg-white text-black" : "hover:bg-gray-800 text-gray-300 hover:text-white"
+        activeTab === id ? "bg-[#5D1A1D] text-white" : "hover:bg-gray-800 text-gray-300 hover:text-white"
       }`}
     >
       <Icon className="w-5 h-5" />

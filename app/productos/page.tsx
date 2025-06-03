@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, Filter, Grid, List, User } from 'lucide-react'
+import { Search, Filter, Grid, List, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -22,7 +22,7 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all")
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "name")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [filteredProducts, setFilteredProducts = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   // Update URL params when filters change

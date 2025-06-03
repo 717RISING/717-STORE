@@ -262,7 +262,7 @@ export default function SettingsTab() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="bg-white text-black hover:bg-gray-200">
+        <Button onClick={handleSave} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
           <Save className="w-4 h-4 mr-2" />
           Guardar Configuración
         </Button>

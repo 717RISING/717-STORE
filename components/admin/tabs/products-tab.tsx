@@ -84,7 +84,7 @@ export default function ProductsTab() {
           <h1 className="text-2xl font-bold text-white">Gestión de Productos</h1>
           <p className="text-gray-400">Administra el inventario y catálogo de productos</p>
         </div>
-        <Button className="bg-white text-black hover:bg-gray-200">
+        <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Producto
         </Button>

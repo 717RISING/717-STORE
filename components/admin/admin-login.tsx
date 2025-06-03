@@ -102,7 +102,7 @@ export default function AdminLogin({ onLogin, adminEmail, adminPassword }: Admin
 
             <Button
               type="submit"
-              className="w-full bg-white text-black hover:bg-gray-200 font-semibold"
+              className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold"
               disabled={isLoading}
             >
               {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
