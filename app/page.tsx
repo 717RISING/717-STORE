@@ -122,11 +122,11 @@ export default function HomePage() {
                   />
                   {product.isNew && <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>}
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
-                  <p className="text-gray-400 mb-4">{product.description}</p>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
+                  <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description.substring(0, 60)}</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold">${product.price}</span>
+                    <span className="text-xl font-bold">${product.price}</span>
                     <Link href={`/productos/${product.id}`}>
                       <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
                     </Link>
@@ -138,7 +138,7 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Link href="/productos">
-              <Button size="lg" variant="outline" className="border-gray-600 text-white hover:bg-gray-800">
+              <Button size="lg" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
                 VER TODOS LOS PRODUCTOS
               </Button>
             </Link>

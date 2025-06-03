@@ -171,7 +171,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     onClick={() => setSelectedSize(size)}
                     className={`py-3 px-4 border rounded-lg font-medium transition-colors ${
                       selectedSize === size
-                        ? "border-white bg-white text-black"
+                        ? "border-[#5D1A1D] bg-[#5D1A1D] text-white"
                         : "border-gray-600 hover:border-gray-400"
                     }`}
                   >
@@ -190,7 +190,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   size="icon"
                   onClick={decrementQuantity}
                   disabled={quantity <= 1}
-                  className="border-gray-600 text-white hover:bg-gray-800"
+                  className="border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
@@ -199,7 +199,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   variant="outline"
                   size="icon"
                   onClick={incrementQuantity}
-                  className="border-gray-600 text-white hover:bg-gray-800"
+                  className="border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>

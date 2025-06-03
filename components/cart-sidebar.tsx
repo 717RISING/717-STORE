@@ -26,7 +26,7 @@ export default function CartSidebar() {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white hover:text-gray-300 relative">
+        <Button variant="ghost" size="icon" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] relative">
           <ShoppingBag className="w-5 h-5" />
           {state.items.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -70,7 +70,7 @@ export default function CartSidebar() {
                         variant="outline"
                         size="icon"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 border-gray-600 text-white hover:bg-gray-800"
+                        className="w-8 h-8 border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
                       >
                         <Minus className="w-3 h-3" />
                       </Button>
@@ -79,7 +79,7 @@ export default function CartSidebar() {
                         variant="outline"
                         size="icon"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 border-gray-600 text-white hover:bg-gray-800"
+                        className="w-8 h-8 border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
                       >
                         <Plus className="w-3 h-3" />
                       </Button>
@@ -113,7 +113,7 @@ export default function CartSidebar() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-800"
+                    className="w-full border-[#5D1A1D] text-white hover:bg-[#5D1A1D] hover:text-white"
                     onClick={() => setIsOpen(false)}
                   >
                     SEGUIR COMPRANDO

@@ -3,110 +3,92 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { User, Filter, Grid, List, ChevronDown } from "lucide-react"
+import { User, Grid, List, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { products } from "@/lib/products"
-import type { Product } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
 
 export default function ProductsPage() {
-  const searchParams = useSearchParams()
-  const searchQuery = searchParams.get("search") || ""
-
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products)
+  const [userName, setUserName] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [sortBy, setSortBy] = useState("name")
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
-  const [showFilters, setShowFilters] = useState(false)
-
-  const categories = ["Camisetas", "Hoodies", "Pantalones", "Accesorios"]
-  const sizes = ["XS", "S", "M", "L", "XL", "XXL"]
+  const [filteredProducts, setFilteredProducts] = useState(products)
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    let filtered = products
+    // Verificar si el usuario está autenticado
+    const userAuth = localStorage.getItem("userAuth")
+    const userInfo = localStorage.getItem("userInfo")
 
-    // Filtrar por búsqueda
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.toLowerCase()),
+    if (userAuth === "authenticated" && userInfo) {
+      setIsAuthenticated(true)
+      const user = JSON.parse(userInfo)
+      setUserName(user.name)
+    }
+  }, [])
+
+  useEffect(() => {
+    let result = products
+
+    // Filtrar por categoría
+    if (selectedCategories.length > 0) {
+      result = result.filter((product) => selectedCategories.includes(product.category))
+    }
+
+    // Filtrar por precio
+    result = result.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
+
+    // Filtrar por término de búsqueda
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      result = result.filter(
+        (product) => product.name.toLowerCase().includes(term) || product.description.toLowerCase().includes(term),
       )
     }
 
-    // Filtrar por categorías
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((product) => selectedCategories.includes(product.category))
-    }
+    setFilteredProducts(result)
+  }, [selectedCategories, priceRange, searchTerm])
 
-    // Filtrar por tallas
-    if (selectedSizes.length > 0) {
-      filtered = filtered.filter((product) => product.sizes.some((size) => selectedSizes.includes(size)))
-    }
-
-    // Filtrar por rango de precio
-    filtered = filtered.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
-
-    // Ordenar
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "name":
-          return a.name.localeCompare(b.name)
-        default:
-          return 0
-      }
-    })
-
-    setFilteredProducts(filtered)
-  }, [searchQuery, selectedCategories, selectedSizes, priceRange, sortBy])
-
-  const handleCategoryChange = (category: string, checked: boolean) => {
-    if (checked) {
-      setSelectedCategories([...selectedCategories, category])
-    } else {
-      setSelectedCategories(selectedCategories.filter((c) => c !== category))
-    }
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+    )
   }
 
-  const handleSizeChange = (size: string, checked: boolean) => {
-    if (checked) {
-      setSelectedSizes([...selectedSizes, size])
-    } else {
-      setSelectedSizes(selectedSizes.filter((s) => s !== size))
-    }
+  const handlePriceChange = (min: number, max: number) => {
+    setPriceRange([min, max])
   }
 
-  const clearFilters = () => {
-    setSelectedCategories([])
-    setSelectedSizes([])
-    setPriceRange([0, 200])
-  }
+  const categories = Array.from(new Set(products.map((product) => product.category)))
 
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
       <header className="px-4 py-6 bg-transparent border-b border-gray-800">
         <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Search and Icons */}
-          <div className="flex justify-between items-center mb-4">
-            <ProductSearch />
+          {/* Top Row - Icons Only */}
+          <div className="flex justify-end items-center mb-4">
             <div className="flex items-center space-x-4">
-              <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
-                <User className="w-6 h-6" />
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-6 h-6" />
+                    {userName && <span className="hidden md:inline text-sm">{userName}</span>}
+                  </div>
+                </Link>
+              ) : (
+                <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+                  <User className="w-6 h-6" />
+                </Link>
+              )}
               <CartSidebar />
             </div>
           </div>
@@ -142,140 +124,129 @@ export default function ProductsPage() {
         </nav>
       </header>
 
+      {/* Products Section */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">PRODUCTOS</h1>
-          {searchQuery && (
-            <p className="text-gray-300">
-              Resultados para: <span className="text-white font-semibold">"{searchQuery}"</span>
-            </p>
-          )}
-          <p className="text-gray-400">{filteredProducts.length} productos encontrados</p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:w-64">
-            <div className="lg:hidden mb-4">
-              <Button
-                onClick={() => setShowFilters(!showFilters)}
-                variant="outline"
-                className="w-full border-gray-600 text-white hover:bg-gray-800"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filtros
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar Filters */}
+          <div className="w-full md:w-64 space-y-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Buscar</h3>
+              <ProductSearch onSearch={setSearchTerm} />
             </div>
 
-            <div className={`space-y-6 ${showFilters ? "block" : "hidden lg:block"}`}>
-              {/* Categories */}
-              <div>
-                <h3 className="font-semibold mb-3">Categorías</h3>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <div key={category} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={category}
-                        checked={selectedCategories.includes(category)}
-                        onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
-                        className="border-gray-600 data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:border-[#5D1A1D]"
-                      />
-                      <label htmlFor={category} className="text-sm text-gray-300 cursor-pointer">
-                        {category}
-                      </label>
-                    </div>
-                  ))}
-                </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Categorías</h3>
+              <div className="space-y-2">
+                {categories.map((category) => (
+                  <div key={category} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`category-${category}`}
+                      checked={selectedCategories.includes(category)}
+                      onCheckedChange={() => toggleCategory(category)}
+                      className="border-[#5D1A1D] data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:text-white"
+                    />
+                    <Label
+                      htmlFor={`category-${category}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {category}
+                    </Label>
+                  </div>
+                ))}
               </div>
-
-              {/* Sizes */}
-              <div>
-                <h3 className="font-semibold mb-3">Tallas</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {sizes.map((size) => (
-                    <div key={size} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={size}
-                        checked={selectedSizes.includes(size)}
-                        onCheckedChange={(checked) => handleSizeChange(size, checked as boolean)}
-                        className="border-gray-600 data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:border-[#5D1A1D]"
-                      />
-                      <label htmlFor={size} className="text-sm text-gray-300 cursor-pointer">
-                        {size}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Clear Filters */}
-              <Button
-                onClick={clearFilters}
-                variant="outline"
-                className="w-full border-gray-600 text-white hover:bg-gray-800"
-              >
-                Limpiar Filtros
-              </Button>
             </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Precio</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePriceChange(0, 50)}
+                    className={`border-[#5D1A1D] text-white ${
+                      priceRange[0] === 0 && priceRange[1] === 50 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
+                    }`}
+                  >
+                    $0 - $50
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePriceChange(50, 100)}
+                    className={`border-[#5D1A1D] text-white ${
+                      priceRange[0] === 50 && priceRange[1] === 100 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
+                    }`}
+                  >
+                    $50 - $100
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePriceChange(100, 150)}
+                    className={`border-[#5D1A1D] text-white ${
+                      priceRange[0] === 100 && priceRange[1] === 150 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
+                    }`}
+                  >
+                    $100 - $150
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePriceChange(150, 200)}
+                    className={`border-[#5D1A1D] text-white ${
+                      priceRange[0] === 150 && priceRange[1] === 200 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
+                    }`}
+                  >
+                    $150 - $200
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => {
+                setSelectedCategories([])
+                setPriceRange([0, 200])
+                setSearchTerm("")
+              }}
+              className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Limpiar filtros
+            </Button>
           </div>
 
           {/* Products Grid */}
           <div className="flex-1">
-            {/* Controls */}
             <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-4">
+              <h2 className="text-2xl font-bold">Productos ({filteredProducts.length})</h2>
+              <div className="flex items-center space-x-2">
                 <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="sm"
+                  variant="outline"
+                  size="icon"
                   onClick={() => setViewMode("grid")}
-                  className={
-                    viewMode === "grid"
-                      ? "bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
-                      : "border-gray-600 text-white hover:bg-gray-800"
-                  }
+                  className={`border-[#5D1A1D] ${
+                    viewMode === "grid" ? "bg-[#5D1A1D] text-white" : "text-white hover:bg-[#5D1A1D]"
+                  }`}
                 >
                   <Grid className="w-4 h-4" />
                 </Button>
                 <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="sm"
+                  variant="outline"
+                  size="icon"
                   onClick={() => setViewMode("list")}
-                  className={
-                    viewMode === "list"
-                      ? "bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
-                      : "border-gray-600 text-white hover:bg-gray-800"
-                  }
+                  className={`border-[#5D1A1D] ${
+                    viewMode === "list" ? "bg-[#5D1A1D] text-white" : "text-white hover:bg-[#5D1A1D]"
+                  }`}
                 >
                   <List className="w-4 h-4" />
                 </Button>
               </div>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48 bg-gray-900 border-gray-700 text-white">
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-700">
-                  <SelectItem value="name">Nombre A-Z</SelectItem>
-                  <SelectItem value="price-low">Precio: Menor a Mayor</SelectItem>
-                  <SelectItem value="price-high">Precio: Mayor a Menor</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
-            {/* Products */}
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-400 text-lg">No se encontraron productos</p>
-                <Button onClick={clearFilters} className="mt-4 bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-                  Ver todos los productos
-                </Button>
+                <p className="text-gray-400 text-lg">No se encontraron productos que coincidan con tu búsqueda.</p>
               </div>
-            ) : (
-              <div
-                className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}
-              >
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
                   <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden group">
                     <div className="relative aspect-square">
@@ -290,17 +261,50 @@ export default function ProductsPage() {
                       )}
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-2 text-white">{product.name}</h3>
-                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
+                      <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
+                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description.substring(0, 60)}</p>
                       <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold text-white">${product.price}</span>
+                        <span className="text-xl font-bold">${product.price}</span>
                         <Link href={`/productos/${product.id}`}>
-                          <Button size="sm" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-                            Ver Detalles
-                          </Button>
+                          <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
                         </Link>
                       </div>
                     </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredProducts.map((product) => (
+                  <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden">
+                    <div className="flex flex-col md:flex-row">
+                      <div className="relative w-full md:w-48 h-48">
+                        <Image
+                          src={product.images[0] || "/placeholder.svg"}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                        {product.isNew && (
+                          <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>
+                        )}
+                      </div>
+                      <CardContent className="flex-1 p-4">
+                        <div className="flex flex-col h-full justify-between">
+                          <div>
+                            <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
+                            <p className="text-gray-400 mb-4">{product.description}</p>
+                            <p className="text-sm text-gray-500 mb-2">Categoría: {product.category}</p>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-2xl font-bold">${product.price}</span>
+                            <Link href={`/productos/${product.id}`}>
+                              <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </div>
                   </Card>
                 ))}
               </div>
