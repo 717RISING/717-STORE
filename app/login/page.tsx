@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import { useToast } from "@/hooks/use-toast"
+import { verifyUserCredentials, registerUser } from "@/lib/users"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -48,30 +49,52 @@ export default function LoginPage() {
     }))
   }
 
-  // Modificar la función handleLogin para redirigir al inicio después del login
+  // Función de login actualizada para verificar usuarios registrados
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate login
+    // Simulate login delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Guardar estado de autenticación
-    localStorage.setItem("userAuth", "authenticated")
-    localStorage.setItem("userName", loginData.email.split("@")[0])
+    console.log("Intentando login con:", loginData)
 
-    toast({
-      title: "Inicio de sesión exitoso",
-      description: "Bienvenido de vuelta a 717 Store.",
-    })
+    // Verificar credenciales contra usuarios registrados
+    const user = verifyUserCredentials(loginData.email, loginData.password)
 
-    setIsLoading(false)
+    if (user) {
+      // Guardar estado de autenticación del usuario
+      localStorage.setItem("userAuth", "authenticated")
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }),
+      )
 
-    // Redirigir al inicio después del login exitoso
-    window.location.href = "/"
+      toast({
+        title: "Inicio de sesión exitoso",
+        description: `Bienvenido de vuelta, ${user.name}.`,
+      })
+
+      setIsLoading(false)
+
+      // Redirigir al inicio después del login exitoso
+      window.location.href = "/"
+    } else {
+      toast({
+        title: "Error de autenticación",
+        description: "Email o contraseña incorrectos. Verifica tus credenciales.",
+        variant: "destructive",
+      })
+      setIsLoading(false)
+    }
   }
 
-  // Modificar la función handleRegister para redirigir al inicio después del registro
+  // Función de registro actualizada
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -84,24 +107,53 @@ export default function LoginPage() {
       return
     }
 
+    if (registerData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "La contraseña debe tener al menos 6 caracteres.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
 
-    // Simulate registration
+    // Simulate registration delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Guardar estado de autenticación
-    localStorage.setItem("userAuth", "authenticated")
-    localStorage.setItem("userName", registerData.name)
+    // Intentar registrar el usuario
+    const newUser = registerUser(registerData.name, registerData.email, registerData.password)
 
-    toast({
-      title: "Cuenta creada exitosamente",
-      description: "Bienvenido a 717 Store. Ya puedes empezar a comprar.",
-    })
+    if (newUser) {
+      // Guardar estado de autenticación del nuevo usuario
+      localStorage.setItem("userAuth", "authenticated")
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify({
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+        }),
+      )
 
-    setIsLoading(false)
+      toast({
+        title: "Cuenta creada exitosamente",
+        description: `Bienvenido a 717 Store, ${newUser.name}. Ya puedes empezar a comprar.`,
+      })
 
-    // Redirigir al inicio después del registro exitoso
-    window.location.href = "/"
+      setIsLoading(false)
+
+      // Redirigir al inicio después del registro exitoso
+      window.location.href = "/"
+    } else {
+      toast({
+        title: "Error en el registro",
+        description: "Este email ya está registrado. Intenta con otro email o inicia sesión.",
+        variant: "destructive",
+      })
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -308,7 +360,7 @@ export default function LoginPage() {
                         value={registerData.password}
                         onChange={handleRegisterChange}
                         className="pl-10 pr-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
-                        placeholder="Crea una contraseña"
+                        placeholder="Crea una contraseña (mín. 6 caracteres)"
                       />
                       <button
                         type="button"
@@ -419,6 +471,25 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Información de credenciales de admin para desarrollo */}
+        <div className="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
+          <h3 className="text-sm font-semibold text-white mb-2">🔑 Credenciales de Administrador:</h3>
+          <div className="text-xs text-gray-300 space-y-1">
+            <p>
+              <strong>Email:</strong> 717days@gmail.com
+            </p>
+            <p>
+              <strong>Contraseña:</strong> JP7CR1DM7CM_STREETWEAR
+            </p>
+            <p className="text-yellow-400 mt-2">
+              💡 Usa estas credenciales para acceder al panel de admin en{" "}
+              <Link href="/admin" className="underline">
+                /admin
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
