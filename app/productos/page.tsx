@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, Filter, Grid, List, User } from "lucide-react"
+import { Search, Filter, Grid, List, User } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -22,7 +22,7 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all")
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "name")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts = useState<Product[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   // Update URL params when filters change
@@ -163,7 +163,7 @@ export default function ProductsPage() {
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      selectedCategory === category.id ? "bg-white text-black" : "bg-gray-800 hover:bg-gray-700"
+                      selectedCategory === category.id ? "bg-[#8B2635] text-white" : "bg-gray-800 hover:bg-gray-700"
                     }`}
                   >
                     {category.name} ({category.count})
@@ -173,7 +173,7 @@ export default function ProductsPage() {
 
               {/* Clear Filters */}
               {(searchQuery || selectedCategory !== "all" || sortBy !== "name") && (
-                <Button variant="ghost" onClick={clearFilters} className="text-gray-400 hover:text-white">
+                <Button variant="ghost" onClick={clearFilters} className="text-gray-400 hover:text-[#8B2635]">
                   Limpiar filtros
                 </Button>
               )}
@@ -197,13 +197,13 @@ export default function ProductsPage() {
               <div className="flex border border-gray-700 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 ${viewMode === "grid" ? "bg-white text-black" : "bg-gray-900 text-white hover:bg-gray-800"}`}
+                  className={`p-2 ${viewMode === "grid" ? "bg-[#8B2635] text-white" : "bg-gray-900 text-white hover:bg-gray-800"}`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 ${viewMode === "list" ? "bg-white text-black" : "bg-gray-900 text-white hover:bg-gray-800"}`}
+                  className={`p-2 ${viewMode === "list" ? "bg-[#8B2635] text-white" : "bg-gray-900 text-white hover:bg-gray-800"}`}
                 >
                   <List className="w-4 h-4" />
                 </button>

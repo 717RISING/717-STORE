@@ -210,7 +210,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <Button
               onClick={handleAddToCart}
               size="lg"
-              className="w-full bg-white text-black hover:bg-gray-200 font-semibold py-4 text-lg"
+              className="w-full bg-[#8B2635] text-white hover:bg-[#9A3444] font-semibold py-4 text-lg"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               AGREGAR AL CARRITO

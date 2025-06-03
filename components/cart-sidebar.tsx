@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { X, Plus, Minus, ShoppingBag } from "lucide-react"
+import { X, Plus, Minus, ShoppingBag } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useCart } from "@/lib/cart-context"
@@ -106,7 +106,7 @@ export default function CartSidebar() {
 
                 <div className="space-y-2">
                   <Button
-                    className="w-full bg-white text-black hover:bg-gray-200 font-semibold"
+                    className="w-full bg-[#8B2635] text-white hover:bg-[#9A3444] font-semibold"
                     onClick={() => setIsOpen(false)}
                   >
                     PROCEDER AL PAGO
