@@ -280,7 +280,7 @@ export default function LoginPage() {
 
                   <div className="flex items-center justify-between">
                     <label className="flex items-center">
-                      <input type="checkbox" className="rounded border-gray-700 bg-gray-800 text-white" />
+                      <input type="checkbox" className="rounded border-gray-700 bg-gray-800 text-[#5D1A1D]" />
                       <span className="ml-2 text-sm text-gray-300">Recordarme</span>
                     </label>
                     <Link href="#" className="text-sm text-gray-300 hover:text-white">
@@ -399,7 +399,11 @@ export default function LoginPage() {
                   </div>
 
                   <div className="flex items-start">
-                    <input type="checkbox" required className="rounded border-gray-700 bg-gray-800 text-white mt-1" />
+                    <input
+                      type="checkbox"
+                      required
+                      className="rounded border-gray-700 bg-gray-800 text-[#5D1A1D] mt-1"
+                    />
                     <span className="ml-2 text-sm text-gray-300">
                       Acepto los{" "}
                       <Link href="#" className="text-white hover:underline">
@@ -440,7 +444,7 @@ export default function LoginPage() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+                <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] border-0">
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -461,7 +465,7 @@ export default function LoginPage() {
                   </svg>
                   Google
                 </Button>
-                <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+                <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] border-0">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
@@ -471,25 +475,6 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Información de credenciales de admin para desarrollo */}
-        <div className="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
-          <h3 className="text-sm font-semibold text-white mb-2">🔑 Credenciales de Administrador:</h3>
-          <div className="text-xs text-gray-300 space-y-1">
-            <p>
-              <strong>Email:</strong> 717days@gmail.com
-            </p>
-            <p>
-              <strong>Contraseña:</strong> JP7CR1DM7CM_STREETWEAR
-            </p>
-            <p className="text-yellow-400 mt-2">
-              💡 Usa estas credenciales para acceder al panel de admin en{" "}
-              <Link href="/admin" className="underline">
-                /admin
-              </Link>
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   )

@@ -1,15 +1,15 @@
-// Sistema de usuarios simulado
+// Sistema de usuarios simulado para 717 Store
 export interface User {
   id: string
   name: string
   email: string
   password: string
-  role: "user" | "admin"
+  role: "admin" | "user"
   createdAt: string
 }
 
-// Base de datos simulada de usuarios
-export const registeredUsers: User[] = [
+// Base de datos de usuarios simulada
+const users: User[] = [
   {
     id: "1",
     name: "Administrador 717",
@@ -22,20 +22,21 @@ export const registeredUsers: User[] = [
 
 // Función para verificar credenciales de usuario
 export function verifyUserCredentials(email: string, password: string): User | null {
-  const user = registeredUsers.find((u) => u.email === email && u.password === password)
+  const user = users.find((u) => u.email === email && u.password === password)
   return user || null
 }
 
-// Función para registrar nuevo usuario
+// Función para registrar un nuevo usuario
 export function registerUser(name: string, email: string, password: string): User | null {
   // Verificar si el email ya existe
-  const existingUser = registeredUsers.find((u) => u.email === email)
+  const existingUser = users.find((u) => u.email === email)
   if (existingUser) {
     return null // Email ya registrado
   }
 
+  // Crear nuevo usuario
   const newUser: User = {
-    id: (registeredUsers.length + 1).toString(),
+    id: Date.now().toString(),
     name,
     email,
     password,
@@ -43,17 +44,32 @@ export function registerUser(name: string, email: string, password: string): Use
     createdAt: new Date().toISOString(),
   }
 
-  registeredUsers.push(newUser)
+  users.push(newUser)
   return newUser
 }
 
-// Función para obtener usuario por email
-export function getUserByEmail(email: string): User | null {
-  return registeredUsers.find((u) => u.email === email) || null
+// Función para verificar si un usuario es admin
+export function isAdmin(email: string): boolean {
+  const user = users.find((u) => u.email === email)
+  return user?.role === "admin" || false
 }
 
-// Función para verificar si es admin
-export function isAdmin(email: string): boolean {
-  const user = getUserByEmail(email)
-  return user?.role === "admin" || false
+// Función para obtener todos los usuarios (solo para admin)
+export function getAllUsers(): User[] {
+  return users.map((user) => ({
+    ...user,
+    password: "***", // No exponer contraseñas
+  }))
+}
+
+// Función para obtener un usuario por ID
+export function getUserById(id: string): User | null {
+  const user = users.find((u) => u.id === id)
+  if (user) {
+    return {
+      ...user,
+      password: "***", // No exponer contraseña
+    }
+  }
+  return null
 }

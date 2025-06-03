@@ -1,56 +1,98 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import Link from "next/link"
 import Image from "next/image"
-import { Search, Filter, Grid, List, User } from "lucide-react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { User, Filter, Grid, List, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { searchProducts, categories, type Product } from "@/lib/products"
+import { Checkbox } from "@/components/ui/checkbox"
+import { products } from "@/lib/products"
+import type { Product } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
+import ProductSearch from "@/components/product-search"
 
 export default function ProductsPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
+  const searchQuery = searchParams.get("search") || ""
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all")
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "name")
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [sortBy, setSortBy] = useState("name")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
+  const [showFilters, setShowFilters] = useState(false)
 
-  // Update URL params when filters change
+  const categories = ["Camisetas", "Hoodies", "Pantalones", "Accesorios"]
+  const sizes = ["XS", "S", "M", "L", "XL", "XXL"]
+
   useEffect(() => {
-    const params = new URLSearchParams()
-    if (searchQuery) params.set("search", searchQuery)
-    if (selectedCategory !== "all") params.set("category", selectedCategory)
-    if (sortBy !== "name") params.set("sort", sortBy)
+    let filtered = products
 
-    const newUrl = params.toString() ? `/productos?${params.toString()}` : "/productos"
-    router.replace(newUrl, { scroll: false })
-  }, [searchQuery, selectedCategory, sortBy, router])
+    // Filtrar por búsqueda
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    }
 
-  // Filter products when search criteria change
-  useEffect(() => {
-    const results = searchProducts(searchQuery, selectedCategory, sortBy)
-    setFilteredProducts(results)
-  }, [searchQuery, selectedCategory, sortBy])
+    // Filtrar por categorías
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((product) => selectedCategories.includes(product.category))
+    }
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category)
-    setIsFilterOpen(false)
+    // Filtrar por tallas
+    if (selectedSizes.length > 0) {
+      filtered = filtered.filter((product) => product.sizes.some((size) => selectedSizes.includes(size)))
+    }
+
+    // Filtrar por rango de precio
+    filtered = filtered.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
+
+    // Ordenar
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "price-low":
+          return a.price - b.price
+        case "price-high":
+          return b.price - a.price
+        case "name":
+          return a.name.localeCompare(b.name)
+        default:
+          return 0
+      }
+    })
+
+    setFilteredProducts(filtered)
+  }, [searchQuery, selectedCategories, selectedSizes, priceRange, sortBy])
+
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories([...selectedCategories, category])
+    } else {
+      setSelectedCategories(selectedCategories.filter((c) => c !== category))
+    }
+  }
+
+  const handleSizeChange = (size: string, checked: boolean) => {
+    if (checked) {
+      setSelectedSizes([...selectedSizes, size])
+    } else {
+      setSelectedSizes(selectedSizes.filter((s) => s !== size))
+    }
   }
 
   const clearFilters = () => {
-    setSearchQuery("")
-    setSelectedCategory("all")
-    setSortBy("name")
+    setSelectedCategories([])
+    setSelectedSizes([])
+    setPriceRange([0, 200])
   }
 
   return (
@@ -58,8 +100,9 @@ export default function ProductsPage() {
       {/* Navigation */}
       <header className="px-4 py-6 bg-transparent border-b border-gray-800">
         <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons Only */}
-          <div className="flex justify-end items-center mb-4">
+          {/* Top Row - Search and Icons */}
+          <div className="flex justify-between items-center mb-4">
+            <ProductSearch />
             <div className="flex items-center space-x-4">
               <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
                 <User className="w-6 h-6" />
@@ -102,85 +145,113 @@ export default function ProductsPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">CATÁLOGO DE PRODUCTOS</h1>
-          <p className="text-gray-400">Descubre nuestra colección completa de streetwear</p>
+          <h1 className="text-4xl font-bold mb-4">PRODUCTOS</h1>
+          {searchQuery && (
+            <p className="text-gray-300">
+              Resultados para: <span className="text-white font-semibold">"{searchQuery}"</span>
+            </p>
+          )}
+          <p className="text-gray-400">{filteredProducts.length} productos encontrados</p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:border-white"
-            />
-          </div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:w-64">
+            <div className="lg:hidden mb-4">
+              <Button
+                onClick={() => setShowFilters(!showFilters)}
+                variant="outline"
+                className="w-full border-gray-600 text-white hover:bg-gray-800"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filtros
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
 
-          {/* Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex flex-wrap gap-4 items-center">
-              {/* Mobile Filter Button */}
-              <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="sm:hidden border-gray-600 text-white hover:bg-gray-800">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtros
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="bg-black text-white border-gray-800">
-                  <SheetHeader>
-                    <SheetTitle className="text-white">Filtros</SheetTitle>
-                  </SheetHeader>
-                  <div className="py-6 space-y-6">
-                    <div>
-                      <h3 className="font-semibold mb-3">Categorías</h3>
-                      <div className="space-y-2">
-                        {categories.map((category) => (
-                          <button
-                            key={category.id}
-                            onClick={() => handleCategoryChange(category.id)}
-                            className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                              selectedCategory === category.id ? "bg-white text-black" : "hover:bg-gray-800"
-                            }`}
-                          >
-                            {category.name} ({category.count})
-                          </button>
-                        ))}
-                      </div>
+            <div className={`space-y-6 ${showFilters ? "block" : "hidden lg:block"}`}>
+              {/* Categories */}
+              <div>
+                <h3 className="font-semibold mb-3">Categorías</h3>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <div key={category} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={category}
+                        checked={selectedCategories.includes(category)}
+                        onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                        className="border-gray-600 data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:border-[#5D1A1D]"
+                      />
+                      <label htmlFor={category} className="text-sm text-gray-300 cursor-pointer">
+                        {category}
+                      </label>
                     </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
+                  ))}
+                </div>
+              </div>
 
-              {/* Desktop Category Filters */}
-              <div className="hidden sm:flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      selectedCategory === category.id ? "bg-[#8B2635] text-white" : "bg-gray-800 hover:bg-gray-700"
-                    }`}
-                  >
-                    {category.name} ({category.count})
-                  </button>
-                ))}
+              {/* Sizes */}
+              <div>
+                <h3 className="font-semibold mb-3">Tallas</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {sizes.map((size) => (
+                    <div key={size} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={size}
+                        checked={selectedSizes.includes(size)}
+                        onCheckedChange={(checked) => handleSizeChange(size, checked as boolean)}
+                        className="border-gray-600 data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:border-[#5D1A1D]"
+                      />
+                      <label htmlFor={size} className="text-sm text-gray-300 cursor-pointer">
+                        {size}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Clear Filters */}
-              {(searchQuery || selectedCategory !== "all" || sortBy !== "name") && (
-                <Button variant="ghost" onClick={clearFilters} className="text-gray-400 hover:text-[#8B2635]">
-                  Limpiar filtros
-                </Button>
-              )}
+              <Button
+                onClick={clearFilters}
+                variant="outline"
+                className="w-full border-gray-600 text-white hover:bg-gray-800"
+              >
+                Limpiar Filtros
+              </Button>
             </div>
+          </div>
 
-            <div className="flex items-center gap-4">
-              {/* Sort Dropdown */}
+          {/* Products Grid */}
+          <div className="flex-1">
+            {/* Controls */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={
+                    viewMode === "grid"
+                      ? "bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+                      : "border-gray-600 text-white hover:bg-gray-800"
+                  }
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={
+                    viewMode === "list"
+                      ? "bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+                      : "border-gray-600 text-white hover:bg-gray-800"
+                  }
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-48 bg-gray-900 border-gray-700 text-white">
                   <SelectValue placeholder="Ordenar por" />
@@ -189,103 +260,25 @@ export default function ProductsPage() {
                   <SelectItem value="name">Nombre A-Z</SelectItem>
                   <SelectItem value="price-low">Precio: Menor a Mayor</SelectItem>
                   <SelectItem value="price-high">Precio: Mayor a Menor</SelectItem>
-                  <SelectItem value="newest">Más Nuevos</SelectItem>
                 </SelectContent>
               </Select>
-
-              {/* View Mode Toggle */}
-              <div className="flex border border-gray-700 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 ${viewMode === "grid" ? "bg-[#8B2635] text-white" : "bg-gray-900 text-white hover:bg-gray-800"}`}
-                >
-                  <Grid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 ${viewMode === "list" ? "bg-[#8B2635] text-white" : "bg-gray-900 text-white hover:bg-gray-800"}`}
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Active Filters */}
-        {(searchQuery || selectedCategory !== "all") && (
-          <div className="mb-6 flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-gray-400">Filtros activos:</span>
-            {searchQuery && (
-              <Badge variant="secondary" className="bg-gray-800 text-white">
-                Búsqueda: "{searchQuery}"
-                <button onClick={() => setSearchQuery("")} className="ml-2 hover:text-gray-300">
-                  ×
-                </button>
-              </Badge>
-            )}
-            {selectedCategory !== "all" && (
-              <Badge variant="secondary" className="bg-gray-800 text-white">
-                {categories.find((c) => c.id === selectedCategory)?.name}
-                <button onClick={() => setSelectedCategory("all")} className="ml-2 hover:text-gray-300">
-                  ×
-                </button>
-              </Badge>
-            )}
-          </div>
-        )}
-
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-400">
-            {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""} encontrado
-            {filteredProducts.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        {/* Products Grid/List */}
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-semibold mb-2">No se encontraron productos</h3>
-            <p className="text-gray-400 mb-6">Intenta ajustar tus filtros o términos de búsqueda</p>
-            <Button onClick={clearFilters} className="bg-white text-black hover:bg-gray-200">
-              Limpiar filtros
-            </Button>
-          </div>
-        ) : (
-          <div
-            className={
-              viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-6"
-            }
-          >
-            {filteredProducts.map((product) => (
-              <Link
-                key={product.id}
-                href={`/productos/${product.id}`}
-                className={`group ${viewMode === "list" ? "flex gap-6 p-4 bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors" : ""}`}
+            {/* Products */}
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-lg">No se encontraron productos</p>
+                <Button onClick={clearFilters} className="mt-4 bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
+                  Ver todos los productos
+                </Button>
+              </div>
+            ) : (
+              <div
+                className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}
               >
-                {viewMode === "grid" ? (
-                  <div className="cursor-pointer">
-                    <div className="relative overflow-hidden bg-gray-900 rounded-lg mb-4">
-                      <Image
-                        src={product.images[0] || "/placeholder.svg"}
-                        alt={product.name}
-                        width={300}
-                        height={400}
-                        className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {product.isNew && (
-                        <Badge className="absolute top-4 right-4 bg-red-600 hover:bg-red-700">NUEVO</Badge>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                    <p className="text-gray-400 mb-2 line-clamp-2">{product.description}</p>
-                    <p className="text-xl font-bold">${product.price}</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative w-32 h-32 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                {filteredProducts.map((product) => (
+                  <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden group">
+                    <div className="relative aspect-square">
                       <Image
                         src={product.images[0] || "/placeholder.svg"}
                         alt={product.name}
@@ -293,25 +286,27 @@ export default function ProductsPage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       {product.isNew && (
-                        <Badge className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-xs">NUEVO</Badge>
+                        <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                      <p className="text-gray-400 mb-3">{product.description}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-2xl font-bold">${product.price}</p>
-                        <Badge variant="outline" className="border-gray-600 text-gray-300">
-                          {categories.find((c) => c.id === product.category)?.name}
-                        </Badge>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-lg mb-2 text-white">{product.name}</h3>
+                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-2xl font-bold text-white">${product.price}</span>
+                        <Link href={`/productos/${product.id}`}>
+                          <Button size="sm" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
+                            Ver Detalles
+                          </Button>
+                        </Link>
                       </div>
-                    </div>
-                  </>
-                )}
-              </Link>
-            ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

@@ -1,24 +1,55 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { User } from "lucide-react"
+import { User, ArrowRight, Truck, Shield, Headphones } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { products } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import HeroSlider from "@/components/hero-slider"
-import { products } from "@/lib/products"
 
 export default function HomePage() {
+  const [userName, setUserName] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Verificar si el usuario está autenticado
+    const userAuth = localStorage.getItem("userAuth")
+    const userInfo = localStorage.getItem("userInfo")
+
+    if (userAuth === "authenticated" && userInfo) {
+      setIsAuthenticated(true)
+      const user = JSON.parse(userInfo)
+      setUserName(user.name)
+    }
+  }, [])
+
+  const featuredProducts = products.slice(0, 4)
+
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navigation Header */}
-      <header className="relative z-10 px-4 py-6 bg-transparent">
+      {/* Navigation */}
+      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
         <nav className="max-w-7xl mx-auto">
           {/* Top Row - Icons Only */}
           <div className="flex justify-end items-center mb-4">
             <div className="flex items-center space-x-4">
-              <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
-                <User className="w-6 h-6" />
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-6 h-6" />
+                    {userName && <span className="hidden md:inline text-sm">{userName}</span>}
+                  </div>
+                </Link>
+              ) : (
+                <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+                  <User className="w-6 h-6" />
+                </Link>
+              )}
               <CartSidebar />
             </div>
           </div>
@@ -54,67 +85,113 @@ export default function HomePage() {
         </nav>
       </header>
 
-      {/* Hero Section with Slider */}
-      <main className="relative">
-        <div className="absolute inset-0">
-          <HeroSlider />
-        </div>
-
-        <div className="relative z-10 min-h-[80vh] flex items-center justify-center px-4">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-wider">717</h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-200">STREETWEAR COLLECTION</p>
+      {/* Hero Section */}
+      <section className="relative h-[70vh] overflow-hidden">
+        <HeroSlider />
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="text-center">
+            <h1 className="text-6xl md:text-8xl font-bold mb-6 text-white drop-shadow-lg">717</h1>
+            <p className="text-xl md:text-2xl mb-8 text-white drop-shadow-lg">STREETWEAR AUTÉNTICO</p>
             <Link href="/productos">
-              <Button size="lg" className="bg-[#8B2635] text-white hover:bg-[#9A3444] font-semibold px-8 py-3 text-lg">
+              <Button size="lg" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold px-8 py-4 text-lg">
                 EXPLORAR COLECCIÓN
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Featured Products Section */}
-      <section className="py-20 px-4">
+      {/* Featured Products */}
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16">PRODUCTOS DESTACADOS</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">PRODUCTOS DESTACADOS</h2>
+            <p className="text-gray-400 text-lg">Descubre nuestras piezas más populares</p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.slice(0, 6).map((product) => (
-              <Link key={product.id} href={`/productos/${product.id}`} className="group cursor-pointer">
-                <div className="relative overflow-hidden bg-gray-900 rounded-lg mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProducts.map((product) => (
+              <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden group">
+                <div className="relative aspect-square">
                   <Image
                     src={product.images[0] || "/placeholder.svg"}
                     alt={product.name}
-                    width={300}
-                    height={400}
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  {product.isNew && (
-                    <div className="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 text-sm font-semibold">
-                      NUEVO
-                    </div>
-                  )}
+                  {product.isNew && <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                <p className="text-gray-400 mb-2">{product.description.substring(0, 50)}...</p>
-                <p className="text-xl font-bold">${product.price}</p>
-              </Link>
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
+                  <p className="text-gray-400 mb-4">{product.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold">${product.price}</span>
+                    <Link href={`/productos/${product.id}`}>
+                      <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/productos">
+              <Button size="lg" variant="outline" className="border-gray-600 text-white hover:bg-gray-800">
+                VER TODOS LOS PRODUCTOS
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-20 px-4 bg-gray-900">
+      {/* Features Section */}
+      <section className="py-16 px-4 bg-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#5D1A1D] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Truck className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">ENVÍO GRATIS</h3>
+              <p className="text-gray-400">En pedidos superiores a $50</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#5D1A1D] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">COMPRA SEGURA</h3>
+              <p className="text-gray-400">Protección total en tus pagos</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#5D1A1D] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Headphones className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">SOPORTE 24/7</h3>
+              <p className="text-gray-400">Estamos aquí para ayudarte</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-8">SOBRE 717</h2>
-          <p className="text-lg text-gray-300 leading-relaxed mb-8">
-            717 es más que una marca de ropa, es un estilo de vida. Creamos piezas únicas que reflejan la cultura urbana
-            y la expresión personal. Cada diseño cuenta una historia, cada prenda es una declaración.
+          <h2 className="text-4xl font-bold mb-4">MANTENTE AL DÍA</h2>
+          <p className="text-gray-400 text-lg mb-8">
+            Suscríbete a nuestro newsletter y recibe las últimas novedades y ofertas exclusivas
           </p>
-          <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-black">
-            CONOCE MÁS
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="Tu email"
+              className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white"
+            />
+            <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] px-8 py-3">SUSCRIBIRSE</Button>
+          </div>
         </div>
       </section>
 
