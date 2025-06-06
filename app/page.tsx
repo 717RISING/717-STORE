@@ -93,7 +93,10 @@ export default function HomePage() {
             <h1 className="text-6xl md:text-8xl font-bold mb-6 text-white drop-shadow-lg">717</h1>
             <p className="text-xl md:text-2xl mb-8 text-white drop-shadow-lg">STREETWEAR AUTÉNTICO</p>
             <Link href="/productos">
-              <Button size="lg" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold px-8 py-4 text-lg">
+              <Button
+                size="lg"
+                className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold px-8 py-4 text-lg rounded-modern-lg hover-lift-modern"
+              >
                 EXPLORAR COLECCIÓN
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
@@ -111,24 +114,46 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden group">
-                <div className="relative aspect-square">
+            {featuredProducts.map((product, index) => (
+              <Card
+                key={product.id}
+                className="bg-gray-900 border-gray-800 overflow-hidden group card-modern rounded-modern-lg hover-lift-modern animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="relative aspect-square rounded-modern-lg overflow-hidden">
                   <Image
                     src={product.images[0] || "/placeholder.svg"}
                     alt={product.name}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-modern-lg"
                   />
-                  {product.isNew && <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>}
+                  {product.isNew && (
+                    <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 animate-pulse-glow rounded-modern text-white border-0">
+                      NUEVO
+                    </Badge>
+                  )}
+
+                  {/* Overlay con efecto glassmorphism */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-modern-lg backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-modern-lg" />
+                  </div>
                 </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                  <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description.substring(0, 60)}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold">${product.price}</span>
+
+                <CardContent className="p-6 space-y-3">
+                  <h3 className="font-semibold text-lg mb-2 group-hover:text-[#5D1A1D] transition-colors duration-300 text-glow">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-400 text-sm mb-3 line-clamp-2 group-hover:text-gray-300 transition-colors duration-300">
+                    {product.description.substring(0, 60)}...
+                  </p>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-xl font-bold group-hover:scale-110 transition-transform duration-300 text-white">
+                      ${product.price}
+                    </span>
                     <Link href={`/productos/${product.id}`}>
-                      <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
+                      <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] rounded-modern-lg hover-glow-modern transition-all duration-300">
+                        Ver Detalles
+                      </Button>
                     </Link>
                   </div>
                 </CardContent>
@@ -138,7 +163,10 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Link href="/productos">
-              <Button size="lg" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
+              <Button
+                size="lg"
+                className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] rounded-modern-lg hover-lift-modern px-8 py-4"
+              >
                 VER TODOS LOS PRODUCTOS
               </Button>
             </Link>
@@ -150,27 +178,27 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[#5D1A1D] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Truck className="w-8 h-8 text-white" />
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#5D1A1D] to-[#6B1E22] rounded-modern-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 hover-glow-modern">
+                <Truck className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">ENVÍO GRATIS</h3>
+              <h3 className="text-xl font-semibold mb-3">ENVÍO GRATIS</h3>
               <p className="text-gray-400">En pedidos superiores a $50</p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[#5D1A1D] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-white" />
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#5D1A1D] to-[#6B1E22] rounded-modern-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 hover-glow-modern">
+                <Shield className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">COMPRA SEGURA</h3>
+              <h3 className="text-xl font-semibold mb-3">COMPRA SEGURA</h3>
               <p className="text-gray-400">Protección total en tus pagos</p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[#5D1A1D] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Headphones className="w-8 h-8 text-white" />
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#5D1A1D] to-[#6B1E22] rounded-modern-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 hover-glow-modern">
+                <Headphones className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">SOPORTE 24/7</h3>
+              <h3 className="text-xl font-semibold mb-3">SOPORTE 24/7</h3>
               <p className="text-gray-400">Estamos aquí para ayudarte</p>
             </div>
           </div>
@@ -188,9 +216,11 @@ export default function HomePage() {
             <input
               type="email"
               placeholder="Tu email"
-              className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white"
+              className="flex-1 px-6 py-4 input-modern text-white placeholder-gray-400 focus:outline-none focus:border-[#5D1A1D] rounded-modern-lg"
             />
-            <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] px-8 py-3">SUSCRIBIRSE</Button>
+            <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] px-8 py-4 rounded-modern-lg hover-glow-modern">
+              SUSCRIBIRSE
+            </Button>
           </div>
         </div>
       </section>

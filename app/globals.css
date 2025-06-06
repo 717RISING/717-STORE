@@ -73,74 +73,132 @@ body {
     border-radius: 3rem;
   }
 
-  /* Efectos hover modernos */
+  /* Efectos hover modernos adaptativos */
   .hover-lift-modern {
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .hover-lift-modern:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(74, 21, 24, 0.3);
   }
 
-  .hover-glow-modern {
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hover-glow-modern::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s;
-  }
-
-  .hover-glow-modern:hover::before {
-    left: 100%;
-  }
-
-  /* Cards modernas */
-  .card-modern {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  .card-modern:hover {
+  /* Cards adaptativas por tema */
+  .card-dark {
     backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-dark:hover {
+    backdrop-filter: blur(30px);
+    background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  /* Inputs modernos */
-  .input-modern {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-  }
-
-  .input-modern:focus {
+  .card-light {
     backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(74, 21, 24, 0.5);
-    box-shadow: 0 0 20px rgba(74, 21, 24, 0.3);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  /* Efectos de brillo */
-  .border-glow {
-    box-shadow: 0 0 20px rgba(74, 21, 24, 0.3);
+  .card-light:hover {
+    backdrop-filter: blur(30px);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.15);
   }
 
-  .text-glow {
-    text-shadow: 0 0 10px rgba(74, 21, 24, 0.5);
+  /* Sombras adaptativas */
+  .shadow-dark {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .shadow-dark:hover {
+    box-shadow: 0 20px 40px rgba(74, 21, 24, 0.4);
+  }
+
+  .shadow-light {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-light:hover {
+    box-shadow: 0 20px 40px rgba(74, 21, 24, 0.2);
+  }
+
+  /* Efectos de brillo adaptativos */
+  .text-glow-dark {
+    text-shadow: 0 0 10px rgba(74, 21, 24, 0.6);
+  }
+
+  .text-glow-light {
+    text-shadow: 0 0 5px rgba(74, 21, 24, 0.3);
+  }
+
+  /* Shimmer adaptativos */
+  .shimmer-dark {
+    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .shimmer-light {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Glassmorphism adaptativos */
+  .hover-glassmorphism-dark {
+    transition: all 0.4s ease;
+  }
+
+  .hover-glassmorphism-dark:hover {
+    backdrop-filter: blur(25px);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .hover-glassmorphism-light {
+    transition: all 0.4s ease;
+  }
+
+  .hover-glassmorphism-light:hover {
+    backdrop-filter: blur(25px);
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+
+  /* Efectos neon adaptativos */
+  .animate-neon-glow-dark {
+    animation: neonGlowDark 2s ease-in-out infinite alternate;
+  }
+
+  .animate-neon-glow-light {
+    animation: neonGlowLight 2s ease-in-out infinite alternate;
+  }
+
+  /* Sombras especiales para botones */
+  .shadow-glow-dark {
+    box-shadow: 0 0 20px rgba(74, 21, 24, 0.5);
+  }
+
+  .shadow-glow-light {
+    box-shadow: 0 0 15px rgba(74, 21, 24, 0.3);
+  }
+
+  .shadow-pulse-dark {
+    box-shadow: 0 0 25px rgba(74, 21, 24, 0.6);
+  }
+
+  .shadow-pulse-light {
+    box-shadow: 0 0 20px rgba(74, 21, 24, 0.4);
+  }
+
+  .shadow-modern-dark {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 21, 24, 0.4);
+  }
+
+  .shadow-modern-light {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 0 15px rgba(74, 21, 24, 0.2);
   }
 
   /* Mobile optimizations */
@@ -154,11 +212,35 @@ body {
   /* Transición suave de tema */
   .theme-transition {
     transition: background-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.6s
-      cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.6s
+      cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
-/* Keyframes modernos */
+/* Keyframes adaptativos */
+@keyframes neonGlowDark {
+  from {
+    box-shadow: 0 0 10px #4a1518, 0 0 20px #4a1518, 0 0 30px #4a1518;
+    text-shadow: 0 0 10px #4a1518;
+  }
+  to {
+    box-shadow: 0 0 5px #4a1518, 0 0 10px #4a1518, 0 0 15px #4a1518;
+    text-shadow: 0 0 5px #4a1518;
+  }
+}
+
+@keyframes neonGlowLight {
+  from {
+    box-shadow: 0 0 8px #4a1518, 0 0 15px #4a1518, 0 0 25px #4a1518;
+    text-shadow: 0 0 8px #4a1518;
+  }
+  to {
+    box-shadow: 0 0 4px #4a1518, 0 0 8px #4a1518, 0 0 12px #4a1518;
+    text-shadow: 0 0 4px #4a1518;
+  }
+}
+
+/* Keyframes existentes */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -394,12 +476,16 @@ body {
     @apply text-gray-700;
   }
 
-  /* Botones para ambos temas */
-  button:not(.variant-outline):not(.variant-ghost) {
-    @apply bg-[#4A1518] hover:bg-[#3A1014] text-white cursor-pointer rounded-modern-lg;
+  /* Botones adaptativos */
+  [data-theme="dark"] button:not(.variant-outline):not(.variant-ghost) {
+    @apply bg-[#4A1518] hover:bg-[#3A1014] text-white cursor-pointer rounded-modern-lg shadow-dark;
   }
 
-  /* Links para ambos temas */
+  [data-theme="light"] button:not(.variant-outline):not(.variant-ghost) {
+    @apply bg-[#4A1518] hover:bg-[#3A1014] text-white cursor-pointer rounded-modern-lg shadow-light;
+  }
+
+  /* Links adaptativos */
   [data-theme="dark"] a {
     @apply text-white hover:text-[#4A1518] cursor-pointer transition-colors duration-300;
   }
@@ -408,26 +494,26 @@ body {
     @apply text-gray-900 hover:text-[#4A1518] cursor-pointer transition-colors duration-300;
   }
 
-  /* Inputs para ambos temas */
+  /* Inputs adaptativos */
   [data-theme="dark"] input,
   [data-theme="dark"] textarea,
   [data-theme="dark"] select {
-    @apply input-modern text-white placeholder-gray-400 rounded-modern;
+    @apply bg-gray-900/50 border-gray-700 text-white placeholder-gray-400 rounded-modern backdrop-blur-md;
   }
 
   [data-theme="light"] input,
   [data-theme="light"] textarea,
   [data-theme="light"] select {
-    @apply bg-white border-gray-300 text-gray-900 placeholder-gray-500 rounded-modern;
+    @apply bg-white/80 border-gray-300 text-gray-900 placeholder-gray-500 rounded-modern backdrop-blur-md;
   }
 
-  /* Cards para ambos temas */
+  /* Cards adaptativos */
   [data-theme="dark"] .card {
-    @apply card-modern rounded-modern-lg;
+    @apply card-dark rounded-modern-lg;
   }
 
   [data-theme="light"] .card {
-    @apply bg-white border-gray-200 rounded-modern-lg;
+    @apply card-light rounded-modern-lg;
   }
 
   /* Aplicar border radius moderno a todos los elementos */
@@ -495,5 +581,16 @@ body {
   /* Better mobile typography */
   body {
     font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Reducir efectos en móvil para mejor rendimiento */
+  .card-dark,
+  .card-light {
+    backdrop-filter: blur(10px);
+  }
+
+  .hover-glassmorphism-dark,
+  .hover-glassmorphism-light {
+    backdrop-filter: blur(15px);
   }
 }
