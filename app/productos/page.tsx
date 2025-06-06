@@ -25,9 +25,11 @@ export default function ProductsPage() {
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
 
   useEffect(() => {
+    setMounted(true)
     // Verificar si el usuario está autenticado
     const userAuth = localStorage.getItem("userAuth")
     const userInfo = localStorage.getItem("userInfo")
@@ -76,6 +78,17 @@ export default function ProductsPage() {
 
   const categories = Array.from(new Set(products.map((product) => product.category)))
 
+  // Mostrar tema por defecto hasta que se monte el componente
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#4A1518]"></div>
+        </div>
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
@@ -88,7 +101,9 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "bg-black" : "bg-gray-50"} theme-transition`}>
+    <div
+      className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900"} theme-transition`}
+    >
       {/* Navigation */}
       <header
         className={`px-4 py-6 border-b animate-fade-in ${theme === "dark" ? "border-gray-800" : "border-gray-200"}`}
