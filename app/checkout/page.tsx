@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
-import { createOrder, calculateOrderTotals } from "@/lib/orders"
+import { createOrder, calculateOrderTotals, markEmailSent } from "@/lib/orders"
+import { sendOrderConfirmation } from "@/lib/email"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Lock } from "lucide-react"
+import { ArrowLeft, Lock, Mail } from "lucide-react"
 import Link from "next/link"
 import ShippingForm from "@/components/checkout/shipping-form"
 import PaymentForm from "@/components/checkout/payment-form"
@@ -17,6 +18,7 @@ export default function CheckoutPage() {
   const { state, dispatch } = useCart()
   const [isLoading, setIsLoading] = useState(false)
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
+  const [emailStatus, setEmailStatus] = useState<string>("")
 
   const [shippingData, setShippingData] = useState({
     firstName: "",
@@ -93,6 +95,13 @@ export default function CheckoutPage() {
       }
     }
 
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(shippingData.email)) {
+      alert("Por favor ingresa un email válido")
+      return false
+    }
+
     // Validar datos de pago si es tarjeta
     if (paymentData.method === "card") {
       const requiredPaymentFields = ["cardNumber", "expiryDate", "cvv", "cardName"]
@@ -111,10 +120,11 @@ export default function CheckoutPage() {
     if (!validateForm()) return
 
     setIsLoading(true)
+    setEmailStatus("Procesando pedido...")
 
     try {
       // Simular procesamiento del pedido
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
       const orderData = {
         items: state.items,
@@ -137,15 +147,36 @@ export default function CheckoutPage() {
         total,
       }
 
+      // Crear el pedido
       const order = createOrder(orderData)
+      setEmailStatus("Enviando confirmación por email...")
+
+      // Enviar email de confirmación
+      try {
+        const emailSent = await sendOrderConfirmation(order)
+        if (emailSent) {
+          markEmailSent(order.id, "confirmation")
+          setEmailStatus("✅ Email de confirmación enviado")
+        } else {
+          setEmailStatus("⚠️ Error al enviar email, pero pedido creado")
+        }
+      } catch (emailError) {
+        console.error("Error enviando email:", emailError)
+        setEmailStatus("⚠️ Error al enviar email, pero pedido creado")
+      }
 
       // Limpiar carrito
       dispatch({ type: "CLEAR_CART" })
 
+      // Esperar un momento para mostrar el estado del email
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       // Redirigir a página de confirmación
       router.push(`/checkout/confirmacion?orderId=${order.id}`)
     } catch (error) {
+      console.error("Error procesando pedido:", error)
       alert("Error al procesar el pedido. Por favor intenta de nuevo.")
+      setEmailStatus("")
     } finally {
       setIsLoading(false)
     }
@@ -197,6 +228,18 @@ export default function CheckoutPage() {
           <div className="space-y-6">
             <OrderSummary subtotal={subtotal} shipping={shipping} tax={tax} total={total} />
 
+            {/* Estado del email */}
+            {emailStatus && (
+              <Card className="bg-gray-900 border-gray-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="w-4 h-4 text-[#5D1A1D]" />
+                    <span className="text-gray-300">{emailStatus}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Button
               onClick={handleSubmitOrder}
               disabled={isLoading}
@@ -206,6 +249,10 @@ export default function CheckoutPage() {
             </Button>
 
             <div className="text-center text-xs text-gray-400">
+              <p className="flex items-center justify-center gap-1 mb-2">
+                <Mail className="w-3 h-3" />
+                Recibirás confirmación por email
+              </p>
               <p>Al realizar el pedido, aceptas nuestros</p>
               <p>
                 <Link href="/terminos" className="text-[#5D1A1D] hover:underline">
