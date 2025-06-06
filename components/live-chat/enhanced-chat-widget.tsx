@@ -1,104 +1,135 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
-import ChatLoader from "@/components/loaders/chat-loader"
+import { MessageCircle, Sparkles } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import EnhancedButton from "../enhanced-button"
+import ChatInterface from "./chat-interface"
 
-type EnhancedChatWidgetProps = {}
-
-interface Message {
-  sender: "user" | "agent"
-  text: string
-}
-
-const EnhancedChatWidget: React.FC<EnhancedChatWidgetProps> = ({/* props */}) => {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState("")
-  const [chatState, setChatState] = useState<"connecting" | "connected" | "disconnected">("connecting")
-  const [isAgentTyping, setIsAgentTyping] = useState(false)
+export default function EnhancedChatWidget() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(false)
+  const [hasNewMessage, setHasNewMessage] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
+  const [showWelcome, setShowWelcome] = useState(true)
 
   useEffect(() => {
-    // Simulate connecting to a chat service
-    const connectTimeout = setTimeout(() => {
-      setChatState("connected")
-    }, 2000)
+    const interval = setInterval(() => {
+      setIsOnline(Math.random() > 0.1)
+    }, 30000)
 
-    // Simulate agent typing
-    const typingTimeout = setTimeout(() => {
-      setIsAgentTyping(true)
-      setTimeout(() => {
-        setIsAgentTyping(false)
-      }, 1500)
-    }, 4000)
-
-    return () => {
-      clearTimeout(connectTimeout)
-      clearTimeout(typingTimeout)
-    }
+    return () => clearInterval(interval)
   }, [])
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() !== "") {
-      setMessages([...messages, { sender: "user", text: newMessage }])
-      setNewMessage("")
+  useEffect(() => {
+    if (!isOpen) {
+      const timeout = setTimeout(() => {
+        setHasNewMessage(true)
+      }, 10000)
 
-      // Simulate agent response
-      setTimeout(() => {
-        setMessages([
-          ...messages,
-          { sender: "user", text: newMessage },
-          { sender: "agent", text: "Thank you for your message!" },
-        ])
-      }, 1000)
+      return () => clearTimeout(timeout)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const welcomeTimeout = setTimeout(() => {
+      setShowWelcome(false)
+    }, 5000)
+
+    return () => clearTimeout(welcomeTimeout)
+  }, [])
+
+  const handleToggleChat = () => {
+    setIsOpen(!isOpen)
+    setHasNewMessage(false)
+    setIsMinimized(false)
+  }
+
+  const handleMinimize = () => {
+    setIsMinimized(true)
+    setIsOpen(false)
+  }
+
+  const handleNewMessage = () => {
+    if (!isOpen) {
+      setHasNewMessage(true)
     }
   }
 
   return (
-    <div className="border rounded shadow-md p-4 w-96">
-      <h2 className="text-lg font-semibold mb-2">Live Chat</h2>
-
-      {chatState === "connecting" && (
-        <div className="p-4">
-          <ChatLoader size="md" status="connecting" />
-        </div>
-      )}
-
-      {/* Chat messages display */}
-      <div className="mb-2 h-48 overflow-y-auto">
-        {messages.map((message, index) => (
-          <div key={index} className={`mb-1 ${message.sender === "user" ? "text-right" : "text-left"}`}>
-            <span className={`inline-block p-2 rounded ${message.sender === "user" ? "bg-blue-200" : "bg-gray-200"}`}>
-              {message.text}
-            </span>
+    <>
+      {/* Chat Interface */}
+      {isOpen && !isMinimized && (
+        <div className="fixed bottom-20 right-4 z-50 w-80 h-96 animate-scale-in">
+          <div className="bg-gray-900 border border-gray-700 rounded-modern-xl shadow-2xl overflow-hidden border-glow card-modern">
+            <ChatInterface onClose={handleToggleChat} onMinimize={handleMinimize} onNewMessage={handleNewMessage} />
           </div>
-        ))}
-      </div>
-
-      {isAgentTyping && (
-        <div className="p-2">
-          <ChatLoader size="sm" status="typing" />
         </div>
       )}
 
-      {/* Input and send button */}
-      {chatState === "connected" && (
-        <div className="flex">
-          <input
-            type="text"
-            className="flex-grow border rounded p-2 mr-2"
-            placeholder="Type your message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <button className="bg-blue-500 text-white rounded p-2" onClick={handleSendMessage}>
-            Send
-          </button>
+      {/* Minimized Chat Indicator */}
+      {isMinimized && (
+        <div className="fixed bottom-20 right-4 z-50 animate-bounce-subtle">
+          <EnhancedButton
+            variant="modern"
+            size="icon"
+            onClick={() => {
+              setIsMinimized(false)
+              setIsOpen(true)
+            }}
+            className="rounded-modern-2xl p-4 shadow-lg hover-lift-modern"
+          >
+            <MessageCircle className="w-6 h-6" />
+            {hasNewMessage && (
+              <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 min-w-[24px] h-6 rounded-modern animate-pulse">
+                1
+              </Badge>
+            )}
+          </EnhancedButton>
         </div>
       )}
 
-      {chatState === "disconnected" && <p>Disconnected from chat.</p>}
-    </div>
+      {/* Chat Toggle Button */}
+      {!isOpen && !isMinimized && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="relative">
+            <EnhancedButton
+              variant="modern"
+              size="icon"
+              onClick={handleToggleChat}
+              className="rounded-modern-3xl p-5 shadow-lg animate-float hover-lift-modern"
+            >
+              <MessageCircle className="w-7 h-7" />
+              {hasNewMessage && (
+                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 min-w-[24px] h-6 rounded-modern animate-pulse">
+                  1
+                </Badge>
+              )}
+            </EnhancedButton>
+
+            {/* Status Indicator */}
+            <div className="absolute -top-1 -left-1">
+              <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-500"}`}>
+                {isOnline && <div className="w-4 h-4 rounded-full bg-green-500 animate-ping absolute"></div>}
+              </div>
+            </div>
+
+            {/* Welcome Message */}
+            {showWelcome && !hasNewMessage && (
+              <div className="absolute bottom-full right-0 mb-4 animate-slide-up">
+                <div className="bg-gray-800 text-white text-sm px-4 py-3 rounded-modern-lg shadow-lg max-w-xs border border-gray-700 border-glow card-modern">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4 text-[#4A1518] animate-twinkle" />
+                    <span className="font-semibold">¡Hola!</span>
+                  </div>
+                  <p>¿Necesitas ayuda? Estoy aquí para asistirte 24/7</p>
+                  <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
-
-export default EnhancedChatWidget

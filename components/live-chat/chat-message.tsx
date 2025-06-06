@@ -1,58 +1,38 @@
 "use client"
+import { Bot, User } from "lucide-react"
 
-import { User, Bot, Clock, CheckCheck } from "lucide-react"
-
-export interface ChatMessageData {
+interface Message {
   id: string
   content: string
   sender: "user" | "bot"
   timestamp: Date
-  status?: "sending" | "sent" | "delivered" | "read"
 }
 
 interface ChatMessageProps {
-  message: ChatMessageData
+  message: Message
 }
 
 export default function ChatMessage({ message }: ChatMessageProps) {
-  const isUser = message.sender === "user"
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
+  const isBot = message.sender === "bot"
 
   return (
-    <div className={`flex items-start space-x-2 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
-      {/* Avatar */}
+    <div className={`flex items-start space-x-3 animate-fade-in ${isBot ? "" : "flex-row-reverse space-x-reverse"}`}>
       <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-          isUser ? "bg-gray-800" : "bg-[#4A1518]"
+        className={`w-8 h-8 rounded-modern-lg flex items-center justify-center flex-shrink-0 ${
+          isBot ? "bg-gradient-to-r from-[#5D1A1D] to-[#4A1518]" : "bg-gradient-to-r from-gray-600 to-gray-700"
         }`}
       >
-        {isUser ? <User className="w-3 h-3 text-white" /> : <Bot className="w-3 h-3 text-white" />}
+        {isBot ? <Bot className="w-4 h-4 text-white" /> : <User className="w-4 h-4 text-white" />}
       </div>
-
-      {/* Message Content */}
-      <div className={`max-w-xs ${isUser ? "items-end" : "items-start"} flex flex-col`}>
-        <div className={`rounded-lg px-3 py-2 ${isUser ? "bg-[#4A1518] text-white" : "bg-gray-900 text-white"}`}>
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        </div>
-
-        {/* Timestamp and Status */}
-        <div className={`flex items-center space-x-1 mt-1 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
-          <span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
-
-          {isUser && message.status && (
-            <div className="flex items-center">
-              {message.status === "sending" && <Clock className="w-3 h-3 text-gray-500" />}
-              {message.status === "sent" && <CheckCheck className="w-3 h-3 text-gray-500" />}
-              {message.status === "delivered" && <CheckCheck className="w-3 h-3 text-blue-500" />}
-              {message.status === "read" && <CheckCheck className="w-3 h-3 text-green-500" />}
-            </div>
-          )}
-        </div>
+      <div
+        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-modern-lg shadow-lg card-modern ${
+          isBot ? "bg-gray-800 text-white" : "bg-gradient-to-r from-[#4A1518] to-[#6B1E22] text-white"
+        }`}
+      >
+        <p className="text-sm leading-relaxed">{message.content}</p>
+        <span className="text-xs opacity-70 mt-1 block">
+          {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
       </div>
     </div>
   )

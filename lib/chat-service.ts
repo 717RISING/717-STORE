@@ -1,8 +1,32 @@
-// Servicio de chat para respuestas automáticas
+// Servicio de chat con IA integrada
 export async function getChatResponse(userMessage: string): Promise<string> {
+  try {
+    // Intentar obtener respuesta de IA
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: userMessage }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      return data.message
+    } else {
+      throw new Error("AI service unavailable")
+    }
+  } catch (error) {
+    console.log("Fallback to predefined responses:", error)
+    // Fallback a respuestas predefinidas
+    return getPredefinedResponse(userMessage)
+  }
+}
+
+// Respuestas predefinidas como fallback
+function getPredefinedResponse(userMessage: string): string {
   const message = userMessage.toLowerCase()
 
-  // Respuestas predefinidas basadas en palabras clave
   const responses: { [key: string]: string[] } = {
     // Saludos
     hola: [
@@ -39,36 +63,6 @@ export async function getChatResponse(userMessage: string): Promise<string> {
       "👕 **Nuestros Productos:**\n\n• Camisetas premium\n• Hoodies exclusivos\n• Pantalones streetwear\n• Accesorios únicos\n\nTodos nuestros productos son de alta calidad y diseño exclusivo. ¿Buscas algo en particular?",
       "Tenemos una amplia colección de streetwear auténtico. Desde camisetas hasta accesorios, todo con la calidad 717. ¿Qué tipo de producto te interesa?",
     ],
-
-    // Stock
-    stock: [
-      "📦 **Disponibilidad:**\n\nLa mayoría de nuestros productos están en stock y listos para envío inmediato. Si un artículo no está disponible, te notificaremos antes de procesar tu pedido.\n\n¿Hay algún producto específico que te interese?",
-      "Mantenemos buen stock de nuestros productos más populares. Si algo no está disponible, te avisamos de inmediato. ¿Qué producto buscas?",
-    ],
-
-    // Seguimiento
-    seguimiento: [
-      "📍 **Seguimiento de Pedido:**\n\nUna vez que tu pedido sea enviado, recibirás un email con el número de seguimiento. También puedes revisar el estado en tu cuenta de usuario.\n\n¿Tienes un pedido que quieras rastrear?",
-      "Puedes rastrear tu pedido con el número que te enviamos por email, o desde tu cuenta en el sitio. ¿Necesitas ayuda para encontrar tu número de seguimiento?",
-    ],
-
-    // Cuenta
-    cuenta: [
-      "👤 **Tu Cuenta:**\n\nDesde tu cuenta puedes:\n• Ver historial de pedidos\n• Gestionar direcciones\n• Actualizar información personal\n• Acceder a ofertas exclusivas\n\n¿Necesitas ayuda con tu cuenta?",
-      "En tu cuenta tienes acceso completo a tus pedidos, direcciones y configuración personal. ¿Hay algo específico que necesites cambiar?",
-    ],
-
-    // Ofertas
-    oferta: [
-      "🎉 **Ofertas Especiales:**\n\n• Descuentos por primera compra\n• Ofertas de temporada\n• Envío gratis en compras +$50\n• Descuentos por volumen\n\n¡Suscríbete a nuestro newsletter para no perderte ninguna oferta!",
-      "Siempre tenemos ofertas especiales para nuestros clientes. Desde descuentos por primera compra hasta ofertas de temporada. ¿Te interesa alguna en particular?",
-    ],
-
-    // Contacto
-    contacto: [
-      "📞 **Contacto:**\n\n• Chat en vivo (aquí mismo)\n• Email: soporte@717store.com\n• WhatsApp: +1 (555) 717-0717\n• Horario: Lun-Vie 9AM-6PM\n\n¿Prefieres algún método de contacto específico?",
-      "Puedes contactarnos por varios medios. Este chat es la forma más rápida, pero también tenemos email y WhatsApp. ¿Cómo prefieres que te ayudemos?",
-    ],
   }
 
   // Buscar respuesta basada en palabras clave
@@ -81,14 +75,11 @@ export async function getChatResponse(userMessage: string): Promise<string> {
 
   // Respuestas genéricas si no se encuentra palabra clave específica
   const genericResponses = [
-    "Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto. Mientras tanto, ¿hay algo específico en lo que pueda ayudarte?",
-    "Entiendo tu consulta. Para brindarte la mejor ayuda, ¿podrías ser más específico sobre lo que necesitas?",
-    "¡Perfecto! Estoy aquí para ayudarte con cualquier duda sobre 717 Store. ¿Podrías darme más detalles sobre tu consulta?",
-    "Gracias por contactarnos. ¿Tu consulta es sobre productos, envíos, devoluciones o algo más específico?",
+    "Gracias por tu mensaje. ¿Podrías ser más específico sobre lo que necesitas? Puedo ayudarte con productos, envíos, devoluciones, tallas o cualquier otra consulta sobre 717 Store.",
+    "Entiendo tu consulta. Para brindarte la mejor ayuda, ¿podrías darme más detalles sobre lo que buscas?",
+    "¡Perfecto! Estoy aquí para ayudarte con cualquier duda sobre 717 Store. ¿Tu consulta es sobre productos, envíos, pagos o algo más específico?",
+    "Gracias por contactarnos. ¿En qué área específica puedo asistirte hoy?",
   ]
-
-  // Simular tiempo de respuesta
-  await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 1000))
 
   return genericResponses[Math.floor(Math.random() * genericResponses.length)]
 }

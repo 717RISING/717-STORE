@@ -7,6 +7,7 @@ import { getChatResponse } from "@/lib/chat-service"
 export function useChatService() {
   const [messages, setMessages] = useState<ChatMessageData[]>([])
   const [isConnected, setIsConnected] = useState(true)
+  const [isThinking, setIsThinking] = useState(false)
 
   // Simular conexión intermitente
   useEffect(() => {
@@ -38,28 +39,44 @@ export function useChatService() {
       setMessages((prev) => prev.map((msg) => (msg.id === userMessage.id ? { ...msg, status: "delivered" } : msg)))
     }, 1000)
 
-    // Simular respuesta del bot
+    // Mostrar indicador de "pensando"
+    setIsThinking(true)
+
     try {
+      // Obtener respuesta de IA o fallback
       const response = await getChatResponse(content)
 
-      setTimeout(
-        () => {
-          const botMessage: ChatMessageData = {
-            id: (Date.now() + 1).toString(),
-            content: response,
-            sender: "bot",
-            timestamp: new Date(),
-          }
+      // Simular tiempo de respuesta más realista para IA
+      const thinkingTime = response.length > 100 ? 2000 : 1000
 
-          setMessages((prev) => [...prev, botMessage])
+      setTimeout(() => {
+        setIsThinking(false)
 
-          // Marcar mensaje del usuario como leído
-          setMessages((prev) => prev.map((msg) => (msg.id === userMessage.id ? { ...msg, status: "read" } : msg)))
-        },
-        1000 + Math.random() * 2000,
-      ) // Respuesta entre 1-3 segundos
+        const botMessage: ChatMessageData = {
+          id: (Date.now() + 1).toString(),
+          content: response,
+          sender: "bot",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, botMessage])
+
+        // Marcar mensaje del usuario como leído
+        setMessages((prev) => prev.map((msg) => (msg.id === userMessage.id ? { ...msg, status: "read" } : msg)))
+      }, thinkingTime)
     } catch (error) {
       console.error("Error sending message:", error)
+      setIsThinking(false)
+
+      // Mensaje de error
+      const errorMessage: ChatMessageData = {
+        id: (Date.now() + 1).toString(),
+        content: "Lo siento, hay un problema temporal con el servicio. Por favor intenta de nuevo en unos momentos.",
+        sender: "bot",
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, errorMessage])
     }
   }, [])
 
@@ -67,5 +84,6 @@ export function useChatService() {
     messages,
     sendMessage,
     isConnected,
+    isThinking,
   }
 }
