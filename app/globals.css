@@ -11,7 +11,7 @@ body {
     text-wrap: balance;
   }
 
-  /* Animaciones personalizadas */
+  /* Animaciones básicas existentes */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out forwards;
   }
@@ -40,6 +40,242 @@ body {
     animation: shimmer 2s linear infinite;
   }
 
+  /* Nuevas animaciones avanzadas */
+  .animate-slide-in-left {
+    animation: slideInLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-zoom-in {
+    animation: zoomIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-rotate-in {
+    animation: rotateIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-flip-in {
+    animation: flipIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-elastic-in {
+    animation: elasticIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+
+  .animate-typewriter {
+    animation: typewriter 3s steps(40) forwards;
+  }
+
+  .animate-gradient {
+    animation: gradientShift 3s ease infinite;
+  }
+
+  .animate-wave {
+    animation: wave 2s ease-in-out infinite;
+  }
+
+  .animate-heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 1s ease-in-out infinite;
+  }
+
+  .animate-swing {
+    animation: swing 2s ease-in-out infinite;
+  }
+
+  .animate-rubber-band {
+    animation: rubberBand 1s ease-in-out;
+  }
+
+  .animate-jello {
+    animation: jello 1s ease-in-out;
+  }
+
+  .animate-tada {
+    animation: tada 1s ease-in-out;
+  }
+
+  .animate-flash {
+    animation: flash 2s infinite;
+  }
+
+  .animate-neon-glow {
+    animation: neonGlow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-matrix {
+    animation: matrix 20s linear infinite;
+  }
+
+  .animate-particle-float {
+    animation: particleFloat 6s ease-in-out infinite;
+  }
+
+  /* Animaciones de transición de página */
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .page-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease-in, transform 0.4s ease-in;
+  }
+
+  /* Transiciones específicas por tipo de página */
+  .page-fade-enter {
+    opacity: 0;
+  }
+
+  .page-fade-enter-active {
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+  }
+
+  .page-fade-exit {
+    opacity: 1;
+  }
+
+  .page-fade-exit-active {
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+  }
+
+  .page-slide-enter {
+    transform: translateX(100%);
+  }
+
+  .page-slide-enter-active {
+    transform: translateX(0);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .page-slide-exit {
+    transform: translateX(0);
+  }
+
+  .page-slide-exit-active {
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .page-zoom-enter {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .page-zoom-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+
+  .page-zoom-exit {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .page-zoom-exit-active {
+    opacity: 0;
+    transform: scale(1.1);
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+  }
+
+  .page-flip-enter {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(90deg);
+  }
+
+  .page-flip-enter-active {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .page-flip-exit {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0);
+  }
+
+  .page-flip-exit-active {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-90deg);
+    transition: opacity 0.4s ease-in, transform 0.4s ease-in;
+  }
+
+  /* Animaciones de loader */
+  .loader-spin {
+    animation: loaderSpin 1s linear infinite;
+  }
+
+  .loader-pulse {
+    animation: loaderPulse 2s ease-in-out infinite;
+  }
+
+  .loader-bounce {
+    animation: loaderBounce 1.4s ease-in-out infinite both;
+  }
+
+  .loader-dots {
+    animation: loaderDots 1.4s ease-in-out infinite both;
+  }
+
+  .loader-wave {
+    animation: loaderWave 1.2s ease-in-out infinite;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4a1518, #8b2635, #4a1518);
+    background-size: 200% 100%;
+    animation: progressShimmer 2s ease-in-out infinite;
+    z-index: 9999;
+    transform-origin: left;
+  }
+
+  .progress-bar-enter {
+    transform: scaleX(0);
+  }
+
+  .progress-bar-enter-active {
+    transform: scaleX(1);
+    transition: transform 0.3s ease-out;
+  }
+
+  .progress-bar-exit {
+    transform: scaleX(1);
+  }
+
+  .progress-bar-exit-active {
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease-in;
+  }
+
+  /* Efectos hover avanzados */
   .hover-lift {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -68,6 +304,40 @@ body {
 
   .hover-glow:hover::before {
     left: 100%;
+  }
+
+  .hover-tilt {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-tilt:hover {
+    transform: perspective(1000px) rotateX(10deg) rotateY(10deg) scale(1.05);
+  }
+
+  .hover-3d {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+  }
+
+  .hover-3d:hover {
+    transform: perspective(1000px) rotateY(15deg) scale(1.05);
+  }
+
+  .hover-magnetic {
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .hover-magnetic:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  .hover-neon {
+    transition: all 0.3s ease;
+  }
+
+  .hover-neon:hover {
+    box-shadow: 0 0 20px #4a1518, 0 0 40px #4a1518, 0 0 60px #4a1518;
+    text-shadow: 0 0 10px #4a1518;
   }
 
   .button-press {
@@ -100,8 +370,86 @@ body {
     transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
       border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* Efectos de scroll */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Efectos de texto */
+  .text-gradient {
+    background: linear-gradient(45deg, #4a1518, #8b2635, #4a1518);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(74, 21, 24, 0.8), 0 0 40px rgba(74, 21, 24, 0.6);
+  }
+
+  /* Efectos de background */
+  .bg-animated-gradient {
+    background: linear-gradient(-45deg, #000000, #1a1a1a, #4a1518, #000000);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+  }
+
+  .bg-particles {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bg-particles::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(2px 2px at 20px 30px, #4a1518, transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(74, 21, 24, 0.5), transparent),
+      radial-gradient(1px 1px at 90px 40px, #4a1518, transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(74, 21, 24, 0.3), transparent);
+    background-repeat: repeat;
+    background-size: 150px 100px;
+    animation: particleFloat 20s linear infinite;
+    opacity: 0.3;
+  }
+
+  /* Efectos de loading */
+  .loading-dots {
+    display: inline-block;
+  }
+
+  .loading-dots::after {
+    content: "";
+    animation: loadingDots 1.5s infinite;
+  }
+
+  .loading-pulse {
+    animation: loadingPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .loading-spin {
+    animation: loadingSpin 1s linear infinite;
+  }
+
+  .loading-bounce {
+    animation: loadingBounce 1.4s ease-in-out infinite both;
+  }
 }
 
+/* Keyframes para todas las animaciones */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -127,6 +475,78 @@ body {
 @keyframes scaleIn {
   from {
     opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-200deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0);
+  }
+}
+
+@keyframes flipIn {
+  from {
+    opacity: 0;
+    transform: perspective(400px) rotateY(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(400px) rotateY(0);
+  }
+}
+
+@keyframes elasticIn {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
     transform: scale(0.9);
   }
   to {
@@ -171,6 +591,331 @@ body {
   }
   100% {
     background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(20deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  7% {
+    transform: rotateZ(0);
+  }
+  15% {
+    transform: rotateZ(-15deg);
+  }
+  20% {
+    transform: rotateZ(10deg);
+  }
+  25% {
+    transform: rotateZ(-10deg);
+  }
+  30% {
+    transform: rotateZ(6deg);
+  }
+  35% {
+    transform: rotateZ(-4deg);
+  }
+  40%,
+  100% {
+    transform: rotateZ(0);
+  }
+}
+
+@keyframes swing {
+  20% {
+    transform: rotate(15deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes rubberBand {
+  from {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.25, 0.75);
+  }
+  40% {
+    transform: scale(0.75, 1.25);
+  }
+  50% {
+    transform: scale(1.15, 0.85);
+  }
+  65% {
+    transform: scale(0.95, 1.05);
+  }
+  75% {
+    transform: scale(1.05, 0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes jello {
+  from,
+  11.1%,
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+  22.2% {
+    transform: skewX(-12.5deg) skewY(-12.5deg);
+  }
+  33.3% {
+    transform: skewX(6.25deg) skewY(6.25deg);
+  }
+  44.4% {
+    transform: skewX(-3.125deg) skewY(-3.125deg);
+  }
+  55.5% {
+    transform: skewX(1.5625deg) skewY(1.5625deg);
+  }
+  66.6% {
+    transform: skewX(-0.78125deg) skewY(-0.78125deg);
+  }
+  77.7% {
+    transform: skewX(0.390625deg) skewY(0.390625deg);
+  }
+  88.8% {
+    transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+  }
+}
+
+@keyframes tada {
+  from {
+    transform: scale(1);
+  }
+  10%,
+  20% {
+    transform: scale(0.9) rotate(-3deg);
+  }
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: scale(1.1) rotate(3deg);
+  }
+  40%,
+  60%,
+  80% {
+    transform: scale(1.1) rotate(-3deg);
+  }
+  to {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes flash {
+  from,
+  50%,
+  to {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0;
+  }
+}
+
+@keyframes neonGlow {
+  from {
+    text-shadow: 0 0 10px #4a1518, 0 0 20px #4a1518, 0 0 30px #4a1518, 0 0 40px #4a1518;
+  }
+  to {
+    text-shadow: 0 0 5px #4a1518, 0 0 10px #4a1518, 0 0 15px #4a1518, 0 0 20px #4a1518;
+  }
+}
+
+@keyframes matrix {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Keyframes para loaders */
+@keyframes loaderSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loaderPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes loaderBounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes loaderDots {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes loaderWave {
+  0%,
+  40%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes progressShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes loadingDots {
+  0%,
+  20% {
+    content: "";
+  }
+  40% {
+    content: ".";
+  }
+  60% {
+    content: "..";
+  }
+  80%,
+  100% {
+    content: "...";
+  }
+}
+
+@keyframes loadingPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes loadingSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loadingBounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
   }
 }
 
@@ -255,6 +1000,7 @@ body {
 
   html {
     @apply theme-transition;
+    scroll-behavior: smooth;
   }
 
   body {
