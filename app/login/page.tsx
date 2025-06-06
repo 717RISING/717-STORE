@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { User, Eye, EyeOff, Mail, Lock } from "lucide-react"
@@ -14,16 +14,15 @@ import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import { useToast } from "@/hooks/use-toast"
 import { verifyUserCredentials, registerUser } from "@/lib/users"
-import { useTheme } from "@/lib/theme-context"
+import { useThemeSafe } from "@/hooks/use-theme-safe"
 import ThemeToggle from "@/components/theme-toggle"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
-  const { theme } = useTheme()
+  const { theme, mounted } = useThemeSafe()
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -36,10 +35,6 @@ export default function LoginPage() {
     password: "",
     confirmPassword: "",
   })
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -164,17 +159,6 @@ export default function LoginPage() {
     }
   }
 
-  // Mostrar tema por defecto hasta que se monte el componente
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#4A1518]"></div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div
       className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900"} theme-transition`}
@@ -202,7 +186,7 @@ export default function LoginPage() {
             </Link>
 
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
+              {mounted && <ThemeToggle />}
               <Link
                 href="/login"
                 className={`${theme === "dark" ? "text-white" : "text-gray-900"} hover:text-[#4A1518] transition-colors`}

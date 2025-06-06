@@ -1,7 +1,8 @@
 "use client"
 
-import type React from "react"
-import { createContext, useContext, useEffect, useState } from "react"
+import React from "react"
+import { useEffect, useState } from "react"
+import { ThemeContext } from "@/hooks/use-theme-safe"
 
 type Theme = "dark" | "light"
 
@@ -10,8 +11,6 @@ interface ThemeContextType {
   toggleTheme: () => void
   setTheme: (theme: Theme) => void
 }
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark")
@@ -38,17 +37,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(newTheme)
   }
 
-  if (!mounted) {
-    return <>{children}</>
+  const value: ThemeContextType = {
+    theme,
+    toggleTheme,
+    setTheme,
   }
 
-  return <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>{children}</ThemeContext.Provider>
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
+// Hook de compatibilidad para componentes existentes
 export function useTheme() {
-  const context = useContext(ThemeContext)
+  const context = React.useContext(ThemeContext)
   if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider")
+    // En lugar de lanzar error, devolver valores por defecto
+    return {
+      theme: "dark" as Theme,
+      toggleTheme: () => {},
+      setTheme: () => {},
+    }
   }
   return context
 }

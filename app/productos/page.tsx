@@ -13,7 +13,7 @@ import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
 import InteractiveProductCard from "@/components/interactive-product-card"
 import LoadingSpinner from "@/components/loading-spinner"
-import { useTheme } from "@/lib/theme-context"
+import { useThemeSafe } from "@/hooks/use-theme-safe"
 import ThemeToggle from "@/components/theme-toggle"
 
 export default function ProductsPage() {
@@ -25,11 +25,9 @@ export default function ProductsPage() {
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
-  const { theme } = useTheme()
+  const { theme, mounted } = useThemeSafe()
 
   useEffect(() => {
-    setMounted(true)
     // Verificar si el usuario está autenticado
     const userAuth = localStorage.getItem("userAuth")
     const userInfo = localStorage.getItem("userInfo")
@@ -78,17 +76,6 @@ export default function ProductsPage() {
 
   const categories = Array.from(new Set(products.map((product) => product.category)))
 
-  // Mostrar tema por defecto hasta que se monte el componente
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#4A1518]"></div>
-        </div>
-      </div>
-    )
-  }
-
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
@@ -127,7 +114,7 @@ export default function ProductsPage() {
             </Link>
 
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
+              {mounted && <ThemeToggle />}
               {isAuthenticated ? (
                 <Link
                   href="/cuenta"

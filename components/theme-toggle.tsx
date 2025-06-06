@@ -1,11 +1,26 @@
 "use client"
 
 import { Moon, Sun } from "lucide-react"
-import { useTheme } from "@/lib/theme-context"
+import { useThemeSafe } from "@/hooks/use-theme-safe"
 import { Button } from "@/components/ui/button"
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme, mounted } = useThemeSafe()
+
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative overflow-hidden group hover:bg-[#4A1518]/20 transition-all duration-300"
+        disabled
+      >
+        <div className="relative w-5 h-5">
+          <Moon className="absolute inset-0 w-5 h-5 text-white" />
+        </div>
+      </Button>
+    )
+  }
 
   return (
     <Button
