@@ -5,14 +5,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { User, Grid, List, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { products } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
+import InteractiveProductCard from "@/components/interactive-product-card"
+import LoadingSpinner from "@/components/loading-spinner"
 
 export default function ProductsPage() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -22,6 +22,7 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // Verificar si el usuario está autenticado
@@ -33,6 +34,9 @@ export default function ProductsPage() {
       const user = JSON.parse(userInfo)
       setUserName(user.name)
     }
+
+    // Simular carga
+    setTimeout(() => setIsLoading(false), 1000)
   }, [])
 
   useEffect(() => {
@@ -69,23 +73,34 @@ export default function ProductsPage() {
 
   const categories = Array.from(new Set(products.map((product) => product.category)))
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner size="lg" color="wine" />
+          <p className="mt-4 text-gray-400">Cargando productos...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
+      <header className="px-4 py-6 bg-transparent border-b border-gray-800 animate-fade-in">
         <nav className="max-w-7xl mx-auto">
           {/* Top Row - Icons Only */}
           <div className="flex justify-end items-center mb-4">
             <div className="flex items-center space-x-4">
               {isAuthenticated ? (
-                <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
+                <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors hover-lift">
                   <div className="flex items-center space-x-2">
                     <User className="w-6 h-6" />
                     {userName && <span className="hidden md:inline text-sm">{userName}</span>}
                   </div>
                 </Link>
               ) : (
-                <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+                <Link href="/login" className="text-white hover:text-gray-300 transition-colors hover-lift">
                   <User className="w-6 h-6" />
                 </Link>
               )}
@@ -95,7 +110,7 @@ export default function ProductsPage() {
 
           {/* Center Logo */}
           <div className="flex justify-center mb-6">
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center hover-lift">
               <div className="w-16 h-16 relative">
                 <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
               </div>
@@ -105,13 +120,19 @@ export default function ProductsPage() {
           {/* Bottom Row - Navigation Links */}
           <div className="flex justify-center">
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
+              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium hover-lift">
                 INICIO
               </Link>
-              <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
+              <Link
+                href="/productos"
+                className="text-white hover:text-gray-300 transition-colors font-medium hover-lift"
+              >
                 PRODUCTOS
               </Link>
-              <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
+              <Link
+                href="/contacto"
+                className="text-white hover:text-gray-300 transition-colors font-medium hover-lift"
+              >
                 CONTACTO
               </Link>
             </div>
@@ -125,10 +146,10 @@ export default function ProductsPage() {
       </header>
 
       {/* Products Section */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 animate-slide-up">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters */}
-          <div className="w-full md:w-64 space-y-8">
+          <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
             <div>
               <h3 className="text-lg font-semibold mb-4">Buscar</h3>
               <ProductSearch onSearch={setSearchTerm} />
@@ -137,17 +158,21 @@ export default function ProductsPage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Categorías</h3>
               <div className="space-y-2">
-                {categories.map((category) => (
-                  <div key={category} className="flex items-center space-x-2">
+                {categories.map((category, index) => (
+                  <div
+                    key={category}
+                    className="flex items-center space-x-2 animate-fade-in"
+                    style={{ animationDelay: `${300 + index * 100}ms` }}
+                  >
                     <Checkbox
                       id={`category-${category}`}
                       checked={selectedCategories.includes(category)}
                       onCheckedChange={() => toggleCategory(category)}
-                      className="border-[#5D1A1D] data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:text-white"
+                      className="border-[#4A1518] data-[state=checked]:bg-[#4A1518] data-[state=checked]:text-white transition-all duration-300"
                     />
                     <Label
                       htmlFor={`category-${category}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-[#4A1518] transition-colors cursor-pointer"
                     >
                       {category}
                     </Label>
@@ -160,42 +185,24 @@ export default function ProductsPage() {
               <h3 className="text-lg font-semibold mb-4">Precio</h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePriceChange(0, 50)}
-                    className={`border-[#5D1A1D] text-white ${
-                      priceRange[0] === 0 && priceRange[1] === 50 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
-                    }`}
-                  >
-                    $0 - $50
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePriceChange(50, 100)}
-                    className={`border-[#5D1A1D] text-white ${
-                      priceRange[0] === 50 && priceRange[1] === 100 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
-                    }`}
-                  >
-                    $50 - $100
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePriceChange(100, 150)}
-                    className={`border-[#5D1A1D] text-white ${
-                      priceRange[0] === 100 && priceRange[1] === 150 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
-                    }`}
-                  >
-                    $100 - $150
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePriceChange(150, 200)}
-                    className={`border-[#5D1A1D] text-white ${
-                      priceRange[0] === 150 && priceRange[1] === 200 ? "bg-[#5D1A1D]" : "hover:bg-[#5D1A1D]"
-                    }`}
-                  >
-                    $150 - $200
-                  </Button>
+                  {[
+                    [0, 50],
+                    [50, 100],
+                    [100, 150],
+                    [150, 200],
+                  ].map(([min, max], index) => (
+                    <Button
+                      key={`${min}-${max}`}
+                      variant="outline"
+                      onClick={() => handlePriceChange(min, max)}
+                      className={`border-[#4A1518] text-white hover-glow button-press animate-fade-in ${
+                        priceRange[0] === min && priceRange[1] === max ? "bg-[#4A1518]" : "hover:bg-[#4A1518]"
+                      }`}
+                      style={{ animationDelay: `${500 + index * 100}ms` }}
+                    >
+                      ${min} - ${max}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -206,7 +213,8 @@ export default function ProductsPage() {
                 setPriceRange([0, 200])
                 setSearchTerm("")
               }}
-              className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] hover-glow button-press animate-fade-in"
+              style={{ animationDelay: "900ms" }}
             >
               <Filter className="w-4 h-4 mr-2" />
               Limpiar filtros
@@ -215,15 +223,15 @@ export default function ProductsPage() {
 
           {/* Products Grid */}
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Productos ({filteredProducts.length})</h2>
+            <div className="flex justify-between items-center mb-6 animate-fade-in" style={{ animationDelay: "300ms" }}>
+              <h2 className="text-2xl font-bold text-glow">Productos ({filteredProducts.length})</h2>
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => setViewMode("grid")}
-                  className={`border-[#5D1A1D] ${
-                    viewMode === "grid" ? "bg-[#5D1A1D] text-white" : "text-white hover:bg-[#5D1A1D]"
+                  className={`border-[#4A1518] hover-glow button-press ${
+                    viewMode === "grid" ? "bg-[#4A1518] text-white" : "text-white hover:bg-[#4A1518]"
                   }`}
                 >
                   <Grid className="w-4 h-4" />
@@ -232,8 +240,8 @@ export default function ProductsPage() {
                   variant="outline"
                   size="icon"
                   onClick={() => setViewMode("list")}
-                  className={`border-[#5D1A1D] ${
-                    viewMode === "list" ? "bg-[#5D1A1D] text-white" : "text-white hover:bg-[#5D1A1D]"
+                  className={`border-[#4A1518] hover-glow button-press ${
+                    viewMode === "list" ? "bg-[#4A1518] text-white" : "text-white hover:bg-[#4A1518]"
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -242,70 +250,21 @@ export default function ProductsPage() {
             </div>
 
             {filteredProducts.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 animate-fade-in">
                 <p className="text-gray-400 text-lg">No se encontraron productos que coincidan con tu búsqueda.</p>
               </div>
             ) : viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => (
-                  <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden group">
-                    <div className="relative aspect-square">
-                      <Image
-                        src={product.images[0] || "/placeholder.svg"}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {product.isNew && (
-                        <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description.substring(0, 60)}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xl font-bold">${product.price}</span>
-                        <Link href={`/productos/${product.id}`}>
-                          <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {filteredProducts.map((product, index) => (
+                  <InteractiveProductCard key={product.id} product={product} delay={index * 100} />
                 ))}
               </div>
             ) : (
               <div className="space-y-6">
-                {filteredProducts.map((product) => (
-                  <Card key={product.id} className="bg-gray-900 border-gray-800 overflow-hidden">
-                    <div className="flex flex-col md:flex-row">
-                      <div className="relative w-full md:w-48 h-48">
-                        <Image
-                          src={product.images[0] || "/placeholder.svg"}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                        {product.isNew && (
-                          <Badge className="absolute top-2 left-2 bg-red-600 hover:bg-red-700">NUEVO</Badge>
-                        )}
-                      </div>
-                      <CardContent className="flex-1 p-4">
-                        <div className="flex flex-col h-full justify-between">
-                          <div>
-                            <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
-                            <p className="text-gray-400 mb-4">{product.description}</p>
-                            <p className="text-sm text-gray-500 mb-2">Categoría: {product.category}</p>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold">${product.price}</span>
-                            <Link href={`/productos/${product.id}`}>
-                              <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">Ver Detalles</Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </div>
-                  </Card>
+                {filteredProducts.map((product, index) => (
+                  <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                    <InteractiveProductCard product={product} />
+                  </div>
                 ))}
               </div>
             )}

@@ -166,8 +166,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-semibold">Talla</h3>
                 <Link
-                  href="/guia-tallas"
-                  className="text-[#5D1A1D] hover:text-[#6B1E22] text-sm font-medium flex items-center transition-colors"
+                  href="/tallas"
+                  className="text-[#4A1518] hover:text-[#3A1014] text-sm font-medium flex items-center transition-colors cursor-pointer"
                 >
                   <Ruler className="w-4 h-4 mr-1" />
                   Guía de tallas
@@ -178,10 +178,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`py-3 px-4 border rounded-lg font-medium transition-colors ${
+                    className={`py-3 px-4 border rounded-lg font-medium transition-colors cursor-pointer ${
                       selectedSize === size
-                        ? "border-[#5D1A1D] bg-[#5D1A1D] text-white"
-                        : "border-gray-600 hover:border-gray-400"
+                        ? "border-[#4A1518] bg-[#4A1518] text-white"
+                        : "border-gray-600 hover:border-gray-400 text-white"
                     }`}
                   >
                     {size}
@@ -199,7 +199,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   size="icon"
                   onClick={decrementQuantity}
                   disabled={quantity <= 1}
-                  className="border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
+                  className="border-[#4A1518] text-white hover:bg-[#4A1518] cursor-pointer"
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
@@ -208,7 +208,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   variant="outline"
                   size="icon"
                   onClick={incrementQuantity}
-                  className="border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
+                  className="border-[#4A1518] text-white hover:bg-[#4A1518] cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -219,7 +219,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <Button
               onClick={handleAddToCart}
               size="lg"
-              className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold py-4 text-lg"
+              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] font-semibold py-4 text-lg cursor-pointer"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               AGREGAR AL CARRITO

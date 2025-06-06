@@ -229,13 +229,8 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">AYUDA</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/envios" className="hover:text-white transition-colors">
-                    Envíos
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/devoluciones" className="hover:text-white transition-colors">
-                    Devoluciones
+                  <Link href="/envios-devoluciones" className="hover:text-white transition-colors">
+                    Envíos y Devoluciones
                   </Link>
                 </li>
                 <li>

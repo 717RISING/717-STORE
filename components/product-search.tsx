@@ -29,12 +29,12 @@ export default function ProductSearch() {
         placeholder="Buscar productos..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="pl-10 pr-20 bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+        className="pl-10 pr-20 bg-black border-gray-800 text-white placeholder-gray-400 focus:border-[#4A1518]"
       />
       <Button
         type="submit"
         size="sm"
-        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-[#4A1518] text-white hover:bg-[#3A1014] cursor-pointer"
       >
         Buscar
       </Button>
