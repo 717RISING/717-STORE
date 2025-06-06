@@ -300,3 +300,8 @@ export async function sendDeliveryNotification(order: Order): Promise<boolean> {
   const template = generateDeliveryNotificationTemplate(order)
   return await emailService.sendEmail(order.shipping.email, template)
 }
+
+// Exportar las funciones con los nombres exactos que se esperan
+export const sendOrderConfirmationEmail = sendOrderConfirmation
+export const sendShippingNotificationEmail = sendShippingNotification
+export const sendDeliveryConfirmationEmail = sendDeliveryNotification
