@@ -12,7 +12,7 @@ import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
 import InteractiveProductCard from "@/components/interactive-product-card"
-import LoadingSpinner from "@/components/loading-spinner"
+import ProductLoader from "@/components/loaders/product-loader"
 import { useThemeSafe } from "@/hooks/use-theme-safe"
 import ThemeToggle from "@/components/theme-toggle"
 
@@ -79,10 +79,7 @@ export default function ProductsPage() {
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
-        <div className="text-center">
-          <LoadingSpinner size="lg" color="wine" />
-          <p className={theme === "dark" ? "mt-4 text-gray-400" : "mt-4 text-gray-600"}>Cargando productos...</p>
-        </div>
+        <ProductLoader size="lg" message="Cargando productos exclusivos..." />
       </div>
     )
   }

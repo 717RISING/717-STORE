@@ -1,29 +1,61 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
+import ProductLoader from "./loaders/product-loader"
+import CheckoutLoader from "./loaders/checkout-loader"
+import ProfileLoader from "./loaders/profile-loader"
+import SearchLoader from "./loaders/search-loader"
+import ChatLoader from "./loaders/chat-loader"
+import BrandLoader from "./loaders/brand-loader"
+import ImageLoader from "./loaders/image-loader"
+import FormLoader from "./loaders/form-loader"
+
+type LoaderType = "product" | "checkout" | "profile" | "search" | "chat" | "brand" | "image" | "form" | "default"
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg"
-  color?: "white" | "wine" | "gray"
-  className?: string
+  color?: "wine" | "white" | "gray"
+  type?: LoaderType
+  message?: string
+  context?: any
 }
 
-export default function LoadingSpinner({ size = "md", color = "wine", className }: LoadingSpinnerProps) {
-  const sizes = {
-    sm: "w-4 h-4",
-    md: "w-8 h-8",
-    lg: "w-12 h-12",
+export default function LoadingSpinner({
+  size = "md",
+  color = "wine",
+  type = "default",
+  message,
+  context = {},
+}: LoadingSpinnerProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
   }
 
-  const colors = {
-    white: "border-white border-t-transparent",
-    wine: "border-[#4A1518] border-t-transparent",
-    gray: "border-gray-400 border-t-transparent",
+  // Render specific loader based on type
+  switch (type) {
+    case "product":
+      return <ProductLoader size={size} message={message} />
+    case "checkout":
+      return <CheckoutLoader size={size} step={context.step} />
+    case "profile":
+      return <ProfileLoader size={size} userName={context.userName} />
+    case "search":
+      return <SearchLoader size={size} searchTerm={context.searchTerm} />
+    case "chat":
+      return <ChatLoader size={size} status={context.status} />
+    case "brand":
+      return <BrandLoader size={size} message={message} />
+    case "image":
+      return <ImageLoader size={size} count={context.count} />
+    case "form":
+      return <FormLoader size={size} type={context.formType} message={message} />
+    default:
+      return <BrandLoader size={size} message={message} />
   }
-
-  return (
-    <div className="flex items-center justify-center">
-      <div className={cn("border-2 rounded-full animate-spin", sizes[size], colors[color], className)} />
-    </div>
-  )
 }

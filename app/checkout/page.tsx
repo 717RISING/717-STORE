@@ -12,6 +12,7 @@ import Link from "next/link"
 import ShippingForm from "@/components/checkout/shipping-form"
 import PaymentForm from "@/components/checkout/payment-form"
 import OrderSummary from "@/components/checkout/order-summary"
+import CheckoutLoader from "@/components/loaders/checkout-loader"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -121,6 +122,15 @@ export default function CheckoutPage() {
 
     setIsLoading(true)
     setEmailStatus("Procesando pedido...")
+
+    // Reemplazar setEmailStatus con el loader visual
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <CheckoutLoader size="lg" step="processing" />
+        </div>
+      )
+    }
 
     try {
       // Simular procesamiento del pedido

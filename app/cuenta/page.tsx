@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
+import ProfileLoader from "@/components/loaders/profile-loader"
 
 // Mock user data
 const userData = {
@@ -119,7 +120,7 @@ export default function UserAccount() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+        <ProfileLoader size="lg" userName={userName || "Usuario"} />
       </div>
     )
   }
