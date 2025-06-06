@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Plus, Minus, ShoppingCart, User } from "lucide-react"
+import { ArrowLeft, Plus, Minus, ShoppingCart, User, Ruler } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
@@ -163,7 +163,16 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
             {/* Size Selection */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Talla</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold">Talla</h3>
+                <Link
+                  href="/guia-tallas"
+                  className="text-[#5D1A1D] hover:text-[#6B1E22] text-sm font-medium flex items-center transition-colors"
+                >
+                  <Ruler className="w-4 h-4 mr-1" />
+                  Guía de tallas
+                </Link>
+              </div>
               <div className="grid grid-cols-6 gap-2">
                 {product.sizes.map((size) => (
                   <button

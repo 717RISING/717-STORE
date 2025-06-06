@@ -243,6 +243,16 @@ export default function HomePage() {
                     Guía de tallas
                   </Link>
                 </li>
+                <li>
+                  <Link href="/terminos" className="hover:text-white transition-colors">
+                    Términos y Condiciones
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacidad" className="hover:text-white transition-colors">
+                    Política de Privacidad
+                  </Link>
+                </li>
               </ul>
             </div>
 
