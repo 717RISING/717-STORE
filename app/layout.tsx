@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/lib/cart-context"
+import { ThemeProvider } from "@/lib/theme-context"
 import { Toaster } from "@/components/ui/toaster"
 import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget"
 
@@ -22,13 +23,15 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <CartProvider>
-          <div className="min-h-screen bg-black text-white">
-            {children}
-            <EnhancedChatWidget />
-            <Toaster />
-          </div>
-        </CartProvider>
+        <ThemeProvider>
+          <CartProvider>
+            <div className="min-h-screen">
+              {children}
+              <EnhancedChatWidget />
+              <Toaster />
+            </div>
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

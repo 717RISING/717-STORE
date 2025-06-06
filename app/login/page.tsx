@@ -14,12 +14,15 @@ import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import { useToast } from "@/hooks/use-toast"
 import { verifyUserCredentials, registerUser } from "@/lib/users"
+import { useTheme } from "@/lib/theme-context"
+import ThemeToggle from "@/components/theme-toggle"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { theme } = useTheme()
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -157,39 +160,60 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-black" : "bg-gray-50"} theme-transition`}>
       {/* Navigation */}
-      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
+      <header
+        className={`px-4 py-6 border-b ${theme === "dark" ? "border-gray-800" : "border-gray-200"} theme-transition`}
+      >
         <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons Only */}
-          <div className="flex justify-end items-center mb-4">
+          {/* Top Row - Icons and Theme Toggle */}
+          <div className="flex justify-between items-center mb-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-10 h-10 relative">
+                <Image
+                  src="/logo.png"
+                  alt="717 Logo"
+                  fill
+                  className={`object-contain ${theme === "dark" ? "filter invert" : ""} transition-all duration-300`}
+                  priority
+                />
+              </div>
+              <span className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                717 Store
+              </span>
+            </Link>
+
             <div className="flex items-center space-x-4">
-              <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
+              <ThemeToggle />
+              <Link
+                href="/login"
+                className={`${theme === "dark" ? "text-white" : "text-gray-900"} hover:text-[#4A1518] transition-colors`}
+              >
                 <User className="w-6 h-6" />
               </Link>
               <CartSidebar />
             </div>
           </div>
 
-          {/* Center Logo */}
-          <div className="flex justify-center mb-6">
-            <Link href="/" className="flex items-center">
-              <div className="w-16 h-16 relative">
-                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
-              </div>
-            </Link>
-          </div>
-
           {/* Bottom Row - Navigation Links */}
           <div className="flex justify-center">
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
+              <Link
+                href="/"
+                className={`${theme === "dark" ? "text-white" : "text-gray-900"} hover:text-[#4A1518] transition-colors font-medium`}
+              >
                 INICIO
               </Link>
-              <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
+              <Link
+                href="/productos"
+                className={`${theme === "dark" ? "text-white" : "text-gray-900"} hover:text-[#4A1518] transition-colors font-medium`}
+              >
                 PRODUCTOS
               </Link>
-              <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
+              <Link
+                href="/contacto"
+                className={`${theme === "dark" ? "text-white" : "text-gray-900"} hover:text-[#4A1518] transition-colors font-medium`}
+              >
                 CONTACTO
               </Link>
             </div>
@@ -203,28 +227,45 @@ export default function LoginPage() {
       </header>
 
       <div className="max-w-md mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">BIENVENIDO</h1>
-          <p className="text-gray-300">Inicia sesión o crea una cuenta para continuar</p>
+        <div className="text-center mb-8 animate-fade-in">
+          <h1 className={`text-4xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>BIENVENIDO</h1>
+          <p className={theme === "dark" ? "text-gray-300" : "text-gray-600"}>
+            Inicia sesión o crea una cuenta para continuar
+          </p>
         </div>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card
+          className={`animate-scale-in ${
+            theme === "dark" ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+          }`}
+        >
           <CardHeader>
-            <CardTitle className="text-white text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
-                <User className="w-8 h-8" />
+            <CardTitle className={`text-center ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+              <div
+                className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                  theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                }`}
+              >
+                <User className={`w-8 h-8 ${theme === "dark" ? "text-white" : "text-gray-700"}`} />
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-gray-800">
-                <TabsTrigger value="login" className="data-[state=active]:bg-[#5D1A1D] data-[state=active]:text-white">
+              <TabsList className={`grid w-full grid-cols-2 ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}>
+                <TabsTrigger
+                  value="login"
+                  className={`data-[state=active]:bg-[#4A1518] data-[state=active]:text-white ${
+                    theme === "dark" ? "text-white hover:bg-gray-700" : "text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
                   Iniciar Sesión
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  className="data-[state=active]:bg-[#5D1A1D] data-[state=active]:text-white"
+                  className={`data-[state=active]:bg-[#4A1518] data-[state=active]:text-white ${
+                    theme === "dark" ? "text-white hover:bg-gray-700" : "text-gray-700 hover:bg-gray-200"
+                  }`}
                 >
                   Registrarse
                 </TabsTrigger>
@@ -234,7 +275,12 @@ export default function LoginPage() {
               <TabsContent value="login" className="space-y-6 mt-6">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label htmlFor="login-email" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label
+                      htmlFor="login-email"
+                      className={`block text-sm font-medium mb-2 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       Correo electrónico
                     </label>
                     <div className="relative">
@@ -246,14 +292,23 @@ export default function LoginPage() {
                         required
                         value={loginData.email}
                         onChange={handleLoginChange}
-                        className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                        className={`pl-10 ${
+                          theme === "dark"
+                            ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } focus:border-[#4A1518]`}
                         placeholder="tu@email.com"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="login-password" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label
+                      htmlFor="login-password"
+                      className={`block text-sm font-medium mb-2 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       Contraseña
                     </label>
                     <div className="relative">
@@ -265,13 +320,19 @@ export default function LoginPage() {
                         required
                         value={loginData.password}
                         onChange={handleLoginChange}
-                        className="pl-10 pr-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                        className={`pl-10 pr-10 ${
+                          theme === "dark"
+                            ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } focus:border-[#4A1518]`}
                         placeholder="Tu contraseña"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                          theme === "dark" ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-700"
+                        }`}
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -280,10 +341,22 @@ export default function LoginPage() {
 
                   <div className="flex items-center justify-between">
                     <label className="flex items-center">
-                      <input type="checkbox" className="rounded border-gray-700 bg-gray-800 text-[#5D1A1D]" />
-                      <span className="ml-2 text-sm text-gray-300">Recordarme</span>
+                      <input
+                        type="checkbox"
+                        className={`rounded ${
+                          theme === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-300 bg-white"
+                        } text-[#4A1518]`}
+                      />
+                      <span className={`ml-2 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                        Recordarme
+                      </span>
                     </label>
-                    <Link href="#" className="text-sm text-gray-300 hover:text-white">
+                    <Link
+                      href="#"
+                      className={`text-sm hover:underline ${
+                        theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </div>
@@ -291,15 +364,15 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold py-3"
+                    className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] font-semibold py-3 hover-glow button-press"
                   >
                     {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
                 </form>
 
                 <div className="text-center">
-                  <p className="text-gray-400">¿No tienes una cuenta?</p>
-                  <p className="text-sm text-gray-300">
+                  <p className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>¿No tienes una cuenta?</p>
+                  <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                     Cambia a la pestaña "Registrarse" para crear una cuenta nueva.
                   </p>
                 </div>
@@ -309,7 +382,12 @@ export default function LoginPage() {
               <TabsContent value="register" className="space-y-6 mt-6">
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div>
-                    <label htmlFor="register-name" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label
+                      htmlFor="register-name"
+                      className={`block text-sm font-medium mb-2 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       Nombre completo
                     </label>
                     <div className="relative">
@@ -321,14 +399,23 @@ export default function LoginPage() {
                         required
                         value={registerData.name}
                         onChange={handleRegisterChange}
-                        className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                        className={`pl-10 ${
+                          theme === "dark"
+                            ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } focus:border-[#4A1518]`}
                         placeholder="Tu nombre completo"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="register-email" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label
+                      htmlFor="register-email"
+                      className={`block text-sm font-medium mb-2 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       Correo electrónico
                     </label>
                     <div className="relative">
@@ -340,14 +427,23 @@ export default function LoginPage() {
                         required
                         value={registerData.email}
                         onChange={handleRegisterChange}
-                        className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                        className={`pl-10 ${
+                          theme === "dark"
+                            ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } focus:border-[#4A1518]`}
                         placeholder="tu@email.com"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="register-password" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label
+                      htmlFor="register-password"
+                      className={`block text-sm font-medium mb-2 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       Contraseña
                     </label>
                     <div className="relative">
@@ -359,13 +455,19 @@ export default function LoginPage() {
                         required
                         value={registerData.password}
                         onChange={handleRegisterChange}
-                        className="pl-10 pr-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                        className={`pl-10 pr-10 ${
+                          theme === "dark"
+                            ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } focus:border-[#4A1518]`}
                         placeholder="Crea una contraseña (mín. 6 caracteres)"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                          theme === "dark" ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-700"
+                        }`}
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -373,7 +475,12 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="register-confirm-password" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label
+                      htmlFor="register-confirm-password"
+                      className={`block text-sm font-medium mb-2 ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       Confirmar contraseña
                     </label>
                     <div className="relative">
@@ -385,13 +492,19 @@ export default function LoginPage() {
                         required
                         value={registerData.confirmPassword}
                         onChange={handleRegisterChange}
-                        className="pl-10 pr-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-white"
+                        className={`pl-10 pr-10 ${
+                          theme === "dark"
+                            ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } focus:border-[#4A1518]`}
                         placeholder="Confirma tu contraseña"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                          theme === "dark" ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-700"
+                        }`}
                       >
                         {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -402,15 +515,17 @@ export default function LoginPage() {
                     <input
                       type="checkbox"
                       required
-                      className="rounded border-gray-700 bg-gray-800 text-[#5D1A1D] mt-1"
+                      className={`rounded mt-1 ${
+                        theme === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-300 bg-white"
+                      } text-[#4A1518]`}
                     />
-                    <span className="ml-2 text-sm text-gray-300">
+                    <span className={`ml-2 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                       Acepto los{" "}
-                      <Link href="#" className="text-white hover:underline">
+                      <Link href="#" className={`hover:underline ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
                         términos y condiciones
                       </Link>{" "}
                       y la{" "}
-                      <Link href="#" className="text-white hover:underline">
+                      <Link href="#" className={`hover:underline ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
                         política de privacidad
                       </Link>
                     </span>
@@ -419,15 +534,17 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold py-3"
+                    className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] font-semibold py-3 hover-glow button-press"
                   >
                     {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                   </Button>
                 </form>
 
                 <div className="text-center">
-                  <p className="text-gray-400">¿Ya tienes una cuenta?</p>
-                  <p className="text-sm text-gray-300">Cambia a la pestaña "Iniciar Sesión" para acceder.</p>
+                  <p className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>¿Ya tienes una cuenta?</p>
+                  <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                    Cambia a la pestaña "Iniciar Sesión" para acceder.
+                  </p>
                 </div>
               </TabsContent>
             </Tabs>
@@ -436,15 +553,17 @@ export default function LoginPage() {
             <div className="mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-700" />
+                  <div className={`w-full border-t ${theme === "dark" ? "border-gray-700" : "border-gray-300"}`} />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gray-900 text-gray-400">O continúa con</span>
+                  <span className={`px-2 ${theme === "dark" ? "bg-gray-900 text-gray-400" : "bg-white text-gray-500"}`}>
+                    O continúa con
+                  </span>
                 </div>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] border-0">
+                <Button className="bg-[#4A1518] text-white hover:bg-[#3A1014] border-0 hover-glow button-press">
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -465,7 +584,7 @@ export default function LoginPage() {
                   </svg>
                   Google
                 </Button>
-                <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] border-0">
+                <Button className="bg-[#4A1518] text-white hover:bg-[#3A1014] border-0 hover-glow button-press">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>

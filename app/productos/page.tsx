@@ -13,6 +13,8 @@ import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
 import InteractiveProductCard from "@/components/interactive-product-card"
 import LoadingSpinner from "@/components/loading-spinner"
+import { useTheme } from "@/lib/theme-context"
+import ThemeToggle from "@/components/theme-toggle"
 
 export default function ProductsPage() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -23,6 +25,7 @@ export default function ProductsPage() {
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const { theme } = useTheme()
 
   useEffect(() => {
     // Verificar si el usuario está autenticado
@@ -75,32 +78,60 @@ export default function ProductsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
         <div className="text-center">
           <LoadingSpinner size="lg" color="wine" />
-          <p className="mt-4 text-gray-400">Cargando productos...</p>
+          <p className={theme === "dark" ? "mt-4 text-gray-400" : "mt-4 text-gray-600"}>Cargando productos...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-black" : "bg-gray-50"} theme-transition`}>
       {/* Navigation */}
-      <header className="px-4 py-6 bg-transparent border-b border-gray-800 animate-fade-in">
+      <header
+        className={`px-4 py-6 border-b animate-fade-in ${theme === "dark" ? "border-gray-800" : "border-gray-200"}`}
+      >
         <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons Only */}
-          <div className="flex justify-end items-center mb-4">
+          {/* Top Row - Icons and Theme Toggle */}
+          <div className="flex justify-between items-center mb-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-10 h-10 relative">
+                <Image
+                  src="/logo.png"
+                  alt="717 Logo"
+                  fill
+                  className={`object-contain ${theme === "dark" ? "filter invert" : ""} transition-all duration-300`}
+                  priority
+                />
+              </div>
+              <span className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                717 Store
+              </span>
+            </Link>
+
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               {isAuthenticated ? (
-                <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors hover-lift">
+                <Link
+                  href="/cuenta"
+                  className={`hover-lift ${
+                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                  } transition-colors`}
+                >
                   <div className="flex items-center space-x-2">
                     <User className="w-6 h-6" />
                     {userName && <span className="hidden md:inline text-sm">{userName}</span>}
                   </div>
                 </Link>
               ) : (
-                <Link href="/login" className="text-white hover:text-gray-300 transition-colors hover-lift">
+                <Link
+                  href="/login"
+                  className={`hover-lift ${
+                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                  } transition-colors`}
+                >
                   <User className="w-6 h-6" />
                 </Link>
               )}
@@ -108,30 +139,30 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Center Logo */}
-          <div className="flex justify-center mb-6">
-            <Link href="/" className="flex items-center hover-lift">
-              <div className="w-16 h-16 relative">
-                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
-              </div>
-            </Link>
-          </div>
-
           {/* Bottom Row - Navigation Links */}
           <div className="flex justify-center">
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium hover-lift">
+              <Link
+                href="/"
+                className={`hover-lift font-medium ${
+                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                } transition-colors`}
+              >
                 INICIO
               </Link>
               <Link
                 href="/productos"
-                className="text-white hover:text-gray-300 transition-colors font-medium hover-lift"
+                className={`hover-lift font-medium ${
+                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                } transition-colors`}
               >
                 PRODUCTOS
               </Link>
               <Link
                 href="/contacto"
-                className="text-white hover:text-gray-300 transition-colors font-medium hover-lift"
+                className={`hover-lift font-medium ${
+                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                } transition-colors`}
               >
                 CONTACTO
               </Link>
@@ -151,12 +182,16 @@ export default function ProductsPage() {
           {/* Sidebar Filters */}
           <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Buscar</h3>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Buscar
+              </h3>
               <ProductSearch onSearch={setSearchTerm} />
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">Categorías</h3>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Categorías
+              </h3>
               <div className="space-y-2">
                 {categories.map((category, index) => (
                   <div
@@ -172,7 +207,9 @@ export default function ProductsPage() {
                     />
                     <Label
                       htmlFor={`category-${category}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-[#4A1518] transition-colors cursor-pointer"
+                      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-[#4A1518] transition-colors cursor-pointer ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
                     >
                       {category}
                     </Label>
@@ -182,7 +219,9 @@ export default function ProductsPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">Precio</h3>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Precio
+              </h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   {[
@@ -195,8 +234,10 @@ export default function ProductsPage() {
                       key={`${min}-${max}`}
                       variant="outline"
                       onClick={() => handlePriceChange(min, max)}
-                      className={`border-[#4A1518] text-white hover-glow button-press animate-fade-in ${
-                        priceRange[0] === min && priceRange[1] === max ? "bg-[#4A1518]" : "hover:bg-[#4A1518]"
+                      className={`border-[#4A1518] hover-glow button-press animate-fade-in ${
+                        priceRange[0] === min && priceRange[1] === max
+                          ? "bg-[#4A1518] text-white"
+                          : `hover:bg-[#4A1518] ${theme === "dark" ? "text-white" : "text-gray-900"}`
                       }`}
                       style={{ animationDelay: `${500 + index * 100}ms` }}
                     >
@@ -224,14 +265,18 @@ export default function ProductsPage() {
           {/* Products Grid */}
           <div className="flex-1">
             <div className="flex justify-between items-center mb-6 animate-fade-in" style={{ animationDelay: "300ms" }}>
-              <h2 className="text-2xl font-bold text-glow">Productos ({filteredProducts.length})</h2>
+              <h2 className={`text-2xl font-bold text-glow ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Productos ({filteredProducts.length})
+              </h2>
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => setViewMode("grid")}
                   className={`border-[#4A1518] hover-glow button-press ${
-                    viewMode === "grid" ? "bg-[#4A1518] text-white" : "text-white hover:bg-[#4A1518]"
+                    viewMode === "grid"
+                      ? "bg-[#4A1518] text-white"
+                      : `${theme === "dark" ? "text-white" : "text-gray-900"} hover:bg-[#4A1518] hover:text-white`
                   }`}
                 >
                   <Grid className="w-4 h-4" />
@@ -241,7 +286,9 @@ export default function ProductsPage() {
                   size="icon"
                   onClick={() => setViewMode("list")}
                   className={`border-[#4A1518] hover-glow button-press ${
-                    viewMode === "list" ? "bg-[#4A1518] text-white" : "text-white hover:bg-[#4A1518]"
+                    viewMode === "list"
+                      ? "bg-[#4A1518] text-white"
+                      : `${theme === "dark" ? "text-white" : "text-gray-900"} hover:bg-[#4A1518] hover:text-white`
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -251,7 +298,9 @@ export default function ProductsPage() {
 
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12 animate-fade-in">
-                <p className="text-gray-400 text-lg">No se encontraron productos que coincidan con tu búsqueda.</p>
+                <p className={theme === "dark" ? "text-gray-400 text-lg" : "text-gray-600 text-lg"}>
+                  No se encontraron productos que coincidan con tu búsqueda.
+                </p>
               </div>
             ) : viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
