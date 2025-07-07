@@ -6,11 +6,11 @@ import { useTheme } from "@/lib/theme-context"
 import type React from "react"
 
 import { useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Heart, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import EnhancedButton from "./enhanced-button"
+import ImageWithFallback from "./image-with-fallback"
 import { useCart } from "@/lib/cart-context"
 import { useToast } from "@/hooks/use-toast"
 
@@ -128,33 +128,11 @@ export default function InteractiveProductCard({ product, delay = 0 }: Interacti
     >
       <Link href={`/productos/${product.id}`}>
         <div className={imageContainerClasses}>
-          {/* Skeleton loader adaptativo */}
-          {!imageLoaded && (
-            <div
-              className={cn(
-                "absolute inset-0 animate-shimmer rounded-t-modern-lg",
-                theme === "dark" ? "bg-gray-800 shimmer-dark" : "bg-gray-200 shimmer-light",
-              )}
-            >
-              <div
-                className={cn(
-                  "h-full w-full bg-[length:200px_100%] bg-no-repeat rounded-t-modern-lg",
-                  theme === "dark"
-                    ? "bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800"
-                    : "bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200",
-                )}
-              ></div>
-            </div>
-          )}
-
-          <Image
+          <ImageWithFallback
             src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
             fill
-            className={cn(
-              "object-cover transition-all duration-700 group-hover:scale-110 rounded-t-modern-lg",
-              imageLoaded ? "opacity-100" : "opacity-0",
-            )}
+            className="object-cover transition-all duration-700 group-hover:scale-110 rounded-t-modern-lg"
             onLoad={() => setImageLoaded(true)}
           />
 
