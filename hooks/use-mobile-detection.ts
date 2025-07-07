@@ -2,57 +2,67 @@
 
 import { useState, useEffect } from "react"
 
-export function useMobileDetection() {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait")
-  const [touchSupport, setTouchSupport] = useState(false)
+interface MobileDetection {
+  isMobile: boolean
+  isTablet: boolean
+  isDesktop: boolean
+  touchSupport: boolean
+  screenWidth: number
+  screenHeight: number
+  orientation: "portrait" | "landscape"
+  deviceType: "mobile" | "tablet" | "desktop"
+}
+
+export function useMobileDetection(): MobileDetection {
+  const [detection, setDetection] = useState<MobileDetection>({
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true,
+    touchSupport: false,
+    screenWidth: 1920,
+    screenHeight: 1080,
+    orientation: "landscape",
+    deviceType: "desktop",
+  })
 
   useEffect(() => {
-    const checkDevice = () => {
-      const userAgent = navigator.userAgent.toLowerCase()
+    const updateDetection = () => {
       const width = window.innerWidth
       const height = window.innerHeight
+      const isMobile = width < 768
+      const isTablet = width >= 768 && width < 1024
+      const isDesktop = width >= 1024
+      const touchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0
+      const orientation = width > height ? "landscape" : "portrait"
 
-      // Mobile detection
-      const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i
-      const isMobileDevice = mobileRegex.test(userAgent) || width <= 768
+      let deviceType: "mobile" | "tablet" | "desktop" = "desktop"
+      if (isMobile) deviceType = "mobile"
+      else if (isTablet) deviceType = "tablet"
 
-      // Tablet detection
-      const isTabletDevice =
-        (width > 768 && width <= 1024) ||
-        userAgent.includes("ipad") ||
-        (userAgent.includes("android") && !userAgent.includes("mobile"))
-
-      // Orientation
-      const currentOrientation = width > height ? "landscape" : "portrait"
-
-      // Touch support
-      const hasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0
-
-      setIsMobile(isMobileDevice)
-      setIsTablet(isTabletDevice)
-      setOrientation(currentOrientation)
-      setTouchSupport(hasTouchSupport)
+      setDetection({
+        isMobile,
+        isTablet,
+        isDesktop,
+        touchSupport,
+        screenWidth: width,
+        screenHeight: height,
+        orientation,
+        deviceType,
+      })
     }
 
-    checkDevice()
-    window.addEventListener("resize", checkDevice)
-    window.addEventListener("orientationchange", checkDevice)
+    // Initial detection
+    updateDetection()
+
+    // Listen for resize events
+    window.addEventListener("resize", updateDetection)
+    window.addEventListener("orientationchange", updateDetection)
 
     return () => {
-      window.removeEventListener("resize", checkDevice)
-      window.removeEventListener("orientationchange", checkDevice)
+      window.removeEventListener("resize", updateDetection)
+      window.removeEventListener("orientationchange", updateDetection)
     }
   }, [])
 
-  return {
-    isMobile,
-    isTablet,
-    isDesktop: !isMobile && !isTablet,
-    orientation,
-    touchSupport,
-    isPortrait: orientation === "portrait",
-    isLandscape: orientation === "landscape",
-  }
+  return detection
 }

@@ -1,144 +1,323 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useTheme } from "@/lib/theme-context"
-import { useMobileDetection } from "@/hooks/use-mobile-detection"
-import InteractiveProductCard from "@/components/interactive-product-card"
-import ProductSearch from "@/components/product-search"
+import Image from "next/image"
+import Link from "next/link"
+import { User, Grid, List, Filter } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { products } from "@/lib/products"
-import { cn } from "@/lib/utils"
+import CartSidebar from "@/components/cart-sidebar"
+import MobileMenu from "@/components/mobile-menu"
+import ProductSearch from "@/components/product-search"
+import InteractiveProductCard from "@/components/interactive-product-card"
+import ProductLoader from "@/components/loaders/product-loader"
+import { useThemeSafe } from "@/hooks/use-theme-safe"
+import ThemeToggle from "@/components/theme-toggle"
 
 export default function ProductsPage() {
+  const [userName, setUserName] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [sortBy, setSortBy] = useState("name")
-  const { theme } = useTheme()
-  const { isMobile, isTablet } = useMobileDetection()
+  const [isLoading, setIsLoading] = useState(true)
+  const { theme, mounted } = useThemeSafe()
 
   useEffect(() => {
-    let filtered = products
+    // Verificar si el usuario está autenticado
+    const userAuth = localStorage.getItem("userAuth")
+    const userInfo = localStorage.getItem("userInfo")
+
+    if (userAuth === "authenticated" && userInfo) {
+      setIsAuthenticated(true)
+      const user = JSON.parse(userInfo)
+      setUserName(user.name)
+    }
+
+    // Simular carga
+    setTimeout(() => setIsLoading(false), 1000)
+  }, [])
+
+  useEffect(() => {
+    let result = products
+
+    // Filtrar por categoría
+    if (selectedCategories.length > 0) {
+      result = result.filter((product) => selectedCategories.includes(product.category))
+    }
+
+    // Filtrar por precio
+    result = result.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
 
     // Filtrar por término de búsqueda
     if (searchTerm) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      const term = searchTerm.toLowerCase()
+      result = result.filter(
+        (product) => product.name.toLowerCase().includes(term) || product.description.toLowerCase().includes(term),
       )
     }
 
-    // Filtrar por categoría
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((product) => product.category === selectedCategory)
-    }
+    setFilteredProducts(result)
+  }, [selectedCategories, priceRange, searchTerm])
 
-    // Ordenar
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "name":
-          return a.name.localeCompare(b.name)
-        default:
-          return 0
-      }
-    })
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+    )
+  }
 
-    setFilteredProducts(filtered)
-  }, [searchTerm, selectedCategory, sortBy])
+  const handlePriceChange = (min: number, max: number) => {
+    setPriceRange([min, max])
+  }
 
-  const categories = ["all", ...Array.from(new Set(products.map((p) => p.category)))]
+  const categories = Array.from(new Set(products.map((product) => product.category)))
 
-  const containerClasses = cn(
-    "min-h-screen transition-all duration-300",
-    theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900",
-  )
-
-  const headerClasses = cn(
-    "sticky top-0 z-40 backdrop-blur-xl border-b transition-all duration-300",
-    isMobile ? "px-4 py-4" : "px-6 py-6",
-    theme === "dark" ? "bg-black/80 border-gray-800" : "bg-white/80 border-gray-200",
-  )
-
-  const titleClasses = cn(
-    "font-bold mb-6 text-center",
-    isMobile ? "text-2xl" : "text-4xl",
-    theme === "dark" ? "text-white" : "text-gray-900",
-  )
-
-  const gridClasses = cn(
-    "product-grid grid transition-all duration-300",
-    isMobile ? "grid-cols-2 gap-3 px-4" : isTablet ? "grid-cols-3 gap-4 px-6" : "grid-cols-4 gap-6 px-8",
-    "pb-8",
-  )
-
-  const filterSectionClasses = cn(
-    "flex flex-wrap gap-4 mb-6",
-    isMobile ? "flex-col space-y-3" : "items-center justify-between",
-  )
-
-  const selectClasses = cn(
-    "px-3 py-2 border rounded-modern transition-all duration-300",
-    isMobile ? "text-sm" : "text-base",
-    theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-gray-900",
-  )
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
+        <ProductLoader size="lg" message="Cargando productos exclusivos..." />
+      </div>
+    )
+  }
 
   return (
-    <div className={containerClasses}>
-      <div className={headerClasses}>
-        <div className="max-w-7xl mx-auto">
-          <h1 className={titleClasses}>Nuestros Productos</h1>
+    <div
+      className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900"} theme-transition`}
+    >
+      {/* Navigation */}
+      <header
+        className={`px-4 py-6 border-b animate-fade-in ${theme === "dark" ? "border-gray-800" : "border-gray-200"}`}
+      >
+        <nav className="max-w-7xl mx-auto">
+          {/* Top Row - Icons and Theme Toggle */}
+          <div className="flex justify-between items-center mb-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-10 h-10 relative">
+                <Image
+                  src="/logo.png"
+                  alt="717 Logo"
+                  fill
+                  className={`object-contain ${theme === "dark" ? "filter invert" : ""} transition-all duration-300`}
+                  priority
+                />
+              </div>
+              <span className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                717 Store
+              </span>
+            </Link>
 
-          <ProductSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} className="mb-6" />
+            <div className="flex items-center space-x-4">
+              {mounted && <ThemeToggle />}
+              {isAuthenticated ? (
+                <Link
+                  href="/cuenta"
+                  className={`hover-lift ${
+                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                  } transition-colors`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <User className="w-6 h-6" />
+                    {userName && <span className="hidden md:inline text-sm">{userName}</span>}
+                  </div>
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className={`hover-lift ${
+                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                  } transition-colors`}
+                >
+                  <User className="w-6 h-6" />
+                </Link>
+              )}
+              <CartSidebar />
+            </div>
+          </div>
 
-          <div className={filterSectionClasses}>
-            <div className={cn("flex gap-4", isMobile && "flex-col")}>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className={selectClasses}
+          {/* Bottom Row - Navigation Links */}
+          <div className="flex justify-center">
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                href="/"
+                className={`hover-lift font-medium ${
+                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                } transition-colors`}
               >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category === "all" ? "Todas las categorías" : category}
-                  </option>
+                INICIO
+              </Link>
+              <Link
+                href="/productos"
+                className={`hover-lift font-medium ${
+                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                } transition-colors`}
+              >
+                PRODUCTOS
+              </Link>
+              <Link
+                href="/contacto"
+                className={`hover-lift font-medium ${
+                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
+                } transition-colors`}
+              >
+                CONTACTO
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <MobileMenu />
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* Products Section */}
+      <div className="max-w-7xl mx-auto px-4 py-8 animate-slide-up">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar Filters */}
+          <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
+            <div>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Buscar
+              </h3>
+              <ProductSearch onSearch={setSearchTerm} />
+            </div>
+
+            <div>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Categorías
+              </h3>
+              <div className="space-y-2">
+                {categories.map((category, index) => (
+                  <div
+                    key={category}
+                    className="flex items-center space-x-2 animate-fade-in"
+                    style={{ animationDelay: `${300 + index * 100}ms` }}
+                  >
+                    <Checkbox
+                      id={`category-${category}`}
+                      checked={selectedCategories.includes(category)}
+                      onCheckedChange={() => toggleCategory(category)}
+                      className="border-[#4A1518] data-[state=checked]:bg-[#4A1518] data-[state=checked]:text-white transition-all duration-300"
+                    />
+                    <Label
+                      htmlFor={`category-${category}`}
+                      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-[#4A1518] transition-colors cursor-pointer ${
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {category}
+                    </Label>
+                  </div>
                 ))}
-              </select>
-
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={selectClasses}>
-                <option value="name">Ordenar por nombre</option>
-                <option value="price-low">Precio: menor a mayor</option>
-                <option value="price-high">Precio: mayor a menor</option>
-              </select>
+              </div>
             </div>
 
-            <div className={cn("text-sm", theme === "dark" ? "text-gray-400" : "text-gray-600")}>
-              {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""} encontrado
-              {filteredProducts.length !== 1 ? "s" : ""}
+            <div>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Precio
+              </h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    [0, 50],
+                    [50, 100],
+                    [100, 150],
+                    [150, 200],
+                  ].map(([min, max], index) => (
+                    <Button
+                      key={`${min}-${max}`}
+                      variant="outline"
+                      onClick={() => handlePriceChange(min, max)}
+                      className={`border-[#4A1518] hover-glow button-press animate-fade-in ${
+                        priceRange[0] === min && priceRange[1] === max
+                          ? "bg-[#4A1518] text-white"
+                          : `hover:bg-[#4A1518] ${theme === "dark" ? "text-white" : "text-gray-900"}`
+                      }`}
+                      style={{ animationDelay: `${500 + index * 100}ms` }}
+                    >
+                      ${min} - ${max}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            <Button
+              onClick={() => {
+                setSelectedCategories([])
+                setPriceRange([0, 200])
+                setSearchTerm("")
+              }}
+              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] hover-glow button-press animate-fade-in"
+              style={{ animationDelay: "900ms" }}
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Limpiar filtros
+            </Button>
+          </div>
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            <div className="flex justify-between items-center mb-6 animate-fade-in" style={{ animationDelay: "300ms" }}>
+              <h2 className={`text-2xl font-bold text-glow ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                Productos ({filteredProducts.length})
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setViewMode("grid")}
+                  className={`border-[#4A1518] hover-glow button-press ${
+                    viewMode === "grid"
+                      ? "bg-[#4A1518] text-white"
+                      : `${theme === "dark" ? "text-white" : "text-gray-900"} hover:bg-[#4A1518] hover:text-white`
+                  }`}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setViewMode("list")}
+                  className={`border-[#4A1518] hover-glow button-press ${
+                    viewMode === "list"
+                      ? "bg-[#4A1518] text-white"
+                      : `${theme === "dark" ? "text-white" : "text-gray-900"} hover:bg-[#4A1518] hover:text-white`
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12 animate-fade-in">
+                <p className={theme === "dark" ? "text-gray-400 text-lg" : "text-gray-600 text-lg"}>
+                  No se encontraron productos que coincidan con tu búsqueda.
+                </p>
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map((product, index) => (
+                  <InteractiveProductCard key={product.id} product={product} delay={index * 100} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredProducts.map((product, index) => (
+                  <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                    <InteractiveProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto py-8">
-        {filteredProducts.length > 0 ? (
-          <div className={gridClasses}>
-            {filteredProducts.map((product, index) => (
-              <InteractiveProductCard key={product.id} product={product} delay={index * 100} />
-            ))}
-          </div>
-        ) : (
-          <div className={cn("text-center py-16", theme === "dark" ? "text-gray-400" : "text-gray-600")}>
-            <div className={cn("text-6xl mb-4", theme === "dark" ? "text-gray-700" : "text-gray-300")}>🔍</div>
-            <h3 className={cn("text-xl font-semibold mb-2", theme === "dark" ? "text-gray-300" : "text-gray-700")}>
-              No se encontraron productos
-            </h3>
-            <p>Intenta con otros términos de búsqueda o filtros</p>
-          </div>
-        )}
       </div>
     </div>
   )
