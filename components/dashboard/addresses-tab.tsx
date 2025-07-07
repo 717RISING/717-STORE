@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 
 // Mock addresses data
@@ -20,12 +21,12 @@ const mockAddresses = [
     isDefault: true,
     name: "Casa",
     fullName: "Juan Pérez",
-    street: "Calle Principal 123",
-    city: "Ciudad de México",
-    state: "CDMX",
-    zipCode: "01000",
-    country: "México",
-    phone: "+52 55 1234 5678",
+    street: "Carrera 70 # 45-32",
+    city: "Medellín",
+    state: "Antioquia",
+    zipCode: "050001",
+    country: "Colombia",
+    phone: "+57 300 123 4567",
   },
   {
     id: "2",
@@ -33,12 +34,12 @@ const mockAddresses = [
     isDefault: false,
     name: "Oficina",
     fullName: "Juan Pérez",
-    street: "Av. Reforma 456, Piso 10",
-    city: "Ciudad de México",
-    state: "CDMX",
-    zipCode: "06600",
-    country: "México",
-    phone: "+52 55 8765 4321",
+    street: "Calle 10 # 40-20, Piso 5",
+    city: "Medellín",
+    state: "Antioquia",
+    zipCode: "050010",
+    country: "Colombia",
+    phone: "+57 301 987 6543",
   },
 ]
 
@@ -53,14 +54,21 @@ export default function AddressesTab() {
     city: "",
     state: "",
     zipCode: "",
-    country: "México",
+    country: "Colombia",
     phone: "",
     type: "home",
   })
   const { toast } = useToast()
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -76,7 +84,7 @@ export default function AddressesTab() {
       city: "",
       state: "",
       zipCode: "",
-      country: "México",
+      country: "Colombia",
       phone: "",
       type: "home",
     })
@@ -184,17 +192,16 @@ export default function AddressesTab() {
                   <Label htmlFor="type" className="text-gray-300">
                     Tipo
                   </Label>
-                  <select
-                    id="type"
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
-                  >
-                    <option value="home">Casa</option>
-                    <option value="work">Oficina</option>
-                    <option value="other">Otro</option>
-                  </select>
+                  <Select value={formData.type} onValueChange={(value) => handleSelectChange("type", value)}>
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="home">Casa</SelectItem>
+                      <SelectItem value="work">Oficina</SelectItem>
+                      <SelectItem value="other">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -220,7 +227,7 @@ export default function AddressesTab() {
                   name="street"
                   value={formData.street}
                   onChange={handleInputChange}
-                  placeholder="Calle, número, colonia"
+                  placeholder="Calle, carrera, número, barrio"
                   className="bg-gray-800 border-gray-700 text-white"
                 />
               </div>
@@ -235,20 +242,54 @@ export default function AddressesTab() {
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
+                    placeholder="Ej: Medellín"
                     className="bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
                 <div>
                   <Label htmlFor="state" className="text-gray-300">
-                    Estado
+                    Departamento
                   </Label>
-                  <Input
-                    id="state"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
+                  <Select value={formData.state} onValueChange={(value) => handleSelectChange("state", value)}>
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue placeholder="Seleccionar" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="antioquia">Antioquia</SelectItem>
+                      <SelectItem value="atlantico">Atlántico</SelectItem>
+                      <SelectItem value="bogota">Bogotá D.C.</SelectItem>
+                      <SelectItem value="bolivar">Bolívar</SelectItem>
+                      <SelectItem value="boyaca">Boyacá</SelectItem>
+                      <SelectItem value="caldas">Caldas</SelectItem>
+                      <SelectItem value="caqueta">Caquetá</SelectItem>
+                      <SelectItem value="cauca">Cauca</SelectItem>
+                      <SelectItem value="cesar">Cesar</SelectItem>
+                      <SelectItem value="cordoba">Córdoba</SelectItem>
+                      <SelectItem value="cundinamarca">Cundinamarca</SelectItem>
+                      <SelectItem value="choco">Chocó</SelectItem>
+                      <SelectItem value="huila">Huila</SelectItem>
+                      <SelectItem value="la-guajira">La Guajira</SelectItem>
+                      <SelectItem value="magdalena">Magdalena</SelectItem>
+                      <SelectItem value="meta">Meta</SelectItem>
+                      <SelectItem value="narino">Nariño</SelectItem>
+                      <SelectItem value="norte-santander">Norte de Santander</SelectItem>
+                      <SelectItem value="quindio">Quindío</SelectItem>
+                      <SelectItem value="risaralda">Risaralda</SelectItem>
+                      <SelectItem value="santander">Santander</SelectItem>
+                      <SelectItem value="sucre">Sucre</SelectItem>
+                      <SelectItem value="tolima">Tolima</SelectItem>
+                      <SelectItem value="valle">Valle del Cauca</SelectItem>
+                      <SelectItem value="arauca">Arauca</SelectItem>
+                      <SelectItem value="casanare">Casanare</SelectItem>
+                      <SelectItem value="putumayo">Putumayo</SelectItem>
+                      <SelectItem value="san-andres">San Andrés y Providencia</SelectItem>
+                      <SelectItem value="amazonas">Amazonas</SelectItem>
+                      <SelectItem value="guainia">Guainía</SelectItem>
+                      <SelectItem value="guaviare">Guaviare</SelectItem>
+                      <SelectItem value="vaupes">Vaupés</SelectItem>
+                      <SelectItem value="vichada">Vichada</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="zipCode" className="text-gray-300">
@@ -259,6 +300,7 @@ export default function AddressesTab() {
                     name="zipCode"
                     value={formData.zipCode}
                     onChange={handleInputChange}
+                    placeholder="Ej: 050001"
                     className="bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
@@ -275,6 +317,7 @@ export default function AddressesTab() {
                     value={formData.country}
                     onChange={handleInputChange}
                     className="bg-gray-800 border-gray-700 text-white"
+                    readOnly
                   />
                 </div>
                 <div>
@@ -286,6 +329,7 @@ export default function AddressesTab() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    placeholder="+57 300 123 4567"
                     className="bg-gray-800 border-gray-700 text-white"
                   />
                 </div>

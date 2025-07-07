@@ -94,6 +94,7 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             value={data.phone}
             onChange={(e) => handleInputChange("phone", e.target.value)}
             className="bg-gray-800 border-gray-700 text-white"
+            placeholder="Ej: +57 300 123 4567"
             required
           />
         </div>
@@ -107,6 +108,7 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             value={data.address}
             onChange={(e) => handleInputChange("address", e.target.value)}
             className="bg-gray-800 border-gray-700 text-white"
+            placeholder="Calle, carrera, número, barrio"
             required
           />
         </div>
@@ -121,23 +123,52 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
               value={data.city}
               onChange={(e) => handleInputChange("city", e.target.value)}
               className="bg-gray-800 border-gray-700 text-white"
+              placeholder="Ej: Medellín"
               required
             />
           </div>
           <div>
             <Label htmlFor="state" className="text-white">
-              Estado/Provincia *
+              Departamento *
             </Label>
             <Select value={data.state} onValueChange={(value) => handleInputChange("state", value)}>
               <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="madrid">Madrid</SelectItem>
-                <SelectItem value="barcelona">Barcelona</SelectItem>
-                <SelectItem value="valencia">Valencia</SelectItem>
-                <SelectItem value="sevilla">Sevilla</SelectItem>
-                <SelectItem value="bilbao">Bilbao</SelectItem>
+                <SelectItem value="antioquia">Antioquia</SelectItem>
+                <SelectItem value="atlantico">Atlántico</SelectItem>
+                <SelectItem value="bogota">Bogotá D.C.</SelectItem>
+                <SelectItem value="bolivar">Bolívar</SelectItem>
+                <SelectItem value="boyaca">Boyacá</SelectItem>
+                <SelectItem value="caldas">Caldas</SelectItem>
+                <SelectItem value="caqueta">Caquetá</SelectItem>
+                <SelectItem value="cauca">Cauca</SelectItem>
+                <SelectItem value="cesar">Cesar</SelectItem>
+                <SelectItem value="cordoba">Córdoba</SelectItem>
+                <SelectItem value="cundinamarca">Cundinamarca</SelectItem>
+                <SelectItem value="choco">Chocó</SelectItem>
+                <SelectItem value="huila">Huila</SelectItem>
+                <SelectItem value="la-guajira">La Guajira</SelectItem>
+                <SelectItem value="magdalena">Magdalena</SelectItem>
+                <SelectItem value="meta">Meta</SelectItem>
+                <SelectItem value="narino">Nariño</SelectItem>
+                <SelectItem value="norte-santander">Norte de Santander</SelectItem>
+                <SelectItem value="quindio">Quindío</SelectItem>
+                <SelectItem value="risaralda">Risaralda</SelectItem>
+                <SelectItem value="santander">Santander</SelectItem>
+                <SelectItem value="sucre">Sucre</SelectItem>
+                <SelectItem value="tolima">Tolima</SelectItem>
+                <SelectItem value="valle">Valle del Cauca</SelectItem>
+                <SelectItem value="arauca">Arauca</SelectItem>
+                <SelectItem value="casanare">Casanare</SelectItem>
+                <SelectItem value="putumayo">Putumayo</SelectItem>
+                <SelectItem value="san-andres">San Andrés y Providencia</SelectItem>
+                <SelectItem value="amazonas">Amazonas</SelectItem>
+                <SelectItem value="guainia">Guainía</SelectItem>
+                <SelectItem value="guaviare">Guaviare</SelectItem>
+                <SelectItem value="vaupes">Vaupés</SelectItem>
+                <SelectItem value="vichada">Vichada</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -150,6 +181,7 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
               value={data.zipCode}
               onChange={(e) => handleInputChange("zipCode", e.target.value)}
               className="bg-gray-800 border-gray-700 text-white"
+              placeholder="Ej: 050001"
               required
             />
           </div>
@@ -164,11 +196,7 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
               <SelectValue placeholder="Seleccionar país" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700">
-              <SelectItem value="es">España</SelectItem>
-              <SelectItem value="mx">México</SelectItem>
-              <SelectItem value="ar">Argentina</SelectItem>
               <SelectItem value="co">Colombia</SelectItem>
-              <SelectItem value="pe">Perú</SelectItem>
             </SelectContent>
           </Select>
         </div>

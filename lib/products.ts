@@ -14,7 +14,7 @@ export const products: Product[] = [
   {
     id: "big-dreams-tshirt",
     name: "BIG DREAMS T-SHIRT",
-    price: 29.99,
+    price: 89900,
     description:
       "Camiseta con diseño exclusivo 'Big Hit Big Dreams'. Confeccionada en algodón 100% premium con estampado de alta calidad. El frente presenta el icónico logo 717, mientras que la parte trasera muestra un diseño artístico con nubes y filosofía de grandes sueños.",
     images: [
@@ -30,7 +30,7 @@ export const products: Product[] = [
   {
     id: "oversized-tee",
     name: "TO U & U CITY TEE",
-    price: 34.99,
+    price: 104900,
     description:
       "Camiseta oversized con diseño urbano exclusivo. El frente presenta el logo 717 minimalista, mientras que la parte trasera muestra un impresionante diseño 'To U & U City' con ilustración de paisaje urbano. Perfecta para el estilo streetwear contemporáneo.",
     images: [
@@ -46,7 +46,7 @@ export const products: Product[] = [
   {
     id: "graphic-tee-blood",
     name: "THE BLOOD OF CHRIST TEE",
-    price: 32.99,
+    price: 98900,
     description:
       "Camiseta con diseño gráfico religioso exclusivo. Presenta el número 717 en rojo en el frente y un poderoso diseño 'The Blood of Christ' en la parte trasera con ilustración de cáliz sagrado. Una pieza única que combina fe y moda urbana.",
     images: [
@@ -61,7 +61,7 @@ export const products: Product[] = [
   {
     id: "graphic-tee-pain",
     name: "OLD PAIN TEE",
-    price: 32.99,
+    price: 98900,
     description:
       "Camiseta con diseño artístico 'Old Pain'. El frente presenta la frase 'OLD PAIN' en tipografía dorada, mientras que la parte trasera muestra una impactante ilustración de una figura en llamas. Arte urbano que expresa emociones profundas.",
     images: [
@@ -76,7 +76,7 @@ export const products: Product[] = [
   {
     id: "urban-hoodie",
     name: "URBAN HOODIE",
-    price: 59.99,
+    price: 179900,
     description:
       "Sudadera con capucha premium de la colección urbana. Tejido suave y cómodo con forro interior. Diseño minimalista con detalles únicos que la hacen perfecta para cualquier ocasión.",
     images: [
@@ -91,7 +91,7 @@ export const products: Product[] = [
   {
     id: "street-pants",
     name: "STREET PANTS",
-    price: 49.99,
+    price: 149900,
     description:
       "Pantalones urbanos cómodos con corte moderno. Fabricados con materiales de alta calidad que garantizan durabilidad y comodidad. Ideales para el estilo streetwear contemporáneo.",
     images: [
@@ -106,7 +106,7 @@ export const products: Product[] = [
   {
     id: "classic-cap",
     name: "CLASSIC CAP",
-    price: 24.99,
+    price: 74900,
     description:
       "Gorra clásica con logo bordado 717. Ajuste perfecto con cierre trasero. Material resistente y cómodo para uso diario. Un accesorio esencial para completar tu look urbano.",
     images: ["/placeholder.svg?height=600&width=500", "/placeholder.svg?height=600&width=500"],
@@ -117,7 +117,7 @@ export const products: Product[] = [
   {
     id: "cargo-shorts",
     name: "CARGO SHORTS",
-    price: 39.99,
+    price: 119900,
     description:
       "Shorts cargo con múltiples bolsillos funcionales. Diseño urbano con detalles únicos. Perfectos para el verano con un estilo streetwear auténtico.",
     images: ["/placeholder.svg?height=600&width=500", "/placeholder.svg?height=600&width=500"],
@@ -128,7 +128,7 @@ export const products: Product[] = [
   {
     id: "zip-hoodie",
     name: "ZIP HOODIE",
-    price: 64.99,
+    price: 194900,
     description:
       "Sudadera con capucha y cierre frontal. Diseño versátil que se adapta a cualquier ocasión. Bolsillos frontales y ajuste cómodo para máxima comodidad.",
     images: ["/placeholder.svg?height=600&width=500", "/placeholder.svg?height=600&width=500"],
@@ -139,7 +139,7 @@ export const products: Product[] = [
   {
     id: "bucket-hat",
     name: "BUCKET HAT",
-    price: 27.99,
+    price: 83900,
     description:
       "Sombrero bucket con estilo retro-urbano. Material resistente al agua y protección UV. Perfecto para festivales y actividades al aire libre.",
     images: ["/placeholder.svg?height=600&width=500", "/placeholder.svg?height=600&width=500"],
@@ -199,4 +199,14 @@ export function searchProducts(query: string, category = "all", sortBy = "name")
   }
 
   return filteredProducts
+}
+
+// Función para formatear precios en pesos colombianos
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price)
 }

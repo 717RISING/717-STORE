@@ -1,279 +1,173 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import { useTheme } from "@/lib/theme-context"
 import type React from "react"
+
 import { useState } from "react"
-import Link from "next/link"
 import Image from "next/image"
-import { ShoppingCart, Heart, Eye } from "lucide-react"
+import Link from "next/link"
+import { Heart, ShoppingCart, Eye } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import EnhancedButton from "./enhanced-button"
 import { useCart } from "@/lib/cart-context"
 import { useToast } from "@/hooks/use-toast"
-
-interface Product {
-  id: string
-  name: string
-  price: number
-  images: string[]
-  isNew?: boolean
-  category: string
-  description: string
-  sizes: string[]
-}
+import { formatPrice, type Product } from "@/lib/products"
+import { useThemeSafe } from "@/hooks/use-theme-safe"
 
 interface InteractiveProductCardProps {
   product: Product
-  delay?: number
 }
 
-export default function InteractiveProductCard({ product, delay = 0 }: InteractiveProductCardProps) {
+export default function InteractiveProductCard({ product }: InteractiveProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const [isLiked, setIsLiked] = useState(false)
-  const [imageError, setImageError] = useState(false)
-  const [imageLoading, setImageLoading] = useState(true)
-  const { dispatch } = useCart()
+  const [selectedSize, setSelectedSize] = useState(product.sizes[0])
+  const [isWishlisted, setIsWishlisted] = useState(false)
+  const { addToCart } = useCart()
   const { toast } = useToast()
-  const { theme } = useTheme()
+  const { theme } = useThemeSafe()
 
-  const handleQuickAdd = (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
-    dispatch({
-      type: "ADD_ITEM",
-      payload: {
-        id: `${product.id}-M`,
-        name: product.name,
-        price: product.price,
-        size: "M",
-        quantity: 1,
-        image: product.images[0],
-      },
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      size: selectedSize,
+      quantity: 1,
     })
 
     toast({
-      title: "¡Agregado al carrito!",
-      description: `${product.name} (Talla M) agregado exitosamente.`,
+      title: "Producto agregado",
+      description: `${product.name} (${selectedSize}) agregado al carrito`,
     })
   }
 
-  const handleLike = (e: React.MouseEvent) => {
+  const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsLiked(!isLiked)
+    setIsWishlisted(!isWishlisted)
 
     toast({
-      title: isLiked ? "Removido de favoritos" : "Agregado a favoritos",
-      description: `${product.name} ${isLiked ? "removido de" : "agregado a"} tu lista de deseos.`,
+      title: isWishlisted ? "Eliminado de favoritos" : "Agregado a favoritos",
+      description: `${product.name} ${isWishlisted ? "eliminado de" : "agregado a"} tu lista de deseos`,
     })
   }
-
-  const handleImageLoad = () => {
-    setImageLoading(false)
-    setImageError(false)
-  }
-
-  const handleImageError = () => {
-    console.log(`Error loading image for product ${product.id}: ${product.images[0]}`)
-    setImageLoading(false)
-    setImageError(true)
-  }
-
-  // Obtener la imagen del producto
-  const productImage = product.images && product.images.length > 0 ? product.images[0] : null
-  const shouldShowPlaceholder = !productImage || imageError
-
-  // Clases adaptativas según el tema
-  const cardClasses = cn(
-    "group cursor-pointer hover-lift-modern animate-fade-in rounded-modern-lg overflow-hidden transition-all duration-500",
-    theme === "dark"
-      ? "card-dark bg-gray-900/80 border-gray-800/50 backdrop-blur-xl shadow-dark"
-      : "card-light bg-white/90 border-gray-200/50 backdrop-blur-xl shadow-light",
-  )
-
-  const imageContainerClasses = cn(
-    "relative aspect-square overflow-hidden rounded-t-modern-lg",
-    theme === "dark" ? "bg-gray-800" : "bg-gray-100",
-  )
-
-  const overlayClasses = cn(
-    "absolute inset-0 flex items-center justify-center gap-3 transition-all duration-500 rounded-t-modern-lg backdrop-blur-sm",
-    theme === "dark" ? "bg-black/40 hover:bg-black/60" : "bg-white/40 hover:bg-white/60",
-    isHovered ? "opacity-100" : "opacity-0",
-  )
-
-  const contentClasses = cn(
-    "p-6 space-y-3 transition-all duration-300",
-    theme === "dark" ? "bg-gray-900/90" : "bg-white/90",
-  )
-
-  const titleClasses = cn(
-    "font-semibold text-lg transition-colors duration-300",
-    theme === "dark"
-      ? "text-white group-hover:text-[#5D1A1D] text-glow-dark"
-      : "text-gray-900 group-hover:text-[#4A1518] text-glow-light",
-  )
-
-  const descriptionClasses = cn(
-    "text-sm line-clamp-2 transition-colors duration-300",
-    theme === "dark" ? "text-gray-400 group-hover:text-gray-300" : "text-gray-600 group-hover:text-gray-700",
-  )
-
-  const priceClasses = cn(
-    "text-xl font-bold group-hover:scale-110 transition-transform duration-300",
-    theme === "dark" ? "text-white" : "text-gray-900",
-  )
-
-  const sizeTagClasses = cn(
-    "text-xs px-3 py-1 rounded-modern transition-colors duration-300 backdrop-blur-sm border",
-    theme === "dark"
-      ? "bg-gray-800/70 text-white border-gray-700 group-hover:bg-[#5D1A1D] group-hover:border-[#5D1A1D]"
-      : "bg-gray-100/70 text-gray-700 border-gray-300 group-hover:bg-[#4A1518] group-hover:text-white group-hover:border-[#4A1518]",
-  )
 
   return (
     <div
-      className={cardClasses}
-      style={{ animationDelay: `${delay}ms` }}
+      className={`group relative bg-gray-900 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+        theme === "dark" ? "hover:shadow-red-900/20" : "hover:shadow-gray-900/20"
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link href={`/productos/${product.id}`}>
-        <div className={imageContainerClasses}>
-          {/* Loading skeleton */}
-          {imageLoading && (
-            <div
-              className={cn(
-                "absolute inset-0 animate-pulse",
-                theme === "dark" ? "image-loading-dark" : "image-loading",
-              )}
-            />
-          )}
-
-          {/* Product Image */}
-          {productImage && !shouldShowPlaceholder ? (
-            <Image
-              src={productImage || "/placeholder.svg"}
-              alt={product.name}
-              fill
-              className={cn(
-                "object-cover transition-all duration-700 group-hover:scale-110 rounded-t-modern-lg",
-                imageLoading ? "opacity-0" : "opacity-100",
-              )}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              priority={delay < 300}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          ) : (
-            <div
-              className={cn(
-                "w-full h-full flex items-center justify-center text-6xl font-bold transition-all duration-700 group-hover:scale-110",
-                theme === "dark" ? "bg-gray-800 text-gray-600" : "bg-gray-200 text-gray-400",
-              )}
-            >
-              717
-            </div>
-          )}
-
-          {/* Overlay con botones adaptativos */}
-          <div className={overlayClasses}>
-            <EnhancedButton
-              variant={theme === "dark" ? "modern" : "outline"}
-              size="icon"
-              onClick={handleQuickAdd}
-              className="transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500 delay-100 rounded-modern-lg"
-            >
-              <ShoppingCart className="w-4 h-4" />
-            </EnhancedButton>
-
-            <EnhancedButton
-              variant="glassmorphism"
-              size="icon"
-              onClick={handleLike}
-              className={cn(
-                "transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 delay-200 rounded-modern-lg",
-                isLiked && "bg-red-500/20 border-red-500 text-red-400",
-                theme === "light" && "border-gray-400 text-gray-700",
-              )}
-            >
-              <Heart className={cn("w-4 h-4", isLiked && "fill-current animate-pulse-glow")} />
-            </EnhancedButton>
-
-            <EnhancedButton
-              variant={theme === "dark" ? "neon" : "ghost"}
-              size="icon"
-              className="transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500 delay-300 rounded-modern-lg"
-            >
-              <Eye className="w-4 h-4" />
-            </EnhancedButton>
-          </div>
-
-          {/* Badge adaptativo */}
-          {product.isNew && (
-            <Badge
-              className={cn(
-                "absolute top-3 left-3 animate-pulse-glow rounded-modern border-0 font-semibold z-10",
-                theme === "dark"
-                  ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
-                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white",
-              )}
-            >
-              NUEVO
-            </Badge>
-          )}
-
-          {/* Efecto de brillo adaptativo */}
-          <div
-            className={cn(
-              "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-t-modern-lg pointer-events-none",
-              theme === "dark"
-                ? "bg-gradient-to-tr from-transparent via-white/10 to-transparent"
-                : "bg-gradient-to-tr from-transparent via-gray-900/10 to-transparent",
-            )}
+        {/* Image Container */}
+        <div className="relative aspect-square overflow-hidden">
+          <Image
+            src={product.images[0] || "/placeholder.svg"}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
-          {/* Partículas flotantes adaptativas */}
-          <div className="absolute inset-0 pointer-events-none">
-            {isHovered &&
-              [...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "absolute w-1 h-1 rounded-full animate-twinkle",
-                    theme === "dark" ? "bg-[#5D1A1D]" : "bg-[#4A1518]",
-                  )}
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    animationDelay: `${i * 0.5}s`,
-                  }}
-                />
-              ))}
+          {/* Overlay */}
+          <div
+            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+              isHovered ? "opacity-100" : "opacity-0"
+            }`}
+          />
+
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {product.isNew && <Badge className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">NUEVO</Badge>}
           </div>
 
-          {/* Error indicator */}
-          {imageError && productImage && (
-            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-modern z-10">
-              Error
+          {/* Action Buttons */}
+          <div
+            className={`absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 ${
+              isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+            }`}
+          >
+            <Button
+              size="icon"
+              variant="secondary"
+              className="bg-white/90 hover:bg-white text-black"
+              onClick={handleWishlist}
+            >
+              <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+            </Button>
+            <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white text-black">
+              <Eye className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Quick Add to Cart */}
+          <div
+            className={`absolute bottom-3 left-3 right-3 transition-all duration-300 ${
+              isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            <div className="flex gap-2 mb-2">
+              {product.sizes.slice(0, 4).map((size) => (
+                <Button
+                  key={size}
+                  size="sm"
+                  variant={selectedSize === size ? "default" : "secondary"}
+                  className={`text-xs ${
+                    selectedSize === size
+                      ? "bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
+                      : "bg-white/90 hover:bg-white text-black"
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setSelectedSize(size)
+                  }}
+                >
+                  {size}
+                </Button>
+              ))}
             </div>
-          )}
+            <Button className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22]" onClick={handleAddToCart}>
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Agregar al Carrito
+            </Button>
+          </div>
         </div>
 
-        <div className={contentClasses}>
-          <h3 className={titleClasses}>{product.name}</h3>
-          <p className={descriptionClasses}>{product.description}</p>
-          <div className="flex justify-between items-center pt-2">
-            <span className={priceClasses}>${product.price}</span>
-            <div className="flex gap-2">
+        {/* Product Info */}
+        <div className="p-4">
+          <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#5D1A1D] transition-colors">
+            {product.name}
+          </h3>
+          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
+
+          {/* Price */}
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold text-[#5D1A1D]">{formatPrice(product.price)}</span>
+            <div className="flex gap-1">
               {product.sizes.slice(0, 3).map((size) => (
-                <span key={size} className={sizeTagClasses}>
+                <span key={size} className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
                   {size}
                 </span>
               ))}
+              {product.sizes.length > 3 && (
+                <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">+{product.sizes.length - 3}</span>
+              )}
             </div>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1 mt-3">
+            {product.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
       </Link>
