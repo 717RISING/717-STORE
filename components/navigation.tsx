@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { CartItem } from "@/lib/cart-context"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, ShoppingCart, User, Menu } from "lucide-react"
@@ -14,10 +15,10 @@ import ProductSearch from "@/components/product-search"
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const { items } = useCart()
-  const { theme } = useTheme()
-
+  const cart = useCart()
+  const items: CartItem[] = cart?.items ?? []
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const { theme } = useTheme()
 
   const navLinks = [
     { href: "/", label: "Inicio" },
