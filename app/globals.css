@@ -245,7 +245,8 @@
 /* Responsive utilities */
 @media (max-width: 768px) {
   .hover-lift-modern {
-    @apply hover:scale-102;
+    /* Use a valid Tailwind scale utility */
+    @apply hover:scale-105;
   }
 
   .card-modern {
