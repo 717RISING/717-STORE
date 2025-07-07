@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import type { CartItem } from "@/lib/cart-context"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, ShoppingCart, User, Menu } from "lucide-react"
@@ -16,55 +15,24 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cart = useCart()
-  const items: CartItem[] = cart?.items ?? []
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const items = cart?.items || []
   const { theme } = useTheme()
 
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+
   const navLinks = [
-    { href: "/", label: "Inicio" },
-    { href: "/productos", label: "Productos" },
-    { href: "/tallas", label: "Guía de Tallas" },
-    { href: "/envios-devoluciones", label: "Envíos" },
-    { href: "/contacto", label: "Contacto" },
+    { href: "/", label: "INICIO" },
+    { href: "/productos", label: "PRODUCTOS" },
+    { href: "/contacto", label: "CONTACTO" },
   ]
 
   return (
     <>
-      <nav
-        className={`sticky top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
-          theme === "dark" ? "bg-black/90 border-gray-800" : "bg-white/90 border-gray-200"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2 hover-lift">
-              <Image src="/logo.png" alt="717 Store" width={40} height={40} className="w-10 h-10 animate-float" />
-              <span
-                className={`text-xl font-bold transition-colors duration-300 ${
-                  theme === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                717 Store
-              </span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`transition-all duration-300 hover:scale-105 ${
-                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Actions */}
+      {/* Navigation */}
+      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
+        <nav className="max-w-7xl mx-auto">
+          {/* Top Row - Icons Only */}
+          <div className="flex justify-end items-center mb-4">
             <div className="flex items-center space-x-4">
               {/* Theme Toggle */}
               <ThemeToggle />
@@ -74,59 +42,65 @@ export default function Navigation() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsSearchOpen(true)}
-                className={`hover-glow transition-all duration-300 ${
-                  theme === "dark" ? "hover:bg-[#4A1518]/20 text-white" : "hover:bg-[#4A1518]/20 text-gray-900"
-                }`}
+                className="text-white hover:text-gray-300 transition-colors"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-6 h-6" />
               </Button>
 
-              {/* Cart */}
-              <Link href="/checkout">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`relative hover-glow transition-all duration-300 ${
-                    theme === "dark" ? "hover:bg-[#4A1518]/20 text-white" : "hover:bg-[#4A1518]/20 text-gray-900"
-                  }`}
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-[#4A1518] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse-glow">
-                      {totalItems}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-
               {/* User */}
-              <Link href="/cuenta">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`hover-glow transition-all duration-300 ${
-                    theme === "dark" ? "hover:bg-[#4A1518]/20 text-white" : "hover:bg-[#4A1518]/20 text-gray-900"
-                  }`}
-                >
-                  <User className="w-5 h-5" />
-                </Button>
+              <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
+                <User className="w-6 h-6" />
               </Link>
 
-              {/* Mobile Menu Toggle */}
+              {/* Cart */}
+              <Link href="/checkout" className="relative text-white hover:text-gray-300 transition-colors">
+                <ShoppingCart className="w-6 h-6" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </div>
+
+          {/* Center Logo */}
+          <div className="flex justify-center mb-6">
+            <Link href="/" className="flex items-center">
+              <div className="w-16 h-16 relative">
+                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
+              </div>
+            </Link>
+          </div>
+
+          {/* Bottom Row - Navigation Links */}
+          <div className="flex justify-center">
+            <div className="hidden md:flex items-center space-x-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-white hover:text-gray-300 transition-colors font-medium"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
               <Button
                 variant="ghost"
                 size="icon"
-                className={`md:hidden hover-glow transition-all duration-300 ${
-                  theme === "dark" ? "hover:bg-[#4A1518]/20 text-white" : "hover:bg-[#4A1518]/20 text-gray-900"
-                }`}
+                className="text-white hover:text-gray-300 transition-colors"
                 onClick={() => setIsMenuOpen(true)}
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-6 h-6" />
               </Button>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       {/* Mobile Menu */}
       <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
