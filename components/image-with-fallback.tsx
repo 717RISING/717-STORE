@@ -38,9 +38,12 @@ export default function ImageWithFallback({
   }
 
   const handleError = () => {
+    console.log(`Error loading image: ${imgSrc}, falling back to: ${fallbackSrc}`)
     setHasError(true)
     setIsLoading(false)
-    setImgSrc(fallbackSrc)
+    if (imgSrc !== fallbackSrc) {
+      setImgSrc(fallbackSrc)
+    }
   }
 
   return (
@@ -62,16 +65,17 @@ export default function ImageWithFallback({
         className={cn(
           "transition-opacity duration-300",
           isLoading ? "opacity-0" : "opacity-100",
-          hasError && "filter grayscale",
+          hasError && imgSrc === fallbackSrc && "filter grayscale",
           className,
         )}
         onLoad={handleLoad}
         onError={handleError}
+        unoptimized={imgSrc.includes("placeholder.svg")}
       />
 
-      {/* Error indicator */}
-      {hasError && (
-        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-modern">
+      {/* Error indicator - only show if we're using fallback */}
+      {hasError && imgSrc === fallbackSrc && (
+        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-modern z-10">
           Imagen no disponible
         </div>
       )}

@@ -68,78 +68,7 @@
   }
 }
 
-/* Border Radius Modernos */
-.rounded-modern {
-  border-radius: 1rem;
-}
-
-.rounded-modern-lg {
-  border-radius: 1.5rem;
-}
-
-.rounded-modern-xl {
-  border-radius: 2rem;
-}
-
-.rounded-modern-2xl {
-  border-radius: 2.5rem;
-}
-
-.rounded-modern-3xl {
-  border-radius: 3rem;
-}
-
-.rounded-t-modern-lg {
-  border-top-left-radius: 1.5rem;
-  border-top-right-radius: 1.5rem;
-}
-
-/* Efectos Modernos */
-.card-modern {
-  @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl;
-}
-
-.card-dark {
-  @apply backdrop-blur-xl bg-gray-900/80 border-gray-800/50 shadow-2xl;
-}
-
-.card-light {
-  @apply backdrop-blur-xl bg-white/90 border-gray-200/50 shadow-lg;
-}
-
-.input-modern {
-  @apply backdrop-blur-sm bg-gray-900/50 border border-gray-700 text-white placeholder-gray-400;
-}
-
-.hover-lift-modern {
-  @apply transition-all duration-300 hover:scale-105 hover:shadow-2xl;
-}
-
-.hover-glow-modern {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25;
-}
-
-.text-glow {
-  text-shadow: 0 0 10px rgba(93, 26, 29, 0.5);
-}
-
-.text-glow-dark {
-  text-shadow: 0 0 15px rgba(93, 26, 29, 0.6);
-}
-
-.text-glow-light {
-  text-shadow: 0 0 8px rgba(74, 21, 24, 0.3);
-}
-
-.shadow-dark {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.shadow-light {
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-}
-
-/* Animaciones */
+/* Custom Animations */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -162,22 +91,35 @@
   }
 }
 
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
   }
-  50% {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200px 0;
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
   }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
   100% {
-    background-position: calc(200px + 100%) 0;
+    box-shadow: 0 0 5px rgba(74, 21, 24, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(74, 21, 24, 0.8);
   }
 }
 
@@ -193,6 +135,36 @@
   }
 }
 
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Animation Classes */
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
 }
@@ -201,79 +173,225 @@
   animation: slide-up 0.8s ease-out forwards;
 }
 
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }
 
 .animate-shimmer {
   animation: shimmer 2s linear infinite;
 }
 
-.animate-twinkle {
-  animation: twinkle 2s ease-in-out infinite;
+/* Modern Border Radius */
+.rounded-modern {
+  border-radius: 12px;
 }
 
-.shimmer-dark {
-  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
-  background-size: 200px 100%;
+.rounded-modern-lg {
+  border-radius: 16px;
 }
 
-.shimmer-light {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-  background-size: 200px 100%;
+.rounded-modern-xl {
+  border-radius: 20px;
 }
 
-/* Transiciones de tema */
-.theme-transition {
-  transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-color
-    0.6s cubic-bezier(0.4, 0, 0.2, 1);
+/* Mobile-optimized border radius */
+@media (max-width: 768px) {
+  .rounded-modern {
+    border-radius: 8px;
+  }
+
+  .rounded-modern-lg {
+    border-radius: 12px;
+  }
+
+  .rounded-modern-xl {
+    border-radius: 16px;
+  }
 }
 
-/* Efectos de hover específicos */
-.button-press {
-  @apply active:scale-95 transition-transform duration-150;
-}
-
+/* Hover Effects */
 .hover-lift {
-  @apply transition-transform duration-300 hover:-translate-y-1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hover-lift-modern {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-lift-modern:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .hover-glow {
-  @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-red-500/20;
+  transition: all 0.3s ease;
 }
 
-/* Responsive utilities */
-@media (max-width: 768px) {
-  .hover-lift-modern {
-    /* Use a valid Tailwind scale utility */
-    @apply hover:scale-105;
-  }
-
-  .card-modern {
-    @apply backdrop-blur-md;
-  }
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(74, 21, 24, 0.4);
 }
 
-/* Scrollbar personalizado */
+/* Button Effects */
+.button-press {
+  transition: all 0.1s ease;
+}
+
+.button-press:active {
+  transform: scale(0.95);
+}
+
+/* Glass Effects */
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Card Styles */
+.card-light {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-dark {
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.shadow-light {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-dark {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Text Effects */
+.text-glow {
+  text-shadow: 0 0 10px rgba(74, 21, 24, 0.3);
+}
+
+.text-glow-light {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-glow-dark {
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+/* Theme Transitions */
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.loading-shimmer-dark {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Image Loading States */
+.image-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.image-loading-dark {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f2937;
-  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #5d1a1d, #4a1518);
-  border-radius: 1rem;
+  background: rgba(74, 21, 24, 0.6);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #6b1e22, #5d1a1d);
+  background: rgba(74, 21, 24, 0.8);
 }
 
-/* Utilidades adicionales */
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(93, 26, 29, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(93, 26, 29, 0.8);
+}
+
+/* Mobile Scrollbar */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+/* Focus States */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-[#4A1518] focus:ring-offset-2;
+}
+
+.focus-ring-dark {
+  @apply focus:outline-none focus:ring-2 focus:ring-[#5D1A1D] focus:ring-offset-2 focus:ring-offset-gray-900;
+}
+
+/* Utility Classes */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -288,16 +406,244 @@
   overflow: hidden;
 }
 
-/* Focus states modernos */
-.focus-modern:focus {
-  @apply outline-none ring-2 ring-red-500/50 ring-offset-2 ring-offset-gray-900;
+/* Product Card Specific Styles */
+.product-card-image {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 16px 16px 0 0;
 }
 
-/* Glassmorphism variants */
-.glassmorphism-dark {
-  @apply backdrop-blur-xl bg-black/20 border border-white/10;
+.product-card-image img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.glassmorphism-light {
-  @apply backdrop-blur-xl bg-white/20 border border-black/10;
+.product-card:hover .product-card-image img {
+  transform: scale(1.1);
+}
+
+/* Mobile Product Card Optimizations */
+@media (max-width: 768px) {
+  .product-card-image {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .product-card-image img {
+    transition: transform 0.3s ease;
+  }
+
+  .product-card:hover .product-card-image img {
+    transform: scale(1.05);
+  }
+}
+
+/* Mobile-specific responsive design */
+@media (max-width: 768px) {
+  /* Disable hover effects on mobile */
+  .hover-lift-modern:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .hover-glow:hover {
+    box-shadow: none;
+  }
+
+  /* Optimize animations for mobile */
+  .animate-fade-in {
+    animation-duration: 0.4s;
+  }
+
+  .animate-slide-up {
+    animation-duration: 0.5s;
+  }
+
+  /* Better touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Reduce backdrop blur for performance */
+  .card-light,
+  .card-dark {
+    backdrop-filter: blur(5px);
+  }
+
+  .glass-effect,
+  .glass-dark {
+    backdrop-filter: blur(5px);
+  }
+
+  /* Mobile typography */
+  body {
+    font-size: 16px; /* Prevents zoom on iOS */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Mobile-optimized spacing */
+  .section-padding {
+    @apply px-4 py-6;
+  }
+
+  /* Mobile product grid */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Mobile product card content */
+  .product-card-content {
+    padding: 16px;
+  }
+
+  .product-card-title {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .product-card-description {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .product-card-price {
+    font-size: 16px;
+  }
+
+  .product-card-sizes {
+    gap: 6px;
+  }
+
+  .product-card-size-tag {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .hover-lift-modern:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1025px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .product-card-image img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hover-lift-modern:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .card-light {
+    border: 2px solid #000;
+  }
+
+  .card-dark {
+    border: 2px solid #fff;
+  }
+
+  .product-card-image {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .product-card {
+    break-inside: avoid;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .hover-lift-modern:hover,
+  .hover-lift:hover,
+  .hover-glow:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Larger touch targets */
+  .product-card-overlay button {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  /* Remove hover-dependent features */
+  .product-card-overlay {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .product-card-content {
+    padding: 12px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .product-card-content {
+    padding: 12px;
+  }
+
+  .product-card-title {
+    font-size: 13px;
+  }
+
+  .product-card-description {
+    font-size: 11px;
+  }
+
+  .product-card-price {
+    font-size: 15px;
+  }
 }
