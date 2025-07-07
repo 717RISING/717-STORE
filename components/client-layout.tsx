@@ -10,7 +10,6 @@ import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget"
 import PageTransition from "@/components/page-transition"
 import ProgressBar from "@/components/progress-bar"
 import BrandLoader from "@/components/loaders/brand-loader"
-import Navigation from "@/components/navigation"
 import { useState, useEffect } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -44,7 +43,6 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
           <CartProvider>
             <div className="min-h-screen">
               <ProgressBar />
-              <Navigation />
               <PageTransition>{children}</PageTransition>
               <EnhancedChatWidget />
               <Toaster />

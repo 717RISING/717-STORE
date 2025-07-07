@@ -15,7 +15,7 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cart = useCart()
-  const items = cart?.items || []
+  const items = cart?.state?.items || []
   const { theme } = useTheme()
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -28,7 +28,7 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Navigation */}
+      {/* Navigation Header */}
       <header className="absolute top-0 left-0 right-0 z-50 px-4 py-6 bg-transparent">
         <nav className="max-w-7xl mx-auto">
           {/* Top Row - Icons Only */}
