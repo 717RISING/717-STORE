@@ -7,7 +7,7 @@ import { User, Grid, List, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { products } from "@/lib/products"
+import { products, formatPrice } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
@@ -21,7 +21,7 @@ export default function ProductsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 600000])
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -224,10 +224,10 @@ export default function ProductsPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    [0, 50],
-                    [50, 100],
-                    [100, 150],
-                    [150, 200],
+                    [0, 150000],
+                    [150000, 300000],
+                    [300000, 450000],
+                    [450000, 600000],
                   ].map(([min, max], index) => (
                     <Button
                       key={`${min}-${max}`}
@@ -240,7 +240,7 @@ export default function ProductsPage() {
                       }`}
                       style={{ animationDelay: `${500 + index * 100}ms` }}
                     >
-                      ${min} - ${max}
+                      {formatPrice(min)} - {formatPrice(max)}
                     </Button>
                   ))}
                 </div>
@@ -250,7 +250,7 @@ export default function ProductsPage() {
             <Button
               onClick={() => {
                 setSelectedCategories([])
-                setPriceRange([0, 200])
+                setPriceRange([0, 600000])
                 setSearchTerm("")
               }}
               className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] hover-glow button-press animate-fade-in"
