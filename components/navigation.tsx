@@ -29,7 +29,7 @@ export default function Navigation() {
   return (
     <>
       {/* Navigation */}
-      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
+      <header className="absolute top-0 left-0 right-0 z-50 px-4 py-6 bg-transparent">
         <nav className="max-w-7xl mx-auto">
           {/* Top Row - Icons Only */}
           <div className="flex justify-end items-center mb-4">
@@ -103,10 +103,10 @@ export default function Navigation() {
       </header>
 
       {/* Mobile Menu */}
-      <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      {isMenuOpen && <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />}
 
       {/* Search Modal */}
-      <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      {isSearchOpen && <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />}
     </>
   )
 }

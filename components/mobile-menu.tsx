@@ -1,30 +1,22 @@
 "use client"
-
-import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, User, Home, Package, Mail } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { User, Home, Package, Mail } from "lucide-react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import CartSidebar from "@/components/cart-sidebar"
 
-export default function MobileMenu() {
-  const [isOpen, setIsOpen] = useState(false)
+interface MobileMenuProps {
+  isOpen: boolean
+  onClose: () => void
+}
 
-  const closeMenu = () => setIsOpen(false)
-
+export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white hover:text-gray-300 md:hidden">
-          <Menu className="w-6 h-6" />
-        </Button>
-      </SheetTrigger>
-
+    <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="left" className="bg-black text-white border-gray-800 w-80">
         <SheetHeader className="border-b border-gray-800 pb-6">
           <SheetTitle className="text-white flex items-center justify-center">
-            <Link href="/" onClick={closeMenu} className="flex items-center">
+            <Link href="/" onClick={onClose} className="flex items-center">
               <div className="w-12 h-12 relative">
                 <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
               </div>
@@ -37,7 +29,7 @@ export default function MobileMenu() {
           <nav className="flex-1 space-y-6">
             <Link
               href="/"
-              onClick={closeMenu}
+              onClick={onClose}
               className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
             >
               <Home className="w-5 h-5" />
@@ -46,7 +38,7 @@ export default function MobileMenu() {
 
             <Link
               href="/productos"
-              onClick={closeMenu}
+              onClick={onClose}
               className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
             >
               <Package className="w-5 h-5" />
@@ -55,7 +47,7 @@ export default function MobileMenu() {
 
             <Link
               href="/contacto"
-              onClick={closeMenu}
+              onClick={onClose}
               className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
             >
               <Mail className="w-5 h-5" />
@@ -67,7 +59,7 @@ export default function MobileMenu() {
           <div className="border-t border-gray-800 pt-6 space-y-4">
             <Link
               href="/cuenta"
-              onClick={closeMenu}
+              onClick={onClose}
               className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
             >
               <User className="w-5 h-5" />

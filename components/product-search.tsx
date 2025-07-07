@@ -1,80 +1,98 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useTheme } from "@/lib/theme-context"
-import { useMobileDetection } from "@/hooks/use-mobile-detection"
-import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { products } from "@/lib/products"
+import Link from "next/link"
+import Image from "next/image"
 
 interface ProductSearchProps {
-  onSearch?: (term: string) => void
-  searchTerm?: string
-  onSearchChange?: (term: string) => void
-  className?: string
+  isOpen: boolean
+  onClose: () => void
 }
 
-export default function ProductSearch({ onSearch, searchTerm = "", onSearchChange, className }: ProductSearchProps) {
-  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm)
-  const { theme } = useTheme()
-  const { isMobile } = useMobileDetection()
+export default function ProductSearch({ isOpen, onClose }: ProductSearchProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredProducts, setFilteredProducts] = useState(products)
 
-  const handleSearch = (term: string) => {
-    setLocalSearchTerm(term)
-    if (onSearch) {
-      onSearch(term)
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredProducts(products)
+    } else {
+      const filtered = products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+      setFilteredProducts(filtered)
     }
-    if (onSearchChange) {
-      onSearchChange(term)
-    }
+  }, [searchTerm])
+
+  const handleClose = () => {
+    setSearchTerm("")
+    onClose()
   }
-
-  const handleClear = () => {
-    setLocalSearchTerm("")
-    if (onSearch) {
-      onSearch("")
-    }
-    if (onSearchChange) {
-      onSearchChange("")
-    }
-  }
-
-  const containerClasses = cn("relative flex items-center", className)
-
-  const inputClasses = cn(
-    "pl-10 pr-10 transition-all duration-300 focus-ring",
-    isMobile ? "h-10 text-sm" : "h-12 text-base",
-    theme === "dark"
-      ? "bg-gray-900/50 border-gray-700 text-white placeholder-gray-400"
-      : "bg-white/80 border-gray-300 text-gray-900 placeholder-gray-500",
-  )
-
-  const iconClasses = cn(
-    "absolute left-3 transition-colors duration-300",
-    theme === "dark" ? "text-gray-400" : "text-gray-500",
-  )
-
-  const clearButtonClasses = cn(
-    "absolute right-2 p-1 rounded-full transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700",
-    localSearchTerm ? "opacity-100" : "opacity-0 pointer-events-none",
-  )
 
   return (
-    <div className={containerClasses}>
-      <Search className={cn(iconClasses, isMobile ? "w-4 h-4" : "w-5 h-5")} />
-      <Input
-        type="text"
-        placeholder={isMobile ? "Buscar..." : "Buscar productos..."}
-        value={localSearchTerm}
-        onChange={(e) => handleSearch(e.target.value)}
-        className={inputClasses}
-      />
-      {localSearchTerm && (
-        <Button variant="ghost" size="sm" onClick={handleClear} className={clearButtonClasses}>
-          <X className={isMobile ? "w-3 h-3" : "w-4 h-4"} />
-        </Button>
-      )}
-    </div>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] bg-black text-white border-gray-800">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span>Buscar Productos</span>
+            <Button variant="ghost" size="icon" onClick={handleClose} className="text-white hover:text-gray-300">
+              <X className="w-5 h-5" />
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Buscar productos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:border-red-600"
+              autoFocus
+            />
+          </div>
+
+          {/* Results */}
+          <div className="max-h-96 overflow-y-auto space-y-2">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/productos/${product.id}`}
+                  onClick={handleClose}
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  <div className="w-12 h-12 relative rounded-lg overflow-hidden">
+                    <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-white">{product.name}</h3>
+                    <p className="text-sm text-gray-400">{product.category}</p>
+                    <p className="text-sm font-medium text-red-400">${product.price}</p>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No se encontraron productos</p>
+                <p className="text-sm">Intenta con otros términos de búsqueda</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

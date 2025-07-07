@@ -1,37 +1,57 @@
 "use client"
 
 import type React from "react"
-
-import { ThemeProvider } from "@/lib/theme-context"
+import { Inter } from "next/font/google"
 import { CartProvider } from "@/lib/cart-context"
+import { ThemeProvider } from "@/lib/theme-context"
 import { PageTransitionProvider } from "@/lib/page-transition-context"
+import { Toaster } from "@/components/ui/toaster"
+import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget"
+import PageTransition from "@/components/page-transition"
+import ProgressBar from "@/components/progress-bar"
+import BrandLoader from "@/components/loaders/brand-loader"
 import Navigation from "@/components/navigation"
-import MobileDebugPanel from "@/components/mobile-debug-panel"
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 
-export default function ClientLayout({
-  children,
-}: {
+const inter = Inter({ subsets: ["latin"] })
+
+interface ClientLayoutProps {
   children: React.ReactNode
-}) {
-  const [showDebug, setShowDebug] = useState(false)
+}
+
+export default function ClientLayout({ children }: ClientLayoutProps) {
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   useEffect(() => {
-    // Show debug panel only on mobile devices or when in development
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-    const isDev = process.env.NODE_ENV === "development"
-    setShowDebug(isMobile || isDev)
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false)
+    }, 2000)
+    return () => clearTimeout(timer)
   }, [])
 
+  if (isInitialLoading) {
+    return (
+      <div className={`${inter.className} bg-black min-h-screen flex items-center justify-center`}>
+        <BrandLoader size="lg" message="Iniciando experiencia 717..." />
+      </div>
+    )
+  }
+
   return (
-    <ThemeProvider>
-      <CartProvider>
+    <div className={inter.className}>
+      <ThemeProvider>
         <PageTransitionProvider>
-          <Navigation />
-          {children}
-          {showDebug && <MobileDebugPanel />}
+          <CartProvider>
+            <div className="min-h-screen">
+              <ProgressBar />
+              <Navigation />
+              <PageTransition>{children}</PageTransition>
+              <EnhancedChatWidget />
+              <Toaster />
+            </div>
+          </CartProvider>
         </PageTransitionProvider>
-      </CartProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </div>
   )
 }
