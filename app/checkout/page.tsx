@@ -30,7 +30,7 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     zipCode: "",
-    country: "",
+    country: "Colombia",
   })
 
   const [billingData, setBillingData] = useState({
@@ -40,7 +40,7 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     zipCode: "",
-    country: "",
+    country: "Colombia",
   })
 
   const [paymentData, setPaymentData] = useState({
@@ -78,17 +78,7 @@ export default function CheckoutPage() {
 
   const validateForm = () => {
     // Validar datos de envío
-    const requiredShippingFields = [
-      "firstName",
-      "lastName",
-      "email",
-      "phone",
-      "address",
-      "city",
-      "state",
-      "zipCode",
-      "country",
-    ]
+    const requiredShippingFields = ["firstName", "lastName", "email", "phone", "address", "city", "state", "zipCode"]
     for (const field of requiredShippingFields) {
       if (!shippingData[field as keyof typeof shippingData]) {
         alert(`Por favor completa el campo: ${field}`)
@@ -122,15 +112,6 @@ export default function CheckoutPage() {
 
     setIsLoading(true)
     setEmailStatus("Procesando pedido...")
-
-    // Reemplazar setEmailStatus con el loader visual
-    if (isLoading) {
-      return (
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <CheckoutLoader size="lg" step="processing" />
-        </div>
-      )
-    }
 
     try {
       // Simular procesamiento del pedido
@@ -196,6 +177,15 @@ export default function CheckoutPage() {
     return null
   }
 
+  // Mostrar loader durante el procesamiento
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <CheckoutLoader size="lg" step="processing" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 py-8">
@@ -255,7 +245,9 @@ export default function CheckoutPage() {
               disabled={isLoading}
               className="w-full bg-[#5D1A1D] hover:bg-[#6B1E22] text-white py-3 text-lg font-semibold"
             >
-              {isLoading ? "Procesando..." : `Finalizar Pedido - $${total.toFixed(2)}`}
+              {isLoading
+                ? "Procesando..."
+                : `Finalizar Pedido - ${total.toLocaleString("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 })}`}
             </Button>
 
             <div className="text-center text-xs text-gray-400">

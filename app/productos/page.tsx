@@ -222,7 +222,7 @@ export default function ProductsPage() {
                 Precio
               </h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-2">
                   {[
                     [0, 150000],
                     [150000, 300000],
@@ -232,11 +232,14 @@ export default function ProductsPage() {
                     <Button
                       key={`${min}-${max}`}
                       variant="outline"
+                      size="sm"
                       onClick={() => handlePriceChange(min, max)}
-                      className={`border-[#4A1518] hover-glow button-press animate-fade-in ${
+                      className={`text-xs px-2 py-1 h-8 border-[#4A1518] transition-all duration-300 ${
                         priceRange[0] === min && priceRange[1] === max
-                          ? "bg-[#4A1518] text-white"
-                          : `hover:bg-[#4A1518] ${theme === "dark" ? "text-white" : "text-gray-900"}`
+                          ? "bg-[#4A1518] text-white border-[#4A1518]"
+                          : theme === "dark"
+                            ? "text-white hover:bg-[#4A1518] hover:text-white border-[#4A1518]"
+                            : "text-gray-900 hover:bg-[#4A1518] hover:text-white border-[#4A1518]"
                       }`}
                       style={{ animationDelay: `${500 + index * 100}ms` }}
                     >
@@ -253,7 +256,7 @@ export default function ProductsPage() {
                 setPriceRange([0, 600000])
                 setSearchTerm("")
               }}
-              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] hover-glow button-press animate-fade-in"
+              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] transition-all duration-300 animate-fade-in"
               style={{ animationDelay: "900ms" }}
             >
               <Filter className="w-4 h-4 mr-2" />
