@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/lib/cart-context"
 import { PageTransitionProvider } from "@/lib/page-transition-context"
 import { Toaster } from "@/components/ui/toaster"
-import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget" // Import the chat widget
+import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -29,7 +29,8 @@ export default function RootLayout({
             <PageTransitionProvider>
               {children}
               <Toaster />
-              <EnhancedChatWidget /> {/* Render the chat widget here */}
+              {/* El EnhancedChatWidget se renderiza aquí para asegurar que esté en el nivel más alto del DOM y su posicionamiento fixed funcione correctamente */}
+              <EnhancedChatWidget />
             </PageTransitionProvider>
           </CartProvider>
         </ThemeProvider>
