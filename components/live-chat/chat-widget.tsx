@@ -51,24 +51,24 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Chat Interface */}
+      {/* Chat Interface - Responsive */}
       {isOpen && !isMinimized && (
-        <div className="fixed bottom-20 right-4 z-50 w-80 h-96 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
+        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm sm:w-80 h-[500px] sm:h-96 max-h-[80vh] bg-gray-900 border border-gray-700 rounded-lg shadow-2xl overflow-hidden animate-scale-in">
           <ChatInterface onClose={handleToggleChat} onMinimize={handleMinimize} onNewMessage={handleNewMessage} />
         </div>
       )}
 
-      {/* Minimized Chat Indicator */}
+      {/* Minimized Chat Indicator - Responsive */}
       {isMinimized && (
-        <div className="fixed bottom-20 right-4 z-50">
+        <div className="fixed bottom-4 right-4 z-50">
           <Button
             onClick={() => {
               setIsMinimized(false)
               setIsOpen(true)
             }}
-            className="bg-[#4A1518] hover:bg-[#3A1014] text-white rounded-full p-3 shadow-lg cursor-pointer"
+            className="bg-[#4A1518] hover:bg-[#3A1014] text-white rounded-full p-3 sm:p-4 shadow-lg cursor-pointer transition-all duration-300 hover:scale-105"
           >
-            <MessageCircle className="w-5 h-5" />
+            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
             {hasNewMessage && (
               <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 min-w-[20px] h-5 rounded-full">
                 1
@@ -78,14 +78,14 @@ export default function ChatWidget() {
         </div>
       )}
 
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button - Responsive */}
       {!isOpen && !isMinimized && (
         <div className="fixed bottom-4 right-4 z-50">
           <Button
             onClick={handleToggleChat}
-            className="bg-[#4A1518] hover:bg-[#3A1014] text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer"
+            className="bg-[#4A1518] hover:bg-[#3A1014] text-white rounded-full p-3 sm:p-4 shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <MessageCircle className="w-6 h-6" />
+            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
             {hasNewMessage && (
               <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 min-w-[20px] h-5 rounded-full animate-pulse">
                 1
@@ -100,9 +100,9 @@ export default function ChatWidget() {
             </div>
           </div>
 
-          {/* Welcome Message Tooltip */}
+          {/* Welcome Message Tooltip - Hidden on mobile */}
           {!hasNewMessage && (
-            <div className="absolute bottom-full right-0 mb-2 bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute bottom-full right-0 mb-2 bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity duration-300 hidden sm:block">
               ¿Necesitas ayuda? ¡Chatea con nosotros!
               <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
             </div>

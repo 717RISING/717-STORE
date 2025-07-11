@@ -58,18 +58,18 @@ export default function EnhancedChatWidget() {
 
   return (
     <>
-      {/* Chat Interface */}
+      {/* Chat Interface - Responsive */}
       {isOpen && !isMinimized && (
-        <div className="fixed bottom-20 right-4 z-50 w-80 h-96 animate-scale-in">
-          <div className="bg-gray-900 border border-gray-700 rounded-modern-xl shadow-2xl overflow-hidden border-glow card-modern">
+        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm sm:w-80 h-[500px] sm:h-96 max-h-[80vh] animate-scale-in">
+          <div className="bg-gray-900 border border-gray-700 rounded-modern-xl shadow-2xl overflow-hidden border-glow card-modern h-full">
             <ChatInterface onClose={handleToggleChat} onMinimize={handleMinimize} onNewMessage={handleNewMessage} />
           </div>
         </div>
       )}
 
-      {/* Minimized Chat Indicator */}
+      {/* Minimized Chat Indicator - Responsive */}
       {isMinimized && (
-        <div className="fixed bottom-20 right-4 z-50 animate-bounce-subtle">
+        <div className="fixed bottom-4 right-4 z-50 animate-bounce-subtle">
           <EnhancedButton
             variant="modern"
             size="icon"
@@ -77,9 +77,9 @@ export default function EnhancedChatWidget() {
               setIsMinimized(false)
               setIsOpen(true)
             }}
-            className="rounded-modern-2xl p-4 shadow-lg hover-lift-modern"
+            className="rounded-modern-2xl p-3 sm:p-4 shadow-lg hover-lift-modern"
           >
-            <MessageCircle className="w-6 h-6" />
+            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
             {hasNewMessage && (
               <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 min-w-[24px] h-6 rounded-modern animate-pulse">
                 1
@@ -89,7 +89,7 @@ export default function EnhancedChatWidget() {
         </div>
       )}
 
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button - Responsive */}
       {!isOpen && !isMinimized && (
         <div className="fixed bottom-4 right-4 z-50">
           <div className="relative">
@@ -97,9 +97,9 @@ export default function EnhancedChatWidget() {
               variant="modern"
               size="icon"
               onClick={handleToggleChat}
-              className="rounded-modern-3xl p-5 shadow-lg animate-float hover-lift-modern"
+              className="rounded-modern-3xl p-4 sm:p-5 shadow-lg animate-float hover-lift-modern"
             >
-              <MessageCircle className="w-7 h-7" />
+              <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7" />
               {hasNewMessage && (
                 <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 min-w-[24px] h-6 rounded-modern animate-pulse">
                   1
@@ -109,14 +109,16 @@ export default function EnhancedChatWidget() {
 
             {/* Status Indicator */}
             <div className="absolute -top-1 -left-1">
-              <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-500"}`}>
-                {isOnline && <div className="w-4 h-4 rounded-full bg-green-500 animate-ping absolute"></div>}
+              <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-500"}`}>
+                {isOnline && (
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500 animate-ping absolute"></div>
+                )}
               </div>
             </div>
 
-            {/* Welcome Message */}
+            {/* Welcome Message - Hidden on mobile */}
             {showWelcome && !hasNewMessage && (
-              <div className="absolute bottom-full right-0 mb-4 animate-slide-up">
+              <div className="absolute bottom-full right-0 mb-4 animate-slide-up hidden sm:block">
                 <div className="bg-gray-800 text-white text-sm px-4 py-3 rounded-modern-lg shadow-lg max-w-xs border border-gray-700 border-glow card-modern">
                   <div className="flex items-center gap-2 mb-1">
                     <Sparkles className="w-4 h-4 text-[#4A1518] animate-twinkle" />
