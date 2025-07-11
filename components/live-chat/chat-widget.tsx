@@ -56,7 +56,7 @@ export default function ChatWidget() {
 
       {/* Minimized indicator */}
       {isMinimized && (
-        <div className="fixed bottom-16 right-4 bg-[#5D1A1D] text-white px-3 py-2 rounded-lg shadow-lg text-sm">
+        <div className="fixed bottom-16 right-4 bg-[#5D1A1D] text-white px-3 py-2 rounded-lg shadow-lg text-sm z-30">
           Chat minimizado
         </div>
       )}

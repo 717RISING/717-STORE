@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { MessageCircle, X, Phone, Mail } from "lucide-react"
+import { MessageCircle, X, Phone, Mail, Sparkles } from "lucide-react"
 import ChatInterface from "./chat-interface"
 import { useChat } from "@/hooks/use-chat"
 
@@ -61,12 +61,12 @@ export default function EnhancedChatWidget() {
         <div className="hidden sm:block fixed bottom-20 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 max-w-xs z-50">
           <div className="flex items-start gap-2">
             <div className="w-8 h-8 bg-[#5D1A1D] rounded-full flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-4 h-4 text-white" />
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">¡Hola! 👋</p>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                ¿Necesitas ayuda? Estoy aquí para asistirte
+                ¿Necesitas ayuda? Estoy aquí para asistirte 24/7
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setShowWelcome(false)} className="p-1 h-auto">
@@ -95,7 +95,7 @@ export default function EnhancedChatWidget() {
             variant="outline"
             size="sm"
             className="w-10 h-10 rounded-full bg-white hover:bg-gray-50 border-gray-200 shadow-md"
-            onClick={() => window.open("mailto:info@717store.com")}
+            onClick={() => window.open("mailto:soporte@717store.com")}
           >
             <Mail className="w-4 h-4 text-[#5D1A1D]" />
           </Button>
