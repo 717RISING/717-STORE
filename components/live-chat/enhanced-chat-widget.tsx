@@ -58,7 +58,7 @@ export default function EnhancedChatWidget() {
 
       {/* Welcome Tooltip - Solo en desktop */}
       {showWelcome && !isOpen && !isMinimized && (
-        <div className="hidden sm:block fixed bottom-20 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 max-w-xs z-50">
+        <div className="hidden sm:block fixed bottom-20 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 max-w-xs z-[999]">
           <div className="flex items-start gap-2">
             <div className="w-8 h-8 bg-[#5D1A1D] rounded-full flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-4 h-4 text-white" />
@@ -82,7 +82,7 @@ export default function EnhancedChatWidget() {
 
       {/* Contact Options - Solo cuando el chat está cerrado */}
       {!isOpen && !isMinimized && (
-        <div className="fixed bottom-20 right-4 flex flex-col gap-2 z-30">
+        <div className="fixed bottom-20 right-4 flex flex-col gap-2 z-[998]">
           <Button
             variant="outline"
             size="sm"
@@ -105,7 +105,7 @@ export default function EnhancedChatWidget() {
       {/* Main Chat Button */}
       <Button
         onClick={handleToggle}
-        className="fixed bottom-4 right-4 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#5D1A1D] hover:bg-[#6B1E22] text-white shadow-lg hover:shadow-xl transition-all duration-300 z-40 relative"
+        className="fixed bottom-4 right-4 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#5D1A1D] hover:bg-[#6B1E22] text-white shadow-lg hover:shadow-xl transition-all duration-300 z-[999] relative"
         size="sm"
       >
         {isOpen && !isMinimized ? (
@@ -124,7 +124,7 @@ export default function EnhancedChatWidget() {
 
       {/* Minimized indicator */}
       {isMinimized && (
-        <div className="fixed bottom-16 right-4 bg-[#5D1A1D] text-white px-3 py-2 rounded-lg shadow-lg text-sm z-30">
+        <div className="fixed bottom-16 right-4 bg-[#5D1A1D] text-white px-3 py-2 rounded-lg shadow-lg text-sm z-[997]">
           Chat minimizado - Toca para abrir
         </div>
       )}

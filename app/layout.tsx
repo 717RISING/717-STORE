@@ -1,23 +1,34 @@
 import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
-import ClientLayout from "@/components/client-layout"
+import { ThemeProvider } from "@/components/theme-provider"
+import { CartProvider } from "@/lib/cart-context"
+import { PageTransitionProvider } from "@/lib/page-transition-context"
+import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget" // Asegúrate de que esta línea exista
 
 export const metadata: Metadata = {
-  title: "717 Store - Streetwear Premium",
-  description: "La mejor colección de streetwear y moda urbana",
-    generator: 'v0.dev'
+  title: "v0 App",
+  description: "Created with v0",
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <CartProvider>
+            <PageTransitionProvider>
+              {children}
+              {/* Asegúrate de que tu footer esté dentro de {children} o en un componente que se renderice antes de EnhancedChatWidget */}
+            </PageTransitionProvider>
+          </CartProvider>
+        </ThemeProvider>
+        <EnhancedChatWidget /> {/* Asegúrate de que esta línea esté aquí */}
       </body>
     </html>
   )
