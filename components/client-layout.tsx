@@ -1,55 +1,28 @@
 "use client"
 
 import type React from "react"
-import { Inter } from "next/font/google"
+
 import { CartProvider } from "@/lib/cart-context"
 import { ThemeProvider } from "@/lib/theme-context"
 import { PageTransitionProvider } from "@/lib/page-transition-context"
-import { Toaster } from "@/components/ui/toaster"
-import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget"
 import PageTransition from "@/components/page-transition"
 import ProgressBar from "@/components/progress-bar"
-import BrandLoader from "@/components/loaders/brand-loader"
-import { useState, useEffect } from "react"
+import EnhancedChatWidget from "@/components/live-chat/enhanced-chat-widget"
 
-const inter = Inter({ subsets: ["latin"] })
-
-interface ClientLayoutProps {
+export default function ClientLayout({
+  children,
+}: {
   children: React.ReactNode
-}
-
-export default function ClientLayout({ children }: ClientLayoutProps) {
-  const [isInitialLoading, setIsInitialLoading] = useState(true)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false)
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (isInitialLoading) {
-    return (
-      <div className={`${inter.className} bg-black min-h-screen flex items-center justify-center`}>
-        <BrandLoader size="lg" message="Iniciando experiencia 717..." />
-      </div>
-    )
-  }
-
+}) {
   return (
-    <div className={inter.className}>
-      <ThemeProvider>
+    <ThemeProvider>
+      <CartProvider>
         <PageTransitionProvider>
-          <CartProvider>
-            <div className="min-h-screen">
-              <ProgressBar />
-              <PageTransition>{children}</PageTransition>
-              <Toaster />
-              <EnhancedChatWidget />
-            </div>
-          </CartProvider>
+          <ProgressBar />
+          <PageTransition>{children}</PageTransition>
+          <EnhancedChatWidget />
         </PageTransitionProvider>
-      </ThemeProvider>
-    </div>
+      </CartProvider>
+    </ThemeProvider>
   )
 }

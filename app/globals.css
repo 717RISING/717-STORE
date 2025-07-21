@@ -164,6 +164,27 @@
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 /* Animation Classes */
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
@@ -201,6 +222,14 @@
   animation: shimmer 2s linear infinite;
 }
 
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Modern Border Radius */
 .rounded-modern {
   border-radius: 12px;
@@ -226,6 +255,34 @@
 
   .rounded-modern-xl {
     border-radius: 16px;
+  }
+
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hover-lift-modern:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .hover-lift-modern:hover,
+  .hover-lift:hover,
+  .hover-glow:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Larger touch targets */
+  button {
+    min-width: 48px;
+    min-height: 48px;
   }
 }
 
@@ -262,6 +319,24 @@
 
 .hover-glow-modern:hover {
   box-shadow: 0 0 25px rgba(93, 26, 29, 0.6);
+}
+
+.btn-hover-effect {
+  transition: all 0.3s ease;
+}
+
+.btn-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(93, 26, 29, 0.3);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Button Effects */
@@ -328,7 +403,7 @@
 }
 
 /* Theme Transitions */
-.theme-transition {
+* {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -394,7 +469,6 @@
   background: rgba(74, 21, 24, 0.8);
 }
 
-/* Dark mode scrollbar */
 .dark ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
 }
@@ -421,6 +495,11 @@
 
 .focus-ring-dark {
   @apply focus:outline-none focus:ring-2 focus:ring-[#5D1A1D] focus:ring-offset-2 focus:ring-offset-gray-900;
+}
+
+.focus-visible:focus-visible {
+  outline: 2px solid #5d1a1d;
+  outline-offset: 2px;
 }
 
 /* Utility Classes */
@@ -484,10 +563,14 @@
   }
 }
 
-/* Tablet optimizations */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .hover-lift-modern:hover {
-    transform: translateY(-4px) scale(1.01);
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .card-light {
+    border: 2px solid #000;
+  }
+
+  .card-dark {
+    border: 2px solid #fff;
   }
 }
 
@@ -504,29 +587,31 @@
   }
 }
 
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .card-light {
-    border: 2px solid #000;
-  }
-
-  .card-dark {
-    border: 2px solid #fff;
-  }
+/* Estilos personalizados para 717 Store */
+.brand-gradient {
+  background: linear-gradient(135deg, #5d1a1d 0%, #8b2635 100%);
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .hover-lift-modern:hover,
-  .hover-lift:hover,
-  .hover-glow:hover {
-    transform: none;
-    box-shadow: none;
-  }
+.text-brand {
+  color: #5d1a1d;
+}
 
-  /* Larger touch targets */
-  button {
-    min-width: 48px;
-    min-height: 48px;
+.bg-brand {
+  background-color: #5d1a1d;
+}
+
+.border-brand {
+  border-color: #5d1a1d;
+}
+
+/* Estilos para el chat */
+.chat-message {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }
