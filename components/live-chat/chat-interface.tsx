@@ -5,10 +5,10 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, X, Minimize2, Phone, Mail } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { X, Minus, Send, Bot } from "lucide-react"
 import { useChat } from "@/hooks/use-chat"
-import ChatMessageComponent from "./chat-message"
+import ChatMessage from "./chat-message"
 
 interface ChatInterfaceProps {
   isOpen: boolean
@@ -17,111 +17,70 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ isOpen, onClose, onMinimize }: ChatInterfaceProps) {
-  const [inputValue, setInputValue] = useState("")
-  const { messages, isLoading, quickReplies, sendMessage, handleQuickReply, markAsRead } = useChat()
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [inputMessage, setInputMessage] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { messages, sendMessage, isTyping, quickReplies, sendQuickReply } = useChat()
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
   useEffect(() => {
-    if (isOpen) {
-      markAsRead()
-      // Focus en el input cuando se abre el chat
-      setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100)
-    }
-  }, [isOpen, markAsRead])
+    scrollToBottom()
+  }, [messages, isTyping])
 
-  useEffect(() => {
-    // Auto scroll al último mensaje
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector("[data-radix-scroll-area-viewport]")
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight
-      }
-    }
-  }, [messages])
-
-  const handleSend = () => {
-    if (inputValue.trim()) {
-      sendMessage(inputValue.trim())
-      setInputValue("")
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (inputMessage.trim()) {
+      sendMessage(inputMessage.trim())
+      setInputMessage("")
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
-  const handleQuickReplyClick = (action: string) => {
-    handleQuickReply(action)
+  const handleQuickReply = (reply: string) => {
+    sendQuickReply(reply)
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed bottom-4 right-4 w-full max-w-sm sm:w-80 md:w-96 h-[500px] sm:h-[550px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#5D1A1D] to-[#6B1E22] text-white p-3 sm:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm sm:text-base font-bold">717</span>
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-sm sm:text-base truncate">Soporte 717 Store</h3>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <p className="text-xs text-white/80">En línea • Respuesta inmediata</p>
+    <div className="fixed bottom-20 right-4 w-80 sm:w-96 h-96 z-[999]">
+      <Card className="h-full flex flex-col shadow-xl border-0 bg-white dark:bg-gray-900">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-[#5D1A1D] text-white rounded-t-lg">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Bot className="w-4 h-4" />
+            Chat de Soporte 717 Store
+          </CardTitle>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" onClick={onMinimize} className="h-6 w-6 p-0 hover:bg-white/20">
+              <Minus className="w-3 h-3" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0 hover:bg-white/20">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex-1 flex flex-col p-0">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.length === 0 && (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <Bot className="w-12 h-12 mx-auto mb-4 text-[#5D1A1D]" />
+                <p className="text-sm">¡Hola! Soy tu asistente virtual de 717 Store.</p>
+                <p className="text-xs mt-1">¿En qué puedo ayudarte hoy?</p>
               </div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-1 flex-shrink-0">
-            <Button variant="ghost" size="sm" onClick={onMinimize} className="text-white hover:bg-white/20 p-1 h-8 w-8">
-              <Minimize2 className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20 p-1 h-8 w-8">
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+            )}
 
-        {/* Contact Options */}
-        <div className="flex space-x-2 mt-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 text-xs flex-1 h-8"
-            onClick={() => window.open("tel:+573001234567")}
-          >
-            <Phone className="w-3 h-3 mr-1" />
-            <span className="hidden sm:inline">Llamar</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 text-xs flex-1 h-8"
-            onClick={() => window.open("mailto:soporte@717store.com")}
-          >
-            <Mail className="w-3 h-3 mr-1" />
-            <span className="hidden sm:inline">Email</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Messages Area */}
-      <div className="flex-1 flex flex-col min-h-0">
-        <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 sm:p-4">
-          <div className="space-y-4">
             {messages.map((message) => (
-              <ChatMessageComponent key={message.id} message={message} />
+              <ChatMessage key={message.id} message={message} />
             ))}
 
-            {isLoading && (
-              <div className="flex justify-start">
+            {isTyping && (
+              <div className="flex items-start gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#5D1A1D] flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 max-w-xs">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -137,48 +96,51 @@ export default function ChatInterface({ isOpen, onClose, onMinimize }: ChatInter
                 </div>
               </div>
             )}
-          </div>
-        </ScrollArea>
 
-        {/* Quick Replies */}
-        <div className="p-2 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="flex flex-wrap gap-1">
-            {quickReplies.slice(0, 3).map((reply) => (
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Replies */}
+          {quickReplies.length > 0 && (
+            <div className="px-4 pb-2">
+              <div className="flex flex-wrap gap-2">
+                {quickReplies.map((reply, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickReply(reply)}
+                    className="text-xs h-7 px-2 border-[#5D1A1D] text-[#5D1A1D] hover:bg-[#5D1A1D] hover:text-white"
+                  >
+                    {reply}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <form onSubmit={handleSendMessage} className="flex gap-2">
+              <Input
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="Escribe tu mensaje..."
+                className="flex-1 text-sm"
+                disabled={isTyping}
+              />
               <Button
-                key={reply.id}
-                variant="outline"
+                type="submit"
                 size="sm"
-                onClick={() => handleQuickReplyClick(reply.action)}
-                className="text-xs h-7 px-2 border-[#5D1A1D] text-[#5D1A1D] hover:bg-[#5D1A1D] hover:text-white"
+                disabled={!inputMessage.trim() || isTyping}
+                className="bg-[#5D1A1D] hover:bg-[#6B1E22] text-white"
               >
-                {reply.text}
+                <Send className="w-4 h-4" />
               </Button>
-            ))}
+            </form>
           </div>
-        </div>
-
-        {/* Input Area */}
-        <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="flex space-x-2">
-            <Input
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Escribe tu mensaje..."
-              className="flex-1 text-sm"
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleSend}
-              disabled={!inputValue.trim() || isLoading}
-              className="bg-[#5D1A1D] hover:bg-[#6B1E22] text-white px-3 py-2 h-auto"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

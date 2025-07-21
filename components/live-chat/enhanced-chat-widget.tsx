@@ -102,10 +102,9 @@ export default function EnhancedChatWidget() {
         </div>
       )}
 
-      {/* Main Chat Button */}
+      {/* Main Chat Button - POSICIONADO EN LA ESQUINA INFERIOR DERECHA */}
       <Button
         onClick={handleToggle}
-        // *** ESTA ES LA LÍNEA CLAVE PARA LA POSICIÓN HORIZONTAL ***
         className="fixed bottom-4 right-4 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#5D1A1D] hover:bg-[#6B1E22] text-white shadow-lg hover:shadow-xl transition-all duration-300 z-[999] relative"
         size="sm"
       >
