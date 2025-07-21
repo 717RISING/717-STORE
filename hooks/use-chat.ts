@@ -10,14 +10,23 @@ interface Message {
   timestamp: Date
 }
 
-const INITIAL_QUICK_REPLIES = ["Ver productos", "Información de envío", "Guía de tallas", "Contactar soporte"]
+const INITIAL_QUICK_REPLIES = [
+  "Ver productos",
+  "Información de envío",
+  "Guía de tallas",
+  "Métodos de pago",
+  "Ofertas especiales",
+  "Cambios y devoluciones",
+  "Contactar soporte",
+  "Horarios de atención",
+]
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       content:
-        "¡Hola! Bienvenido a 717 Store. Soy tu asistente virtual y estoy aquí para ayudarte con cualquier pregunta sobre nuestros productos, envíos, tallas o lo que necesites. ¿En qué puedo ayudarte?",
+        "¡Hola! 👋 Bienvenido a 717 Store.\n\nSoy tu asistente virtual y estoy aquí para ayudarte con:\n\n🛍️ Información de productos\n📦 Envíos y entregas\n📏 Guía de tallas\n💳 Métodos de pago\n🔄 Cambios y devoluciones\n📞 Soporte técnico\n\n¿En qué puedo ayudarte hoy?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -53,7 +62,7 @@ export function useChat() {
         // Obtener respuesta del bot
         const response = await chatService.sendMessage(content)
 
-        // Simular delay de escritura
+        // Simular delay de escritura más realista
         setTimeout(
           () => {
             addMessage(response.message, "bot")
@@ -61,11 +70,14 @@ export function useChat() {
             setQuickReplies(response.quickReplies || INITIAL_QUICK_REPLIES)
             setIsTyping(false)
           },
-          1000 + Math.random() * 1000,
+          1500 + Math.random() * 1000,
         )
       } catch (error) {
         setTimeout(() => {
-          addMessage("Lo siento, ha ocurrido un error. Por favor, intenta de nuevo.", "bot")
+          addMessage(
+            "Lo siento, ha ocurrido un error. Por favor, intenta de nuevo o contacta a nuestro soporte.",
+            "bot",
+          )
           setQuickReplies(INITIAL_QUICK_REPLIES)
           setIsTyping(false)
         }, 1000)
