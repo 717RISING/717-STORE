@@ -19,21 +19,22 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={`flex items-start gap-2 ${isBot ? "" : "flex-row-reverse"}`}>
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+        className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
           isBot ? "bg-[#5D1A1D]" : "bg-gray-600"
         }`}
       >
-        {isBot ? <Bot className="w-4 h-4 text-white" /> : <User className="w-4 h-4 text-white" />}
+        {isBot ? (
+          <Bot className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+        ) : (
+          <User className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+        )}
       </div>
       <div
-        className={`rounded-lg px-3 py-2 max-w-xs ${
-          isBot ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100" : "bg-[#5D1A1D] text-white ml-auto"
+        className={`max-w-[75%] sm:max-w-xs rounded-lg px-2 sm:px-3 py-1 sm:py-2 ${
+          isBot ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100" : "bg-[#5D1A1D] text-white"
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        <p className={`text-xs mt-1 ${isBot ? "text-gray-500" : "text-gray-200"}`}>
-          {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </p>
+        <p className="text-xs sm:text-sm whitespace-pre-wrap">{message.content}</p>
       </div>
     </div>
   )

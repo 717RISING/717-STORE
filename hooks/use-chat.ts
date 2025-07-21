@@ -46,9 +46,6 @@ export function useChat() {
       // Agregar mensaje del usuario
       addMessage(content, "user")
 
-      // Limpiar quick replies temporalmente
-      setQuickReplies([])
-
       // Mostrar indicador de escritura
       setIsTyping(true)
 
@@ -60,7 +57,8 @@ export function useChat() {
         setTimeout(
           () => {
             addMessage(response.message, "bot")
-            setQuickReplies(response.quickReplies || [])
+            // Siempre mostrar quick replies después de cada respuesta
+            setQuickReplies(response.quickReplies || INITIAL_QUICK_REPLIES)
             setIsTyping(false)
           },
           1000 + Math.random() * 1000,
