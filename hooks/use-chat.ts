@@ -1,109 +1,68 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { chatService } from "@/lib/chat-service"
+import { getChatResponse, getQuickReplies } from "@/lib/chat-service"
 
 interface Message {
   id: string
-  content: string
-  sender: "user" | "bot"
+  text: string
+  isUser: boolean
   timestamp: Date
 }
 
-const INITIAL_QUICK_REPLIES = [
-  "Ver productos",
-  "Información de envío",
-  "Guía de tallas",
-  "Métodos de pago",
-  "Ofertas especiales",
-  "Cambios y devoluciones",
-  "Contactar soporte",
-  "Horarios de atención",
-]
-
 export function useChat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      content:
-        "¡Hola! 👋 Bienvenido a 717 Store.\n\nSoy tu asistente virtual y estoy aquí para ayudarte con:\n\n🛍️ Información de productos\n📦 Envíos y entregas\n📏 Guía de tallas\n💳 Métodos de pago\n🔄 Cambios y devoluciones\n📞 Soporte técnico\n\n¿En qué puedo ayudarte hoy?",
-      sender: "bot",
-      timestamp: new Date(),
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [isTyping, setIsTyping] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(1)
-  const [quickReplies, setQuickReplies] = useState<string[]>(INITIAL_QUICK_REPLIES)
+  const [quickReplies, setQuickReplies] = useState<string[]>([
+    "Ver productos",
+    "Información de envío",
+    "Guía de tallas",
+    "Métodos de pago",
+    "Política de cambios",
+    "Contactar soporte",
+    "Ofertas especiales",
+    "Estado de pedido",
+  ])
 
-  const addMessage = useCallback((content: string, sender: "user" | "bot") => {
-    const newMessage: Message = {
+  const sendMessage = useCallback(async (text: string) => {
+    const userMessage: Message = {
       id: Date.now().toString(),
-      content,
-      sender,
+      text,
+      isUser: true,
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, newMessage])
+    setMessages((prev) => [...prev, userMessage])
+    setIsTyping(true)
 
-    if (sender === "bot") {
-      setUnreadCount((prev) => prev + 1)
+    // Simulate typing delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    const response = getChatResponse(text)
+    const botMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      text: response,
+      isUser: false,
+      timestamp: new Date(),
     }
+
+    setMessages((prev) => [...prev, botMessage])
+    setQuickReplies(getQuickReplies(text))
+    setIsTyping(false)
   }, [])
 
-  const sendMessage = useCallback(
-    async (content: string) => {
-      // Agregar mensaje del usuario
-      addMessage(content, "user")
-
-      // Mostrar indicador de escritura
-      setIsTyping(true)
-
-      try {
-        // Obtener respuesta del bot
-        const response = await chatService.sendMessage(content)
-
-        // Simular delay de escritura más realista
-        setTimeout(
-          () => {
-            addMessage(response.message, "bot")
-            // Siempre mostrar quick replies después de cada respuesta
-            setQuickReplies(response.quickReplies || INITIAL_QUICK_REPLIES)
-            setIsTyping(false)
-          },
-          1500 + Math.random() * 1000,
-        )
-      } catch (error) {
-        setTimeout(() => {
-          addMessage(
-            "Lo siento, ha ocurrido un error. Por favor, intenta de nuevo o contacta a nuestro soporte.",
-            "bot",
-          )
-          setQuickReplies(INITIAL_QUICK_REPLIES)
-          setIsTyping(false)
-        }, 1000)
-      }
-    },
-    [addMessage],
-  )
-
   const sendQuickReply = useCallback(
-    (reply: string) => {
-      sendMessage(reply)
+    async (reply: string) => {
+      await sendMessage(reply)
     },
     [sendMessage],
   )
 
-  const markAsRead = useCallback(() => {
-    setUnreadCount(0)
-  }, [])
-
   return {
     messages,
-    isTyping,
-    unreadCount,
-    quickReplies,
     sendMessage,
     sendQuickReply,
-    markAsRead,
+    isTyping,
+    quickReplies,
   }
 }

@@ -73,8 +73,8 @@ export default function ChatInterface({ isOpen, onClose, onMinimize }: ChatInter
         </CardHeader>
 
         <CardContent className="flex-1 flex flex-col p-0 bg-gradient-to-b from-gray-900 to-black">
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 custom-scrollbar">
+          {/* Messages Area with Custom Scrollbar */}
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 chat-scrollbar">
             {messages.length === 0 && (
               <div className="text-center text-gray-300 py-6 sm:py-8">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 bg-gradient-to-br from-[#5D1A1D] to-[#8B2635] rounded-full flex items-center justify-center shadow-lg">
