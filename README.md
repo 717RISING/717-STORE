@@ -47,16 +47,20 @@
 
 ## 📁 Estructura base del proyecto
 
-├── public/
-├── src/
-│ ├── components/
-│ ├── pages/
-│ ├── styles/
-│ └── main.jsx
-├── index.html
-├── tailwind.config.js
-├── vite.config.js
-└── README.md
+717-streetwear/
+├── public/                 # Archivos estáticos (favicon, imágenes, etc.)
+├── src/                    # Código fuente principal
+│   ├── assets/             # Imágenes y recursos multimedia
+│   ├── components/         # Componentes reutilizables de la UI
+│   ├── pages/              # Vistas o páginas del sitio (Home, Product, etc.)
+│   ├── styles/             # Archivos de estilos (Tailwind, CSS personalizados)
+│   └── main.jsx            # Punto de entrada de la app
+├── .gitignore              # Archivos/carpetas ignorados por git
+├── index.html              # HTML base
+├── package.json            # Dependencias y scripts del proyecto
+├── tailwind.config.js      # Configuración de Tailwind CSS
+├── vite.config.js          # Configuración de Vite
+└── README.md               # Documentación del proyecto
 
 
 ---
