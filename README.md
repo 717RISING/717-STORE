@@ -1,55 +1,30 @@
-# 717 Streetwear 🧢
-**E-commerce de moda urbana inspirado en la cultura streetwear.**  
-[![Deploy en Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel)](https://717-streetwear.vercel.app/)
+# 717store clone
 
-## 📦 Proyecto
-**717 Streetwear** es una tienda online enfocada en productos de ropa urbana, con un enfoque moderno, limpio y fácil de navegar. Este sitio web fue diseñado con una estética inspirada en el streetstyle y busca ofrecer una experiencia de compra intuitiva para los usuarios.  
-🔗 **Deploy oficial:** 👉 [717-streetwear.vercel.app](https://717-streetwear.vercel.app/)
+*Automatically synced with your [v0.dev](https://v0.dev) deployments*
 
-## ⚙️ Tecnologías utilizadas
-- **Vite** – Bundler rápido y moderno  
-- **React.js** – Librería para construir la interfaz de usuario  
-- **Tailwind CSS** – Framework de estilos utilitarios  
-- **Vercel** – Plataforma de despliegue  
-- **v0.dev** – Generación y sincronización automática de componentes  
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/717risings-projects/v0-717store-clone)
+[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/TDDc6p5uMJt)
 
-## 🚀 Funcionalidades
-- Catálogo de productos con visual moderno  
-- Navegación responsiva y amigable  
-- Visualización rápida de prendas  
-- Diseño adaptable para móviles y escritorio  
-- Despliegue automático desde `v0.dev` hacia Vercel  
+## Overview
 
-## 🛠 Cómo editar o escalar este proyecto
-1. Accede a tu espacio en [v0.dev](https://v0.dev)  
-2. Busca tu proyecto conectado (717-store)  
-3. Modifica componentes o estilos desde la interfaz  
-4. Los cambios se sincronizan automáticamente con este repositorio  
-5. Vercel despliega la última versión automáticamente  
+This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
+Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
 
-## 📁 Estructura base del proyecto
-```bash
-717-streetwear/
-├── public/                 # Archivos estáticos (favicon, imágenes, etc.)
-├── src/                    # Código fuente principal
-│   ├── assets/             # Imágenes y recursos multimedia
-│   ├── components/         # Componentes reutilizables de la UI
-│   ├── pages/              # Vistas o páginas del sitio (Home, Product, etc.)
-│   ├── styles/             # Archivos de estilos (Tailwind, CSS personalizados)
-│   └── main.jsx            # Punto de entrada de la app
-├── .gitignore              # Archivos/carpetas ignorados por git
-├── index.html              # HTML base
-├── package.json            # Dependencias y scripts del proyecto
-├── tailwind.config.js      # Configuración de Tailwind CSS
-├── vite.config.js          # Configuración de Vite
-└── README.md               # Documentación del proyecto
-```
+## Deployment
 
-## 🤝 Contribuciones
-Actualmente este proyecto está sincronizado automáticamente con [v0.dev](https://v0.dev), por lo tanto los cambios deben realizarse desde allí. Sin embargo, puedes bifurcarlo (fork) y adaptarlo libremente.
+Your project is live at:
 
-## 📬 Contacto
-¿Quieres colaborar, escalar o personalizar esta tienda para tu marca? Contáctame por correo o redes sociales. *(Pronto se incluirán los enlaces)*  
+**[https://vercel.com/717risings-projects/v0-717store-clone](https://vercel.com/717risings-projects/v0-717store-clone)**
 
-© 2025 **717 Streetwear** — Todos los derechos reservados.
+## Build your app
 
+Continue building your app on:
+
+**[https://v0.dev/chat/projects/TDDc6p5uMJt](https://v0.dev/chat/projects/TDDc6p5uMJt)**
+
+## How It Works
+
+1. Create and modify your project using [v0.dev](https://v0.dev)
+2. Deploy your chats from the v0 interface
+3. Changes are automatically pushed to this repository
+4. Vercel deploys the latest version from this repository

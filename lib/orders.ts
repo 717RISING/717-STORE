@@ -1,109 +1,51 @@
-export interface Order {
-  id: string
-  userId?: string
-  items: Array<{
-    id: string
-    name: string
-    price: number
-    quantity: number
-    size: string
-    image: string
-  }>
-  shipping: {
-    firstName: string
-    lastName: string
-    email: string
-    phone: string
-    address: string
-    city: string
-    state: string
-    zipCode: string
-    country: string
-  }
-  billing: {
-    firstName: string
-    lastName: string
-    address: string
-    city: string
-    state: string
-    zipCode: string
-    country: string
-  }
-  payment: {
-    method: "card" | "paypal" | "transfer"
-    cardNumber?: string
-    expiryDate?: string
-    cvv?: string
-    cardName?: string
-  }
-  subtotal: number
-  shipping: number
-  tax: number
-  total: number
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
-  createdAt: string
-  trackingNumber?: string
-  emailsSent: {
-    confirmation: boolean
-    shipping: boolean
-    delivery: boolean
-  }
-}
+import type { Order } from "./database"
+import { sendCorporateOrderNotification, sendOrderConfirmationToCustomer } from "./email"
 
 // Simulación de base de datos de pedidos
 const orders: Order[] = []
 
-export function createOrder(orderData: Omit<Order, "id" | "createdAt" | "status" | "emailsSent">): Order {
-  const order: Order = {
-    ...orderData,
-    id: `717${Date.now()}`,
-    status: "pending",
+export async function createOrder(orderData: Omit<Order, "id" | "createdAt">): Promise<Order> {
+  const newOrder: Order = {
+    id: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     createdAt: new Date().toISOString(),
-    trackingNumber: `717TRK${Date.now().toString().slice(-6)}`,
-    emailsSent: {
-      confirmation: false,
-      shipping: false,
-      delivery: false,
-    },
+    ...orderData,
+  }
+  orders.push(newOrder)
+
+  // Enviar notificación al correo corporativo
+  const corporateEmailSent = await sendCorporateOrderNotification(newOrder)
+  if (!corporateEmailSent) {
+    console.error("Error al enviar la notificación al correo corporativo.")
+    // Aquí podrías implementar un sistema de reintento o alerta
+  } else {
+    console.log("Notificación de pedido enviada al correo corporativo.")
   }
 
-  orders.push(order)
-  return order
-}
-
-export function getOrderById(id: string): Order | null {
-  return orders.find((order) => order.id === id) || null
-}
-
-export function getUserOrders(userId: string): Order[] {
-  return orders.filter((order) => order.userId === userId)
-}
-
-export function updateOrderStatus(orderId: string, status: Order["status"]): Order | null {
-  const order = orders.find((o) => o.id === orderId)
-  if (order) {
-    order.status = status
-    return order
+  // Enviar confirmación al cliente
+  const customerEmailSent = await sendOrderConfirmationToCustomer(newOrder)
+  if (!customerEmailSent) {
+    console.error("Error al enviar la confirmación al cliente.")
+    // Aquí podrías implementar un sistema de reintento o alerta
+  } else {
+    console.log("Confirmación de pedido enviada al cliente.")
   }
-  return null
+
+  return newOrder
 }
 
-export function markEmailSent(orderId: string, emailType: keyof Order["emailsSent"]): void {
-  const order = orders.find((o) => o.id === orderId)
-  if (order) {
-    order.emailsSent[emailType] = true
-  }
+export async function getOrderById(id: string): Promise<Order | undefined> {
+  return orders.find((order) => order.id === id)
 }
 
-export function calculateOrderTotals(items: Order["items"]) {
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shipping = subtotal > 100 ? 0 : 15.99
-  const tax = subtotal * 0.08
-  const total = subtotal + shipping + tax
-
-  return { subtotal, shipping, tax, total }
-}
-
-export function getAllOrders(): Order[] {
+export async function getAllOrders(): Promise<Order[]> {
   return orders
+}
+
+export async function updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
+  const orderIndex = orders.findIndex((order) => order.id === id)
+  if (orderIndex > -1) {
+    orders[orderIndex].status = status
+    return orders[orderIndex]
+  }
+  return undefined
 }
