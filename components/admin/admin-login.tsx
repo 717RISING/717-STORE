@@ -3,158 +3,97 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Lock, User, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { verifyUserCredentials, isAdmin } from "@/lib/users"
+import { verifyUserCredentials } from "@/lib/users" // Importar la función de verificación
 
 interface AdminLoginProps {
-  onLogin: (success: boolean) => void
+  onLoginSuccess: () => void
 }
 
-export default function AdminLogin({ onLogin }: AdminLoginProps) {
+export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
   const { toast } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setLoading(true)
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    const user = await verifyUserCredentials(email, password)
 
-    console.log("Intentando login de admin con:", { email, password })
-
-    // Verificar credenciales del usuario
-    const user = verifyUserCredentials(email, password)
-
-    if (user && isAdmin(email)) {
-      console.log("Login de admin exitoso!")
-
-      // Guardar información del admin en localStorage
-      localStorage.setItem("adminAuth", "authenticated")
-      localStorage.setItem(
-        "adminUser",
-        JSON.stringify({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        }),
-      )
-
+    if (user && user.isAdmin) {
       toast({
-        title: "✅ Acceso concedido",
-        description: `Bienvenido al panel de administración, ${user.name}.`,
+        title: "Inicio de sesión exitoso",
+        description: "Bienvenido al panel de administración.",
       })
-      onLogin(true)
-    } else if (user && !isAdmin(email)) {
-      console.log("Usuario válido pero no es admin")
-      toast({
-        title: "❌ Acceso denegado",
-        description: "No tienes permisos de administrador.",
-        variant: "destructive",
-      })
-      onLogin(false)
+      onLoginSuccess()
+      router.push("/admin") // Redirigir al dashboard
     } else {
-      console.log("Credenciales inválidas")
       toast({
-        title: "❌ Credenciales inválidas",
-        description: "Email o contraseña incorrectos.",
+        title: "Error de inicio de sesión",
+        description: "Credenciales inválidas o no autorizado.",
         variant: "destructive",
       })
-      onLogin(false)
     }
-
-    setIsLoading(false)
+    setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md bg-gray-900 border-gray-800">
-        <CardHeader className="text-center pb-8">
-          <div className="w-20 h-20 mx-auto mb-4 relative">
+    <div className="flex min-h-screen items-center justify-center bg-black p-4">
+      <Card className="w-full max-w-md bg-gray-900 text-white border-gray-800">
+        <CardHeader className="text-center">
+          <div className="relative mx-auto mb-4 h-16 w-16">
             <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" />
           </div>
-          <CardTitle className="text-2xl font-bold text-white">Panel de Administración</CardTitle>
-          <p className="text-gray-400 text-sm mt-2">Solo para administradores autorizados</p>
+          <CardTitle className="text-3xl font-bold">Acceso de Administrador</CardTitle>
+          <CardDescription className="text-gray-400">Ingresa tus credenciales para acceder al panel.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="admin-email" className="block text-sm font-medium text-gray-300">
-                Email de Administrador
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  id="admin-email"
-                  type="email"
-                  placeholder="admin@717store.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
-                  required
-                />
-              </div>
+              <Label htmlFor="email" className="text-gray-300">
+                Correo Electrónico
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="717days@gmail.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-[#5D1A1D]"
+              />
             </div>
-
             <div className="space-y-2">
-              <label htmlFor="admin-password" className="block text-sm font-medium text-gray-300">
+              <Label htmlFor="password" className="text-gray-300">
                 Contraseña
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  id="admin-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Contraseña de administrador"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="JP7CR1DM7CM_STREETWEAR"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-[#5D1A1D]"
+              />
             </div>
-
             <Button
               type="submit"
-              className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold"
-              disabled={isLoading}
+              className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] focus:ring-[#4a1518] focus:ring-offset-2"
+              disabled={loading}
             >
-              {isLoading ? "Verificando acceso..." : "Acceder al Panel"}
+              {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </Button>
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
-              Panel exclusivo para administradores de 717 Store.
-              <br />
-              <span className="text-red-400">Acceso no autorizado prohibido.</span>
-            </p>
-          </div>
-
-          {/* Información de credenciales para desarrollo */}
-          <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
-            <p className="text-xs text-gray-400 text-center">
-              <strong>Admin:</strong> 717days@gmail.com
-              <br />
-              <strong>Pass:</strong> JP7CR1DM7CM_STREETWEAR
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

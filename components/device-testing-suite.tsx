@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Smartphone, Tablet, Monitor, Wifi, Battery, Signal } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 
 interface DeviceInfo {
   userAgent: string
@@ -90,6 +94,24 @@ export default function DeviceTestingSuite() {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null)
   const [selectedPreset, setSelectedPreset] = useState<ViewportTest | null>(null)
   const [testResults, setTestResults] = useState<string[]>([])
+  const [width, setWidth] = useState(375) // Default to iPhone SE width
+  const [height, setHeight] = useState(667) // Default to iPhone SE height
+  const [url, setUrl] = useState("/") // Default to homepage
+
+  const devices = [
+    { name: "iPhone SE", width: 375, height: 667 },
+    { name: "iPhone 12 Pro", width: 390, height: 844 },
+    { name: "iPad Mini", width: 768, height: 1024 },
+    { name: "iPad Pro", width: 1024, height: 1366 },
+    { name: "Desktop (Small)", width: 1280, height: 800 },
+    { name: "Desktop (Large)", width: 1920, height: 1080 },
+  ]
+
+  const handleDeviceChange = (value: string) => {
+    const [w, h] = value.split("x").map(Number)
+    setWidth(w)
+    setHeight(h)
+  }
 
   useEffect(() => {
     const getDeviceInfo = async (): Promise<DeviceInfo> => {
@@ -283,6 +305,93 @@ export default function DeviceTestingSuite() {
         <p className="text-gray-400">Comprehensive testing for mobile devices</p>
       </div>
 
+      <div className="flex h-full flex-col bg-gray-950 text-white">
+        <div className="flex flex-wrap items-center justify-center gap-4 p-4">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="device-select" className="sr-only">
+              Seleccionar Dispositivo
+            </Label>
+            <Select onValueChange={handleDeviceChange} value={`${width}x${height}`}>
+              <SelectTrigger id="device-select" className="w-[180px] bg-gray-800 border-gray-700 text-white">
+                <SelectValue placeholder="Seleccionar Dispositivo" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-700">
+                {devices.map((device) => (
+                  <SelectItem key={device.name} value={`${device.width}x${device.height}`}>
+                    {device.name} ({device.width}x{device.height})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="custom-width" className="sr-only">
+              Ancho Personalizado
+            </Label>
+            <Input
+              id="custom-width"
+              type="number"
+              placeholder="Ancho"
+              value={width}
+              onChange={(e) => setWidth(Number(e.target.value))}
+              className="w-24 bg-gray-800 border-gray-700 text-white"
+            />
+            <span className="text-gray-400">x</span>
+            <Label htmlFor="custom-height" className="sr-only">
+              Alto Personalizado
+            </Label>
+            <Input
+              id="custom-height"
+              type="number"
+              placeholder="Alto"
+              value={height}
+              onChange={(e) => setHeight(Number(e.target.value))}
+              className="w-24 bg-gray-800 border-gray-700 text-white"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-1 max-w-sm">
+            <Label htmlFor="url-input" className="sr-only">
+              URL
+            </Label>
+            <Input
+              id="url-input"
+              type="text"
+              placeholder="URL (ej. /productos)"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="flex-1 bg-gray-800 border-gray-700 text-white"
+            />
+            <Button onClick={() => setUrl(url)} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
+              Ir
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+          <div
+            className={cn(
+              "relative border-[16px] border-gray-800 rounded-[36px] shadow-2xl overflow-hidden bg-white",
+              "transition-all duration-300 ease-in-out",
+            )}
+            style={{ width: `${width}px`, height: `${height}px` }}
+          >
+            {/* Simulate device notch/bezel */}
+            {width < 768 && (
+              <>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/5 h-6 bg-gray-800 rounded-b-xl z-10"></div>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-gray-700 rounded-full z-10"></div>
+              </>
+            )}
+            <iframe
+              src={url}
+              title="Responsive Test Frame"
+              className="w-full h-full border-none"
+              style={{ transform: "scale(1)", transformOrigin: "top left" }}
+            />
+          </div>
+        </div>
+      </div>
+
       <Tabs defaultValue="device-info" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="device-info">Device Info</TabsTrigger>
@@ -457,14 +566,16 @@ export default function DeviceTestingSuite() {
                   <h3 className="font-semibold mb-2">Memory Usage</h3>
                   <div className="text-sm space-y-1">
                     <div>
-                      Used JS Heap: {((performance as any).memory?.usedJSHeapSize / 1024 / 1024).toFixed(2) || "N/A"} MB
+                      Used JS Heap:{" "}
+                      {((window.performance as any).memory?.usedJSHeapSize / 1024 / 1024).toFixed(2) || "N/A"} MB
                     </div>
                     <div>
-                      Total JS Heap: {((performance as any).memory?.totalJSHeapSize / 1024 / 1024).toFixed(2) || "N/A"}{" "}
-                      MB
+                      Total JS Heap:{" "}
+                      {((window.performance as any).memory?.totalJSHeapSize / 1024 / 1024).toFixed(2) || "N/A"} MB
                     </div>
                     <div>
-                      Heap Limit: {((performance as any).memory?.jsHeapSizeLimit / 1024 / 1024).toFixed(2) || "N/A"} MB
+                      Heap Limit:{" "}
+                      {((window.performance as any).memory?.jsHeapSizeLimit / 1024 / 1024).toFixed(2) || "N/A"} MB
                     </div>
                   </div>
                 </div>
@@ -474,10 +585,15 @@ export default function DeviceTestingSuite() {
                   <div className="text-sm space-y-1">
                     <div>
                       DOM Content Loaded:{" "}
-                      {performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart}ms
+                      {window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart}ms
                     </div>
-                    <div>Page Load: {performance.timing.loadEventEnd - performance.timing.navigationStart}ms</div>
-                    <div>DNS Lookup: {performance.timing.domainLookupEnd - performance.timing.domainLookupStart}ms</div>
+                    <div>
+                      Page Load: {window.performance.timing.loadEventEnd - window.performance.timing.navigationStart}ms
+                    </div>
+                    <div>
+                      DNS Lookup:{" "}
+                      {window.performance.timing.domainLookupEnd - window.performance.timing.domainLookupStart}ms
+                    </div>
                   </div>
                 </div>
               </div>

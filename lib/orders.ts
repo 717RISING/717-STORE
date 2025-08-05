@@ -2,7 +2,7 @@
 // Este archivo contendrá las funciones para interactuar con la "base de datos" de pedidos.
 // La lógica de envío de correos se ha movido a las Server Actions.
 
-import { db, type Order, type OrderItem, type ShippingInfo } from "./database"
+import { db, type Order, type OrderItem, type ShippingInfo, updateProductStock } from "./database"
 
 // Función para generar un ID único para el pedido
 function generateOrderId(): string {
@@ -16,20 +16,30 @@ export async function _saveOrderToDatabase(
   shippingInfo: ShippingInfo,
   totalAmount: number,
   customerEmail: string,
+  customerName?: string,
 ): Promise<Order> {
   const newOrder: Order = {
     id: generateOrderId(),
     customerEmail: customerEmail,
+    customerName: customerName,
     items: items,
     shippingInfo: shippingInfo,
     totalAmount: totalAmount,
     orderDate: new Date(),
-    status: "pending", // Estado inicial
+    status: "processing", // Estado inicial después de un pago exitoso
     paymentStatus: "paid", // Asumimos que el pago ya se procesó antes de llamar a esta función
   }
 
   db.orders.push(newOrder)
   console.log(`Pedido ${newOrder.id} guardado en la base de datos mock.`)
+
+  // Actualizar stock de productos
+  for (const item of items) {
+    if (item.size) {
+      await updateProductStock(item.productId, item.size, item.quantity)
+    }
+  }
+
   return newOrder
 }
 

@@ -1,130 +1,96 @@
 "use client"
 
-import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { useCart } from "@/lib/cart-context"
 import Image from "next/image"
 import Link from "next/link"
-import { X, Plus, Minus, ShoppingBag } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useCart } from "@/lib/cart-context"
+import { Trash2, Minus, Plus } from "lucide-react"
 
-export default function CartSidebar() {
-  const { state, dispatch } = useCart()
-  const [isOpen, setIsOpen] = useState(false)
+interface CartSidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
 
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      dispatch({ type: "REMOVE_ITEM", payload: id })
-    } else {
-      dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: newQuantity } })
-    }
-  }
-
-  const removeItem = (id: string) => {
-    dispatch({ type: "REMOVE_ITEM", payload: id })
-  }
+export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
+  const { cart, removeFromCart, updateQuantity, totalPrice } = useCart()
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] relative">
-          <ShoppingBag className="w-5 h-5" />
-          {state.items.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {state.items.reduce((sum, item) => sum + item.quantity, 0)}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
-
-      <SheetContent className="bg-black text-white border-gray-800 w-full sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle className="text-white">Carrito de compras</SheetTitle>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-full sm:max-w-md bg-gray-900 text-white flex flex-col">
+        <SheetHeader className="border-b border-gray-800 pb-4">
+          <SheetTitle className="text-2xl font-bold text-white">Tu Carrito</SheetTitle>
         </SheetHeader>
-
-        <div className="flex flex-col h-full">
-          {state.items.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-                <p className="text-gray-400">Tu carrito está vacío</p>
-              </div>
+        <div className="flex-1 overflow-y-auto py-6 space-y-6 custom-scrollbar">
+          {cart.length === 0 ? (
+            <div className="flex h-full items-center justify-center text-gray-400">
+              <p>Tu carrito está vacío.</p>
             </div>
           ) : (
-            <>
-              {/* Cart Items */}
-              <div className="flex-1 overflow-y-auto py-4 space-y-4">
-                {state.items.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-800 rounded-lg">
-                    <div className="relative w-16 h-16 bg-gray-900 rounded-lg overflow-hidden">
-                      <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium truncate">{item.name}</h4>
-                      <p className="text-sm text-gray-400">Talla: {item.size}</p>
-                      <p className="font-semibold">${item.price}</p>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </Button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 border-[#5D1A1D] text-white hover:bg-[#5D1A1D]"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </Button>
-                    </div>
-
+            cart.map((item) => (
+              <div key={`${item.id}-${item.size}-${item.color}`} className="flex items-center space-x-4">
+                <Image
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
+                  width={80}
+                  height={80}
+                  className="rounded-md object-cover"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg text-white">{item.name}</h3>
+                  <p className="text-sm text-gray-400">
+                    Talla: {item.size} {item.color && `| Color: ${item.color}`}
+                  </p>
+                  <p className="text-base font-medium text-white">${item.price.toLocaleString()}</p>
+                  <div className="flex items-center mt-2 space-x-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 rounded-full border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
+                      onClick={() => updateQuantity(item.id, item.size, item.quantity - 1, item.color)}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-white font-medium">{item.quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 rounded-full border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
+                      onClick={() => updateQuantity(item.id, item.size, item.quantity + 1, item.color)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeItem(item.id)}
-                      className="text-gray-400 hover:text-red-400"
+                      className="text-red-400 hover:bg-gray-800 ml-auto"
+                      onClick={() => removeFromCart(item.id, item.size, item.color)}
                     >
-                      <X className="w-4 h-4" />
+                      <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
-                ))}
-              </div>
-
-              {/* Cart Summary */}
-              <div className="border-t border-gray-800 pt-4 space-y-4">
-                <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total:</span>
-                  <span>${state.total.toFixed(2)}</span>
-                </div>
-
-                <div className="space-y-2">
-                  <Link href="/checkout" className="w-full block">
-                    <Button
-                      className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] font-semibold"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      PROCEDER AL PAGO
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    className="w-full border-[#5D1A1D] text-white hover:bg-[#5D1A1D] hover:text-white bg-transparent"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    SEGUIR COMPRANDO
-                  </Button>
                 </div>
               </div>
-            </>
+            ))
           )}
+        </div>
+        <div className="border-t border-gray-800 pt-6 space-y-4">
+          <div className="flex justify-between text-xl font-bold text-white">
+            <span>Total:</span>
+            <span>${totalPrice.toLocaleString()}</span>
+          </div>
+          <Button asChild className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22] text-lg py-6">
+            <Link href="/checkout" onClick={onClose}>
+              Proceder al Pago
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full border-gray-700 text-white hover:bg-gray-800 bg-transparent"
+            onClick={onClose}
+          >
+            Continuar Comprando
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

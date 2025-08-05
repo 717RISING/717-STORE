@@ -12,7 +12,7 @@ export interface Product {
   category: string
   sizes: string[]
   colors?: string[]
-  stock: { [size: string]: number }
+  stock: { [size: string]: number } // Stock por talla
 }
 
 export interface CartItem {
@@ -62,6 +62,7 @@ export interface OrderItem {
 export interface Order {
   id: string
   userId?: string // Opcional, si el usuario está logueado
+  customerName?: string // Nombre del cliente (para invitados o display)
   customerEmail: string // Email del cliente para confirmaciones
   items: OrderItem[]
   shippingInfo: ShippingInfo
@@ -74,11 +75,22 @@ export interface Order {
 export interface User {
   id: string
   email: string
-  passwordHash: string
+  passwordHash: string // En un sistema real, esto sería un hash
   name: string
-  addresses: ShippingInfo[]
-  wishlist: string[] // Array de IDs de productos
+  addresses?: ShippingInfo[] // Direcciones guardadas del usuario
+  wishlist?: string[] // Array de IDs de productos en la wishlist
   isAdmin: boolean
+}
+
+// Definición del usuario administrador
+export const ADMIN_USER: User = {
+  id: "admin-717",
+  email: "717days@gmail.com",
+  passwordHash: "JP7CR1DM7CM_STREETWEAR", // ¡En producción, usa un hash seguro!
+  name: "Administrador 717",
+  isAdmin: true,
+  addresses: [],
+  wishlist: [],
 }
 
 // Simulación de la base de datos en memoria
@@ -95,7 +107,7 @@ export const db: Database = {
       name: "Camiseta 'Big Dreams'",
       description: "Camiseta de algodón premium con estampado 'Big Dreams'.",
       price: 85000,
-      imageUrl: "/products/camisetas/big-dreams-tshirt.jpg",
+      imageUrl: "/products/camisetas/big-dreams-tshirt.png",
       category: "Camisetas",
       sizes: ["S", "M", "L", "XL"],
       colors: ["Negro", "Blanco"],
@@ -106,7 +118,7 @@ export const db: Database = {
       name: "Oversized Tee 'Street'",
       description: "Camiseta oversized de estilo urbano, ideal para un look relajado.",
       price: 95000,
-      imageUrl: "/products/camisetas/oversized-tee.jpg",
+      imageUrl: "/products/camisetas/oversized-tee.png",
       category: "Camisetas",
       sizes: ["M", "L", "XL"],
       colors: ["Gris", "Negro"],
@@ -117,7 +129,7 @@ export const db: Database = {
       name: "Graphic Tee 'Blood'",
       description: "Camiseta con diseño gráfico audaz y tejido suave.",
       price: 89000,
-      imageUrl: "/products/camisetas/graphic-tee-blood.jpg",
+      imageUrl: "/products/camisetas/graphic-tee-blood.png",
       category: "Camisetas",
       sizes: ["S", "M", "L"],
       colors: ["Negro"],
@@ -128,7 +140,7 @@ export const db: Database = {
       name: "Graphic Tee 'Pain'",
       description: "Camiseta con estampado 'Pain' para un estilo único.",
       price: 89000,
-      imageUrl: "/products/camisetas/graphic-tee-pain.jpg",
+      imageUrl: "/products/camisetas/graphic-tee-pain.png",
       category: "Camisetas",
       sizes: ["M", "L", "XL"],
       colors: ["Blanco"],
@@ -136,8 +148,8 @@ export const db: Database = {
     },
     // Puedes añadir más productos aquí
   ],
-  orders: [],
-  users: [],
+  orders: [], // Inicialmente vacía
+  users: [ADMIN_USER], // Solo el admin al inicio
 }
 
 // Funciones de utilidad para la "base de datos"
@@ -160,4 +172,33 @@ export async function saveUserToDatabase(user: User): Promise<void> {
   } else {
     db.users.push(user)
   }
+}
+
+export async function getAllUsers(): Promise<User[]> {
+  return db.users
+}
+
+// Funciones para órdenes (solo interacción con la DB mock, sin lógica de email aquí)
+export async function saveOrderToDatabase(order: Order): Promise<void> {
+  db.orders.push(order)
+  console.log(`Pedido ${order.id} guardado en la base de datos mock.`)
+}
+
+export async function getOrderById(orderId: string): Promise<Order | null> {
+  return db.orders.find((order) => order.id === orderId) || null
+}
+
+export async function getAllOrders(): Promise<Order[]> {
+  return db.orders
+}
+
+export async function updateProductStock(productId: string, size: string, quantity: number): Promise<boolean> {
+  const product = db.products.find((p) => p.id === productId)
+  if (product && product.stock[size] !== undefined) {
+    product.stock[size] -= quantity
+    if (product.stock[size] < 0) product.stock[size] = 0 // Evitar stock negativo
+    console.log(`Stock de ${product.name} (${size}) actualizado a ${product.stock[size]}`)
+    return true
+  }
+  return false
 }

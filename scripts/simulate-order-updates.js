@@ -1,64 +1,48 @@
-// Script para simular actualizaciones de pedidos y envío de emails
-import { getAllOrders, updateOrderStatus, markEmailSent } from "../lib/orders.js"
-import { sendShippingNotification, sendDeliveryNotification } from "../lib/email.js"
+// scripts/simulate-order-updates.js
+// Este script simula actualizaciones de estado de pedidos en un entorno de desarrollo.
+// No está diseñado para producción.
+
+const { getAllOrders, updateOrderStatus, updateOrderPaymentStatus } = require("../lib/orders") // Asegúrate de que estas funciones estén exportadas
 
 async function simulateOrderUpdates() {
-  console.log("🚀 Iniciando simulación de actualizaciones de pedidos...")
+  console.log("Iniciando simulación de actualizaciones de pedidos...")
 
-  const orders = getAllOrders()
-  console.log(`📦 Encontrados ${orders.length} pedidos`)
+  const orders = await getAllOrders()
+
+  if (orders.length === 0) {
+    console.log("No hay pedidos para simular actualizaciones.")
+    return
+  }
 
   for (const order of orders) {
-    console.log(`\n📋 Procesando pedido ${order.id} (Estado: ${order.status})`)
+    // Simular que algunos pedidos pasan a "shipped" después de un tiempo
+    if (order.status === "processing" && Math.random() > 0.5) {
+      await updateOrderStatus(order.id, "shipped")
+      console.log(`Pedido ${order.id} actualizado a 'Enviado'.`)
+    }
 
-    // Simular progresión de estados
-    if (order.status === "pending") {
-      // Cambiar a processing después de 2 segundos
-      setTimeout(async () => {
-        updateOrderStatus(order.id, "processing")
-        console.log(`✅ Pedido ${order.id} cambiado a 'processing'`)
-      }, 2000)
+    // Simular que algunos pedidos "shipped" pasan a "delivered"
+    if (order.status === "shipped" && Math.random() > 0.7) {
+      await updateOrderStatus(order.id, "delivered")
+      console.log(`Pedido ${order.id} actualizado a 'Entregado'.`)
+    }
 
-      // Cambiar a shipped después de 5 segundos y enviar email
-      setTimeout(async () => {
-        updateOrderStatus(order.id, "shipped")
-        console.log(`🚚 Pedido ${order.id} cambiado a 'shipped'`)
-
-        if (!order.emailsSent.shipping) {
-          try {
-            const emailSent = await sendShippingNotification(order)
-            if (emailSent) {
-              markEmailSent(order.id, "shipping")
-              console.log(`📧 Email de envío enviado para pedido ${order.id}`)
-            }
-          } catch (error) {
-            console.error(`❌ Error enviando email de envío: ${error.message}`)
-          }
-        }
-      }, 5000)
-
-      // Cambiar a delivered después de 8 segundos y enviar email
-      setTimeout(async () => {
-        updateOrderStatus(order.id, "delivered")
-        console.log(`✅ Pedido ${order.id} cambiado a 'delivered'`)
-
-        if (!order.emailsSent.delivery) {
-          try {
-            const emailSent = await sendDeliveryNotification(order)
-            if (emailSent) {
-              markEmailSent(order.id, "delivery")
-              console.log(`📧 Email de entrega enviado para pedido ${order.id}`)
-            }
-          } catch (error) {
-            console.error(`❌ Error enviando email de entrega: ${error.message}`)
-          }
-        }
-      }, 8000)
+    // Simular un fallo de pago para un pedido pendiente (raro)
+    if (order.paymentStatus === "pending" && Math.random() < 0.1) {
+      await updateOrderPaymentStatus(order.id, "failed")
+      await updateOrderStatus(order.id, "cancelled") // Cancelar si el pago falla
+      console.log(`Pedido ${order.id} (pago pendiente) ha fallado y ha sido cancelado.`)
     }
   }
 
-  console.log("\n🎉 Simulación completada. Los pedidos se actualizarán automáticamente.")
+  console.log("Simulación de actualizaciones de pedidos finalizada.")
 }
 
-// Ejecutar la simulación
+// Ejecutar la simulación cada 30 segundos en desarrollo
+// if (process.env.NODE_ENV === 'development') {
+//   setInterval(simulateOrderUpdates, 30000);
+//   console.log('Simulación de actualizaciones de pedidos programada para ejecutarse cada 30 segundos.');
+// }
+
+// Para ejecutar una vez manualmente:
 simulateOrderUpdates()

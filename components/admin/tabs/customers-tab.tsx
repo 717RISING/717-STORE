@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Switch } from "@/components/ui/switch"
+
+import { useState, useEffect } from "react"
 import { Search, Filter, Plus, User, Mail } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,15 +13,28 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import CustomerAcquisitionChart from "@/components/admin/charts/customer-acquisition-chart"
 import CustomerRetentionChart from "@/components/admin/charts/customer-retention-chart"
-import { Badge } from "@/components/ui/badge"
+import { getAllUsers, type User as DBUser } from "@/lib/database" // Importar User de database
 
 export default function CustomersTab() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
+  const [selectedCustomer, setSelectedCustomer] = useState<DBUser | null>(null)
+  const [customers, setCustomers] = useState<DBUser[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const handleEditCustomer = (customer: any) => {
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      setLoading(true)
+      // Filtrar para no mostrar el admin en la lista de clientes regulares
+      const allUsers = await getAllUsers()
+      setCustomers(allUsers.filter((user) => !user.isAdmin))
+      setLoading(false)
+    }
+    fetchCustomers()
+  }, [])
+
+  const handleEditCustomer = (customer: DBUser) => {
     setSelectedCustomer(customer)
     setIsDialogOpen(true)
   }
@@ -27,6 +42,22 @@ export default function CustomersTab() {
   const handleAddCustomer = () => {
     setSelectedCustomer(null)
     setIsDialogOpen(true)
+  }
+
+  const filteredCustomers = customers.filter((customer) => {
+    const matchesSearch =
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+    // No hay un campo 'status' directo en DBUser para filtrar, se podría añadir si es necesario
+    return matchesSearch
+  })
+
+  const totalCustomers = customers.length
+  const activeCustomers = customers.filter((c) => c.isAdmin === false).length // Asumiendo que todos los no-admin son "activos"
+  const newCustomers = 0 // No hay un campo para "nuevos" en el mock, se mantendrá en 0
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[400px] text-white">Cargando clientes...</div>
   }
 
   return (
@@ -73,25 +104,16 @@ export default function CustomersTab() {
               <div className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName" className="text-gray-300">
-                      Nombre
+                    <Label htmlFor="name" className="text-gray-300">
+                      Nombre Completo
                     </Label>
                     <Input
-                      id="firstName"
-                      defaultValue={selectedCustomer?.firstName || ""}
+                      id="name"
+                      defaultValue={selectedCustomer?.name || ""}
                       className="bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="lastName" className="text-gray-300">
-                      Apellido
-                    </Label>
-                    <Input
-                      id="lastName"
-                      defaultValue={selectedCustomer?.lastName || ""}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
+                  {/* No hay apellido en DBUser, se puede añadir si es necesario */}
                 </div>
 
                 <div>
@@ -106,36 +128,37 @@ export default function CustomersTab() {
                   />
                 </div>
 
-                <div>
+                {/* Campos de dirección y teléfono no están en DBUser directamente, se pueden añadir si es necesario */}
+                {/* <div>
                   <Label htmlFor="phone" className="text-gray-300">
                     Teléfono
                   </Label>
                   <Input
                     id="phone"
-                    defaultValue={selectedCustomer?.phone || ""}
+                    defaultValue={selectedCustomer?.phone || ''}
                     className="bg-gray-800 border-gray-700 text-white"
                   />
-                </div>
+                </div> */}
 
-                <div>
+                {/* <div>
                   <Label htmlFor="address" className="text-gray-300">
                     Dirección
                   </Label>
                   <Input
                     id="address"
-                    defaultValue={selectedCustomer?.address || ""}
+                    defaultValue={selectedCustomer?.address || ''}
                     className="bg-gray-800 border-gray-700 text-white"
                   />
-                </div>
+                </div> */}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="city" className="text-gray-300">
                       Ciudad
                     </Label>
                     <Input
                       id="city"
-                      defaultValue={selectedCustomer?.city || ""}
+                      defaultValue={selectedCustomer?.city || ''}
                       className="bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
@@ -145,7 +168,7 @@ export default function CustomersTab() {
                     </Label>
                     <Input
                       id="state"
-                      defaultValue={selectedCustomer?.state || ""}
+                      defaultValue={selectedCustomer?.state || ''}
                       className="bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
@@ -155,25 +178,22 @@ export default function CustomersTab() {
                     </Label>
                     <Input
                       id="zipCode"
-                      defaultValue={selectedCustomer?.zipCode || ""}
+                      defaultValue={selectedCustomer?.zipCode || ''}
                       className="bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <div>
-                  <Label htmlFor="status" className="text-gray-300">
-                    Estado
+                  <Label htmlFor="isAdmin" className="text-gray-300">
+                    Es Administrador
                   </Label>
-                  <Select defaultValue={selectedCustomer?.status || "active"}>
-                    <SelectTrigger id="status" className="bg-gray-800 border-gray-700 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-900 border-gray-700">
-                      <SelectItem value="active">Activo</SelectItem>
-                      <SelectItem value="inactive">Inactivo</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Switch
+                    id="isAdmin"
+                    checked={selectedCustomer?.isAdmin || false}
+                    // onCheckedChange={(checked) => setSelectedCustomer(prev => prev ? { ...prev, isAdmin: checked } : null)}
+                    className="data-[state=checked]:bg-[#5D1A1D]"
+                  />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
@@ -201,8 +221,8 @@ export default function CustomersTab() {
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Clientes Totales</p>
-              <h3 className="text-3xl font-bold">1,248</h3>
-              <p className="text-green-400 text-sm mt-1">+12% desde el mes pasado</p>
+              <h3 className="text-3xl font-bold">{totalCustomers}</h3>
+              <p className="text-green-400 text-sm mt-1">+0% desde el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -216,8 +236,8 @@ export default function CustomersTab() {
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Clientes Activos</p>
-              <h3 className="text-3xl font-bold">876</h3>
-              <p className="text-green-400 text-sm mt-1">+8% desde el mes pasado</p>
+              <h3 className="text-3xl font-bold">{activeCustomers}</h3>
+              <p className="text-green-400 text-sm mt-1">+0% desde el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -231,8 +251,8 @@ export default function CustomersTab() {
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Nuevos Clientes</p>
-              <h3 className="text-3xl font-bold">128</h3>
-              <p className="text-green-400 text-sm mt-1">+5% desde el mes pasado</p>
+              <h3 className="text-3xl font-bold">{newCustomers}</h3>
+              <p className="text-green-400 text-sm mt-1">+0% desde el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -293,122 +313,44 @@ export default function CustomersTab() {
                 <tr className="border-b border-gray-800">
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">Cliente</th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">Email</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Teléfono</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Ubicación</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Pedidos</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Total Gastado</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Estado</th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  {
-                    id: "1",
-                    firstName: "Juan",
-                    lastName: "Pérez",
-                    email: "juan.perez@email.com",
-                    phone: "+1 (555) 123-4567",
-                    city: "Ciudad de México",
-                    state: "CDMX",
-                    orders: 12,
-                    totalSpent: 1247.85,
-                    status: "active",
-                  },
-                  {
-                    id: "2",
-                    firstName: "María",
-                    lastName: "López",
-                    email: "maria.lopez@email.com",
-                    phone: "+1 (555) 234-5678",
-                    city: "Guadalajara",
-                    state: "Jalisco",
-                    orders: 8,
-                    totalSpent: 892.5,
-                    status: "active",
-                  },
-                  {
-                    id: "3",
-                    firstName: "Carlos",
-                    lastName: "Rodríguez",
-                    email: "carlos.rodriguez@email.com",
-                    phone: "+1 (555) 345-6789",
-                    city: "Monterrey",
-                    state: "Nuevo León",
-                    orders: 15,
-                    totalSpent: 1856.75,
-                    status: "active",
-                  },
-                  {
-                    id: "4",
-                    firstName: "Ana",
-                    lastName: "Martínez",
-                    email: "ana.martinez@email.com",
-                    phone: "+1 (555) 456-7890",
-                    city: "Puebla",
-                    state: "Puebla",
-                    orders: 3,
-                    totalSpent: 245.99,
-                    status: "inactive",
-                  },
-                  {
-                    id: "5",
-                    firstName: "Roberto",
-                    lastName: "Sánchez",
-                    email: "roberto.sanchez@email.com",
-                    phone: "+1 (555) 567-8901",
-                    city: "Tijuana",
-                    state: "Baja California",
-                    orders: 6,
-                    totalSpent: 567.25,
-                    status: "active",
-                  },
-                ].map((customer) => (
-                  <tr key={customer.id} className="border-b border-gray-800">
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-medium">
-                          {customer.firstName} {customer.lastName}
-                        </p>
-                        <p className="text-gray-400 text-sm">ID: {customer.id}</p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">{customer.email}</td>
-                    <td className="py-3 px-4">{customer.phone}</td>
-                    <td className="py-3 px-4">
-                      {customer.city}, {customer.state}
-                    </td>
-                    <td className="py-3 px-4">{customer.orders}</td>
-                    <td className="py-3 px-4">${customer.totalSpent}</td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant="outline"
-                        className={`${
-                          customer.status === "active"
-                            ? "border-green-600 text-green-400"
-                            : "border-red-600 text-red-400"
-                        }`}
-                      >
-                        {customer.status === "active" ? "Activo" : "Inactivo"}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-gray-400 hover:text-white"
-                          onClick={() => handleEditCustomer(customer)}
-                        >
-                          <User className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                          <Mail className="w-4 h-4" />
-                        </Button>
-                      </div>
+                {filteredCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="text-center text-gray-400 py-8">
+                      No hay clientes para mostrar.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredCustomers.map((customer) => (
+                    <tr key={customer.id} className="border-b border-gray-800">
+                      <td className="py-3 px-4">
+                        <div>
+                          <p className="font-medium text-white">{customer.name}</p>
+                          <p className="text-gray-400 text-sm">ID: {customer.id}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">{customer.email}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-gray-400 hover:text-white"
+                            onClick={() => handleEditCustomer(customer)}
+                          >
+                            <User className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                            <Mail className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

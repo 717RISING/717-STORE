@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,69 +9,63 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-
-interface ShippingInfo {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  address: string
-  city: string
-  state: string
-  zipCode: string
-  country: string
-  cost: number // Costo de envío
-}
+import type { ShippingInfo } from "@/lib/database"
 
 interface ShippingFormProps {
-  data: ShippingInfo
-  onChange: (data: ShippingInfo) => void
-  onBillingSameAsShipping: (same: boolean) => void
+  onShippingInfoChange: (info: ShippingInfo) => void
+  initialShippingInfo?: ShippingInfo
 }
 
-export default function ShippingForm({ data, onChange, onBillingSameAsShipping }: ShippingFormProps) {
+export default function ShippingForm({ onShippingInfoChange, initialShippingInfo }: ShippingFormProps) {
+  const [firstName, setFirstName] = useState(initialShippingInfo?.firstName || "")
+  const [lastName, setLastName] = useState(initialShippingInfo?.lastName || "")
+  const [email, setEmail] = useState(initialShippingInfo?.email || "")
+  const [phone, setPhone] = useState(initialShippingInfo?.phone || "")
+  const [address, setAddress] = useState(initialShippingInfo?.address || "")
+  const [city, setCity] = useState(initialShippingInfo?.city || "")
+  const [state, setState] = useState(initialShippingInfo?.state || "")
+  const [zipCode, setZipCode] = useState(initialShippingInfo?.zipCode || "")
+  const [country, setCountry] = useState(initialShippingInfo?.country || "Colombia") // Default country
+  const [cost, setCost] = useState(initialShippingInfo?.cost || 0) // Default shipping cost
   const [billingChecked, setBillingChecked] = useState(true)
 
   useEffect(() => {
-    onBillingSameAsShipping(billingChecked)
-  }, [billingChecked, onBillingSameAsShipping])
+    onShippingInfoChange({
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+      cost,
+    })
+  }, [firstName, lastName, email, phone, address, city, state, zipCode, country, cost, onShippingInfoChange])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    onChange({ ...data, [name]: value })
-  }
-
-  const handleSelectChange = (name: string, value: string) => {
-    onChange({ ...data, [name]: value })
-  }
-
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(String(email).toLowerCase())
-  }
+  useEffect(() => {
+    setCountry("Colombia") // Default country
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Basic validation
-    if (
-      !data.firstName ||
-      !data.lastName ||
-      !data.email ||
-      !data.phone ||
-      !data.address ||
-      !data.city ||
-      !data.state ||
-      !data.zipCode
-    ) {
+    if (!firstName || !lastName || !email || !phone || !address || !city || !state || !zipCode) {
       toast.error("Por favor, completa todos los campos de envío.")
       return
     }
-    if (!validateEmail(data.email)) {
+    if (!validateEmail(email)) {
       toast.error("Por favor, introduce un email válido.")
       return
     }
     // If validation passes, the parent component will handle the next step
     toast.success("Información de envío guardada.")
+  }
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(String(email).toLowerCase())
   }
 
   const colombianStates = [
@@ -121,9 +114,8 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="firstName">Nombre</Label>
             <Input
               id="firstName"
-              name="firstName"
-              value={data.firstName}
-              onChange={handleChange}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
@@ -132,9 +124,8 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="lastName">Apellido</Label>
             <Input
               id="lastName"
-              name="lastName"
-              value={data.lastName}
-              onChange={handleChange}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
@@ -143,10 +134,9 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              name="email"
               type="email"
-              value={data.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
@@ -155,10 +145,9 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="phone">Teléfono</Label>
             <Input
               id="phone"
-              name="phone"
               type="tel"
-              value={data.phone}
-              onChange={handleChange}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
@@ -167,9 +156,8 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="address">Dirección</Label>
             <Input
               id="address"
-              name="address"
-              value={data.address}
-              onChange={handleChange}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
@@ -178,28 +166,22 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="city">Ciudad</Label>
             <Input
               id="city"
-              name="city"
-              value={data.city}
-              onChange={handleChange}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="state">Departamento</Label>
-            <Select
-              name="state"
-              value={data.state}
-              onValueChange={(value) => handleSelectChange("state", value)}
-              required
-            >
+            <Select value={state} onValueChange={(value) => setState(value)} required>
               <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white focus-ring">
                 <SelectValue placeholder="Selecciona un departamento" />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 text-white border-gray-700">
-                {colombianStates.map((state) => (
-                  <SelectItem key={state} value={state} className="hover:bg-gray-700">
-                    {state}
+                {colombianStates.map((stateOption) => (
+                  <SelectItem key={stateOption} value={stateOption} className="hover:bg-gray-700">
+                    {stateOption}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -209,23 +191,26 @@ export default function ShippingForm({ data, onChange, onBillingSameAsShipping }
             <Label htmlFor="zipCode">Código Postal</Label>
             <Input
               id="zipCode"
-              name="zipCode"
-              value={data.zipCode}
-              onChange={handleChange}
+              value={zipCode}
+              onChange={(e) => setZipCode(e.target.value)}
               required
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="country">País</Label>
-            <Input
-              id="country"
-              name="country"
-              value={data.country}
-              onChange={handleChange}
-              readOnly
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
+            <Select value={country} onValueChange={setCountry}>
+              <SelectTrigger id="country" className="w-full bg-gray-700 border-gray-600 text-white focus-ring">
+                <SelectValue placeholder="Selecciona un país" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 text-white border-gray-700">
+                <SelectItem value="Colombia">Colombia</SelectItem>
+                <SelectItem value="Mexico">México</SelectItem>
+                <SelectItem value="Spain">España</SelectItem>
+                <SelectItem value="USA">Estados Unidos</SelectItem>
+                {/* Add more countries as needed */}
+              </SelectContent>
+            </Select>
           </div>
           <div className="md:col-span-2 flex items-center space-x-2 mt-4">
             <Checkbox

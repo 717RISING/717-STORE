@@ -1,35 +1,40 @@
 "use client"
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-
-const data = [
-  { name: "Ene", ventas: 4000, pedidos: 240 },
-  { name: "Feb", ventas: 3000, pedidos: 139 },
-  { name: "Mar", ventas: 2000, pedidos: 980 },
-  { name: "Abr", ventas: 2780, pedidos: 390 },
-  { name: "May", ventas: 1890, pedidos: 480 },
-  { name: "Jun", ventas: 2390, pedidos: 380 },
-  { name: "Jul", ventas: 3490, pedidos: 430 },
-]
+import { CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts"
 
 export default function SalesChart() {
+  // Datos de ejemplo para el gráfico de ventas (inicialmente vacíos o con valores bajos)
+  const data = [
+    { name: "Ene", ingresos: 0, pedidos: 0 },
+    { name: "Feb", ingresos: 0, pedidos: 0 },
+    { name: "Mar", ingresos: 0, pedidos: 0 },
+    { name: "Abr", ingresos: 0, pedidos: 0 },
+    { name: "May", ingresos: 0, pedidos: 0 },
+    { name: "Jun", ingresos: 0, pedidos: 0 },
+  ]
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-        <XAxis dataKey="name" stroke="#9CA3AF" />
-        <YAxis stroke="#9CA3AF" />
+      <AreaChart
+        data={data}
+        margin={{
+          top: 10,
+          right: 30,
+          left: 0,
+          bottom: 0,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+        <XAxis dataKey="name" stroke="#999" />
+        <YAxis stroke="#999" />
         <Tooltip
-          contentStyle={{
-            backgroundColor: "#1F2937",
-            border: "1px solid #374151",
-            borderRadius: "8px",
-            color: "#F9FAFB",
-          }}
+          contentStyle={{ backgroundColor: "#333", border: "none", borderRadius: "8px" }}
+          itemStyle={{ color: "#fff" }}
         />
-        <Line type="monotone" dataKey="ventas" stroke="#3B82F6" strokeWidth={2} dot={{ fill: "#3B82F6" }} />
-        <Line type="monotone" dataKey="pedidos" stroke="#10B981" strokeWidth={2} dot={{ fill: "#10B981" }} />
-      </LineChart>
+        <Legend wrapperStyle={{ color: "#fff" }} />
+        <Area type="monotone" dataKey="ingresos" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
+        <Area type="monotone" dataKey="pedidos" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.3} />
+      </AreaChart>
     </ResponsiveContainer>
   )
 }

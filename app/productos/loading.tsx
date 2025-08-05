@@ -1,3 +1,7 @@
+import AdaptiveLoader from "@/components/loaders/adaptive-loader"
+import ProductLoader from "@/components/loaders/product-loader"
+import MobileProductLoader from "@/components/loaders/mobile/mobile-product-loader"
+
 export default function Loading() {
-  return null
+  return <AdaptiveLoader desktopLoader={ProductLoader} mobileLoader={MobileProductLoader} />
 }

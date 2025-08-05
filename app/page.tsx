@@ -1,7 +1,6 @@
 "use client"
-
-import type React from "react"
-
+import HeroSlider from "@/components/hero-slider"
+import { getAllProducts } from "@/lib/database"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -10,13 +9,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import HeroSlider from "@/components/hero-slider"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
-import { products } from "@/lib/products"
 import { useToast } from "@/hooks/use-toast"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const allProducts = await getAllProducts()
+  const featuredProducts = allProducts.filter(
+    (product) => product.id === "camiseta-big-dreams" || product.id === "camiseta-oversized-tee",
+  ) // Example featured products
   const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [email, setEmail] = useState("")
@@ -34,29 +35,6 @@ export default function HomePage() {
       setUserName(user.name)
     }
   }, [])
-
-  // Productos destacados (solo camisetas con imágenes reales)
-  const featuredProducts = products
-    .filter((product) => product.category === "camisetas" && !product.images[0].includes("placeholder"))
-    .slice(0, 4)
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-
-    setIsSubmitting(true)
-
-    // Simular envío
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    toast({
-      title: "¡Suscripción exitosa!",
-      description: "Te has suscrito correctamente al newsletter de 717 Store.",
-    })
-
-    setEmail("")
-    setIsSubmitting(false)
-  }
 
   const features = [
     {
@@ -286,6 +264,21 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Nuestra Filosofía Section */}
+      <section className="container mx-auto px-4 py-12 bg-gray-900 rounded-lg shadow-lg mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-8">Nuestra Filosofía</h2>
+        <div className="text-lg text-gray-300 text-center max-w-3xl mx-auto space-y-4">
+          <p>
+            En 717 Store, creemos que la moda es una extensión de tu identidad. Cada prenda está diseñada para inspirar
+            confianza y autenticidad, fusionando el estilo urbano con la comodidad y la calidad.
+          </p>
+          <p>
+            Nos esforzamos por crear piezas que no solo se vean bien, sino que también cuenten una historia. Únete a
+            nuestra comunidad y expresa tu individualidad con 717.
+          </p>
+        </div>
+      </section>
+
       {/* Newsletter Section */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -297,7 +290,7 @@ export default function HomePage() {
               exclusivas y contenido especial de la comunidad 717.
             </p>
 
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <Input
                 type="email"
                 placeholder="tu@email.com"
@@ -307,11 +300,7 @@ export default function HomePage() {
                 className="input-modern rounded-modern-lg flex-1"
                 disabled={isSubmitting}
               />
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 rounded-modern-lg hover-lift-modern px-6"
-              >
+              <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 rounded-modern-lg hover-lift-modern px-6">
                 {isSubmitting ? "Suscribiendo..." : "Suscribirse"}
               </Button>
             </form>

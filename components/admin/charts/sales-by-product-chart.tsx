@@ -1,31 +1,36 @@
 "use client"
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-
-const data = [
-  { name: "Big Dreams T-Shirt", ventas: 128 },
-  { name: "Urban Hoodie", ventas: 96 },
-  { name: "Street Pants", ventas: 84 },
-  { name: "Classic Cap", ventas: 72 },
-  { name: "Oversized Tee", ventas: 68 },
-]
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
 export default function SalesByProductChart() {
+  const data = [
+    { name: "Producto 1", sales: 0 },
+    { name: "Producto 2", sales: 0 },
+    { name: "Producto 3", sales: 0 },
+    { name: "Producto 4", sales: 0 },
+    { name: "Producto 5", sales: 0 },
+  ]
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-        <XAxis dataKey="name" stroke="#9CA3AF" angle={-45} textAnchor="end" height={100} />
-        <YAxis stroke="#9CA3AF" />
+      <BarChart
+        data={data}
+        margin={{
+          top: 20,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+        <XAxis dataKey="name" stroke="#999" />
+        <YAxis stroke="#999" />
         <Tooltip
-          contentStyle={{
-            backgroundColor: "#1F2937",
-            border: "1px solid #374151",
-            borderRadius: "8px",
-            color: "#F9FAFB",
-          }}
+          contentStyle={{ backgroundColor: "#333", border: "none", borderRadius: "8px" }}
+          itemStyle={{ color: "#fff" }}
         />
-        <Bar dataKey="ventas" fill="#3B82F6" />
+        <Legend wrapperStyle={{ color: "#fff" }} />
+        <Bar dataKey="sales" fill="#8884d8" />
       </BarChart>
     </ResponsiveContainer>
   )

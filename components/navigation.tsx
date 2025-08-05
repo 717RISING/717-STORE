@@ -1,112 +1,155 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, ShoppingCart, User, Menu } from "lucide-react"
+import { ShoppingCart, User, Search, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/cart-context"
-import { useTheme } from "@/lib/theme-context"
-import ThemeToggle from "@/components/theme-toggle"
 import MobileMenu from "@/components/mobile-menu"
+import CartSidebar from "@/components/cart-sidebar"
 import ProductSearch from "@/components/product-search"
+import ThemeToggle from "@/components/theme-toggle"
+import { usePathname } from "next/navigation"
 
 export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { totalItems } = useCart()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isCartSidebarOpen, setIsCartSidebarOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const cart = useCart()
-  const items = cart?.state?.items || []
-  const { theme } = useTheme()
+  const [isSticky, setIsSticky] = useState(false)
+  const pathname = usePathname()
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsSticky(true)
+      } else {
+        setIsSticky(false)
+      }
+    }
 
-  const navLinks = [
-    { href: "/", label: "INICIO" },
-    { href: "/productos", label: "PRODUCTOS" },
-    { href: "/contacto", label: "CONTACTO" },
-  ]
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Close mobile menu and cart sidebar when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+    setIsCartSidebarOpen(false)
+    setIsSearchOpen(false)
+  }, [pathname])
 
   return (
     <>
-      {/* Navigation Header */}
-      <header className="absolute top-0 left-0 right-0 z-50 px-4 py-6 bg-transparent">
-        <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons Only */}
-          <div className="flex justify-end items-center mb-4">
-            <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
-              <ThemeToggle />
+      <header
+        className={`w-full bg-black text-white py-4 px-6 md:px-8 lg:px-12 z-30 transition-all duration-300 ${
+          isSticky ? "fixed top-0 shadow-lg" : "relative"
+        }`}
+      >
+        <div className="container mx-auto flex items-center justify-between">
+          {/* Mobile Menu Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden text-white hover:bg-gray-800"
+            onClick={() => setIsMobileMenuOpen(true)}
+            aria-label="Abrir menú móvil"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
 
-              {/* Search */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSearchOpen(true)}
-                className="text-white hover:text-gray-300 transition-colors"
-              >
-                <Search className="w-6 h-6" />
-              </Button>
-
-              {/* User */}
-              <Link href="/cuenta" className="text-white hover:text-gray-300 transition-colors">
-                <User className="w-6 h-6" />
-              </Link>
-
-              {/* Cart */}
-              <Link href="/checkout" className="relative text-white hover:text-gray-300 transition-colors">
-                <ShoppingCart className="w-6 h-6" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="relative h-10 w-10">
+              <Image
+                src="/logo.png"
+                alt="717 Store Logo"
+                fill
+                className="object-contain filter invert transition-transform duration-300 group-hover:scale-110"
+              />
             </div>
-          </div>
+            <span className="text-2xl font-bold hidden sm:block transition-colors duration-300 group-hover:text-[#5D1A1D]">
+              717 Store
+            </span>
+          </Link>
 
-          {/* Center Logo */}
-          <div className="flex justify-center mb-6">
-            <Link href="/" className="flex items-center">
-              <div className="w-16 h-16 relative">
-                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
-              </div>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8 lg:space-x-10">
+            <Link href="/" className="text-lg font-medium hover:text-[#5D1A1D] transition-colors relative group">
+              Inicio
+              <span className="absolute left-0 bottom-0 h-0.5 bg-[#5D1A1D] w-0 transition-all duration-300 group-hover:w-full"></span>
             </Link>
-          </div>
+            <Link
+              href="/productos"
+              className="text-lg font-medium hover:text-[#5D1A1D] transition-colors relative group"
+            >
+              Productos
+              <span className="absolute left-0 bottom-0 h-0.5 bg-[#5D1A1D] w-0 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link
+              href="/contacto"
+              className="text-lg font-medium hover:text-[#5D1A1D] transition-colors relative group"
+            >
+              Contacto
+              <span className="absolute left-0 bottom-0 h-0.5 bg-[#5D1A1D] w-0 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link
+              href="/envios-devoluciones"
+              className="text-lg font-medium hover:text-[#5D1A1D] transition-colors relative group"
+            >
+              Envíos y Devoluciones
+              <span className="absolute left-0 bottom-0 h-0.5 bg-[#5D1A1D] w-0 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link href="/tallas" className="text-lg font-medium hover:text-[#5D1A1D] transition-colors relative group">
+              Guía de Tallas
+              <span className="absolute left-0 bottom-0 h-0.5 bg-[#5D1A1D] w-0 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+          </nav>
 
-          {/* Bottom Row - Navigation Links */}
-          <div className="flex justify-center">
-            <div className="hidden md:flex items-center space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-white hover:text-gray-300 transition-colors font-medium"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:text-gray-300 transition-colors"
-                onClick={() => setIsMenuOpen(true)}
-              >
-                <Menu className="w-6 h-6" />
+          {/* Right-aligned Icons */}
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-gray-800"
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Buscar productos"
+            >
+              <Search className="h-6 w-6" />
+            </Button>
+            <Link href="/cuenta" aria-label="Mi cuenta">
+              <Button variant="ghost" size="icon" className="text-white hover:bg-gray-800">
+                <User className="h-6 w-6" />
               </Button>
-            </div>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-white hover:bg-gray-800"
+              onClick={() => setIsCartSidebarOpen(true)}
+              aria-label={`Ver carrito, ${totalItems} items`}
+            >
+              <ShoppingCart className="h-6 w-6" />
+              {totalItems > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#5D1A1D] text-xs font-bold text-white">
+                  {totalItems}
+                </span>
+              )}
+            </Button>
+            <ThemeToggle />
           </div>
-        </nav>
+        </div>
       </header>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />}
+      {/* Mobile Menu Sidebar */}
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
-      {/* Search Modal */}
-      {isSearchOpen && <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />}
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={isCartSidebarOpen} onClose={() => setIsCartSidebarOpen(false)} />
+
+      {/* Product Search Overlay */}
+      <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   )
 }

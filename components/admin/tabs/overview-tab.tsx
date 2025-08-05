@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { TrendingUp, TrendingDown, Users, ShoppingBag, Package, DollarSign, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,9 +11,53 @@ import SalesChart from "@/components/admin/charts/sales-chart"
 import VisitorsChart from "@/components/admin/charts/visitors-chart"
 import ProductPerformanceChart from "@/components/admin/charts/product-performance-chart"
 import SalesByRegionChart from "@/components/admin/charts/sales-by-region-chart"
+import { getAllOrders, getAllProducts, getAllUsers } from "@/lib/database" // Importar funciones de la base de datos
 
 export default function OverviewTab() {
   const [timeRange, setTimeRange] = useState("7d")
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+    newCustomers: 0,
+    productsSold: 0,
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true)
+      const orders = await getAllOrders()
+      const products = await getAllProducts()
+      const users = await getAllUsers() // Asumiendo que getAllUsers devuelve todos los usuarios, incluyendo el admin
+
+      const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0)
+      const totalOrders = orders.length
+      const newCustomers = users.filter((user) => !user.isAdmin).length // Contar solo usuarios no admin como "nuevos clientes"
+      const productsSold = orders.reduce(
+        (sum, order) => sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0),
+        0,
+      )
+
+      setStats({
+        totalRevenue,
+        totalOrders,
+        newCustomers,
+        productsSold,
+      })
+      setLoading(false)
+    }
+    fetchStats()
+  }, [])
+
+  // Mock data for recent orders and low stock products (will be empty initially)
+  const recentOrders = []
+  const lowStockProducts = []
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-white">Cargando datos del dashboard...</div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -27,13 +71,13 @@ export default function OverviewTab() {
               </div>
               <Badge variant="outline" className="border-green-500 text-green-400 flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1" />
-                12.5%
+                0.0% {/* Placeholder, as initial is 0 */}
               </Badge>
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Ingresos Totales</p>
-              <h3 className="text-3xl font-bold">$24,780</h3>
-              <p className="text-gray-400 text-xs mt-1">Comparado con $22,032 el mes pasado</p>
+              <h3 className="text-3xl font-bold">${stats.totalRevenue.toLocaleString()}</h3>
+              <p className="text-gray-400 text-xs mt-1">Comparado con $0 el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -46,13 +90,13 @@ export default function OverviewTab() {
               </div>
               <Badge variant="outline" className="border-green-500 text-green-400 flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1" />
-                8.2%
+                0.0%
               </Badge>
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Pedidos Totales</p>
-              <h3 className="text-3xl font-bold">384</h3>
-              <p className="text-gray-400 text-xs mt-1">Comparado con 355 el mes pasado</p>
+              <h3 className="text-3xl font-bold">{stats.totalOrders}</h3>
+              <p className="text-gray-400 text-xs mt-1">Comparado con 0 el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -65,13 +109,13 @@ export default function OverviewTab() {
               </div>
               <Badge variant="outline" className="border-green-500 text-green-400 flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1" />
-                5.3%
+                0.0%
               </Badge>
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Nuevos Clientes</p>
-              <h3 className="text-3xl font-bold">128</h3>
-              <p className="text-gray-400 text-xs mt-1">Comparado con 121 el mes pasado</p>
+              <h3 className="text-3xl font-bold">{stats.newCustomers}</h3>
+              <p className="text-gray-400 text-xs mt-1">Comparado con 0 el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -84,13 +128,13 @@ export default function OverviewTab() {
               </div>
               <Badge variant="outline" className="border-red-500 text-red-400 flex items-center">
                 <TrendingDown className="w-3 h-3 mr-1" />
-                3.1%
+                0.0%
               </Badge>
             </div>
             <div className="mt-4">
               <p className="text-gray-400 text-sm">Productos Vendidos</p>
-              <h3 className="text-3xl font-bold">512</h3>
-              <p className="text-gray-400 text-xs mt-1">Comparado con 528 el mes pasado</p>
+              <h3 className="text-3xl font-bold">{stats.productsSold}</h3>
+              <p className="text-gray-400 text-xs mt-1">Comparado con 0 el mes pasado</p>
             </div>
           </CardContent>
         </Card>
@@ -112,7 +156,11 @@ export default function OverviewTab() {
               <SelectItem value="1y">Último año</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" className="border-gray-700 text-gray-400 hover:text-white">
+          <Button
+            variant="outline"
+            size="icon"
+            className="border-gray-700 text-gray-400 hover:text-white bg-transparent"
+          >
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>
@@ -203,7 +251,7 @@ export default function OverviewTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-white text-lg">Pedidos Recientes</CardTitle>
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800 bg-transparent">
               Ver Todos
             </Button>
           </div>
@@ -221,66 +269,38 @@ export default function OverviewTab() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  {
-                    id: "717001",
-                    customer: "Juan Pérez",
-                    date: "2024-01-15",
-                    total: "$129.99",
-                    status: "delivered",
-                  },
-                  {
-                    id: "717002",
-                    customer: "María López",
-                    date: "2024-01-14",
-                    total: "$89.98",
-                    status: "shipped",
-                  },
-                  {
-                    id: "717003",
-                    customer: "Carlos Rodríguez",
-                    date: "2024-01-14",
-                    total: "$64.99",
-                    status: "processing",
-                  },
-                  {
-                    id: "717004",
-                    customer: "Ana Martínez",
-                    date: "2024-01-13",
-                    total: "$54.98",
-                    status: "cancelled",
-                  },
-                  {
-                    id: "717005",
-                    customer: "Roberto Sánchez",
-                    date: "2024-01-13",
-                    total: "$112.50",
-                    status: "processing",
-                  },
-                ].map((order) => (
-                  <tr key={order.id} className="border-b border-gray-800">
-                    <td className="py-3 px-4">#{order.id}</td>
-                    <td className="py-3 px-4">{order.customer}</td>
-                    <td className="py-3 px-4">{new Date(order.date).toLocaleDateString()}</td>
-                    <td className="py-3 px-4">{order.total}</td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant="outline"
-                        className={`
-                          ${order.status === "delivered" && "border-green-600 text-green-400"}
-                          ${order.status === "shipped" && "border-blue-600 text-blue-400"}
-                          ${order.status === "processing" && "border-yellow-600 text-yellow-400"}
-                          ${order.status === "cancelled" && "border-red-600 text-red-400"}
-                        `}
-                      >
-                        {order.status === "delivered" && "Entregado"}
-                        {order.status === "shipped" && "Enviado"}
-                        {order.status === "processing" && "Procesando"}
-                        {order.status === "cancelled" && "Cancelado"}
-                      </Badge>
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center text-gray-400 py-8">
+                      No hay pedidos recientes.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  recentOrders.map((order) => (
+                    <tr key={order.id} className="border-b border-gray-800">
+                      <td className="py-3 px-4">#{order.id}</td>
+                      <td className="py-3 px-4">{order.customer}</td>
+                      <td className="py-3 px-4">{new Date(order.date).toLocaleDateString()}</td>
+                      <td className="py-3 px-4">{order.total}</td>
+                      <td className="py-3 px-4">
+                        <Badge
+                          variant="outline"
+                          className={`
+                            ${order.status === "delivered" && "border-green-600 text-green-400"}
+                            ${order.status === "shipped" && "border-blue-600 text-blue-400"}
+                            ${order.status === "processing" && "border-yellow-600 text-yellow-400"}
+                            ${order.status === "cancelled" && "border-red-600 text-red-400"}
+                          `}
+                        >
+                          {order.status === "delivered" && "Entregado"}
+                          {order.status === "shipped" && "Enviado"}
+                          {order.status === "processing" && "Procesando"}
+                          {order.status === "cancelled" && "Cancelado"}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -292,7 +312,7 @@ export default function OverviewTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-white text-lg">Productos con Bajo Stock</CardTitle>
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800 bg-transparent">
               Ver Inventario
             </Button>
           </div>
@@ -310,48 +330,31 @@ export default function OverviewTab() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  {
-                    name: "BIG DREAMS T-SHIRT",
-                    sku: "TS-BD-001",
-                    category: "Camisetas",
-                    stock: 3,
-                  },
-                  {
-                    name: "URBAN HOODIE",
-                    sku: "HD-UB-002",
-                    category: "Sudaderas",
-                    stock: 5,
-                  },
-                  {
-                    name: "CLASSIC CAP",
-                    sku: "CP-CL-004",
-                    category: "Accesorios",
-                    stock: 2,
-                  },
-                  {
-                    name: "BUCKET HAT",
-                    sku: "HT-BK-008",
-                    category: "Accesorios",
-                    stock: 4,
-                  },
-                ].map((product, index) => (
-                  <tr key={index} className="border-b border-gray-800">
-                    <td className="py-3 px-4">{product.name}</td>
-                    <td className="py-3 px-4">{product.sku}</td>
-                    <td className="py-3 px-4">{product.category}</td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className="border-red-600 text-red-400">
-                        {product.stock} unidades
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Button size="sm" className="bg-white text-black hover:bg-gray-200">
-                        Reabastecer
-                      </Button>
+                {lowStockProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center text-gray-400 py-8">
+                      No hay productos con bajo stock.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  lowStockProducts.map((product, index) => (
+                    <tr key={index} className="border-b border-gray-800">
+                      <td className="py-3 px-4">{product.name}</td>
+                      <td className="py-3 px-4">{product.sku}</td>
+                      <td className="py-3 px-4">{product.category}</td>
+                      <td className="py-3 px-4">
+                        <Badge variant="outline" className="border-red-600 text-red-400">
+                          {product.stock} unidades
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Button size="sm" className="bg-white text-black hover:bg-gray-200">
+                          Reabastecer
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

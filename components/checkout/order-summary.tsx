@@ -1,73 +1,74 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { useCart } from "@/lib/cart-context"
 import Image from "next/image"
-import { formatPrice } from "@/lib/products" // Assuming this utility exists
-
-interface CartItem {
-  productId: string
-  name: string
-  price: number
-  quantity: number
-  imageUrl: string
-  size?: string
-  color?: string
-}
 
 interface OrderSummaryProps {
-  subtotal: number
-  shipping: number
-  tax: number
-  total: number
-  cartItems?: CartItem[] // Optional: to display items in summary
+  shippingCost: number
 }
 
-export default function OrderSummary({ subtotal, shipping, tax, total, cartItems }: OrderSummaryProps) {
-  return (
-    <Card className="shadow-lg bg-gray-800 border-gray-700 text-white">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-semibold text-[#5D1A1D]">Resumen del Pedido</CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        {cartItems && cartItems.length > 0 && (
-          <div className="mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-            {cartItems.map((item) => (
-              <div key={item.productId + item.size + item.color} className="flex items-center mb-4 last:mb-0">
-                <Image
-                  src={item.imageUrl || "/placeholder.svg"}
-                  alt={item.name}
-                  width={64}
-                  height={64}
-                  className="rounded-md object-cover mr-4"
-                />
-                <div className="flex-1">
-                  <p className="font-medium text-gray-100">{item.name}</p>
-                  <p className="text-sm text-gray-400">
-                    Cantidad: {item.quantity} {item.size && `| Talla: ${item.size}`}
-                  </p>
-                </div>
-                <p className="font-semibold text-gray-100">{formatPrice(item.price * item.quantity)}</p>
-              </div>
-            ))}
-          </div>
-        )}
+export default function OrderSummary({ shippingCost }: OrderSummaryProps) {
+  const { cart, totalPrice } = useCart()
 
-        <div className="space-y-2 border-t border-gray-700 pt-4">
+  const subtotal = totalPrice
+  const taxRate = 0.08 // 8% de impuesto
+  const tax = subtotal * taxRate
+  const total = subtotal + shippingCost + tax
+
+  return (
+    <Card className="bg-gray-900 border-gray-800 text-white">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">Resumen del Pedido</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+          {cart.length === 0 ? (
+            <p className="text-gray-400 text-center">Tu carrito está vacío.</p>
+          ) : (
+            cart.map((item) => (
+              <div key={`${item.id}-${item.size}-${item.color}`} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Image
+                    src={item.image || "/placeholder.svg"}
+                    alt={item.name}
+                    width={60}
+                    height={60}
+                    className="rounded-md object-cover"
+                  />
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-sm text-gray-400">
+                      Cantidad: {item.quantity} {item.size && `| Talla: ${item.size}`}
+                      {item.color && `| Color: ${item.color}`}
+                    </p>
+                  </div>
+                </div>
+                <p className="font-medium">${(item.price * item.quantity).toLocaleString()}</p>
+              </div>
+            ))
+          )}
+        </div>
+
+        <Separator className="bg-gray-700" />
+
+        <div className="space-y-2">
           <div className="flex justify-between text-gray-300">
             <span>Subtotal:</span>
-            <span>{formatPrice(subtotal)}</span>
+            <span>${subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-gray-300">
             <span>Envío:</span>
-            <span>{formatPrice(shipping)}</span>
+            <span>${shippingCost.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-gray-300">
-            <span>Impuestos (IVA 19%):</span>
-            <span>{formatPrice(tax)}</span>
+            <span>Impuestos (8%):</span>
+            <span>${tax.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between text-xl font-bold text-[#5D1A1D] border-t border-gray-700 pt-4 mt-4">
+          <div className="flex justify-between text-lg font-bold text-white border-t border-gray-700 pt-2 mt-2">
             <span>Total:</span>
-            <span>{formatPrice(total)}</span>
+            <span>${total.toLocaleString()}</span>
           </div>
         </div>
       </CardContent>

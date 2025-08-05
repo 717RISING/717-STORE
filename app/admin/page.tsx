@@ -4,66 +4,49 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import AdminLogin from "@/components/admin/admin-login"
 import AdminDashboard from "@/components/admin/admin-dashboard"
+import { isAdmin as checkIsAdmin } from "@/lib/users" // Importar la función isAdmin
+import { useToast } from "@/hooks/use-toast"
 
 export default function AdminPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const { toast } = useToast()
 
-  // Check if admin is logged in on component mount
   useEffect(() => {
-    // Verificar autenticación de ADMIN (separada de usuarios normales)
-    const adminAuth = localStorage.getItem("adminAuth")
-    const adminUser = localStorage.getItem("adminUser")
-
-    console.log("Estado de auth de admin en localStorage:", adminAuth)
-    console.log("Datos de admin en localStorage:", adminUser)
-
-    if (adminAuth === "authenticated" && adminUser) {
-      try {
-        const userData = JSON.parse(adminUser)
-        if (userData.role === "admin") {
-          setIsLoggedIn(true)
-        } else {
-          // Si no es admin, limpiar localStorage
-          localStorage.removeItem("adminAuth")
-          localStorage.removeItem("adminUser")
-        }
-      } catch (error) {
-        console.error("Error parsing admin user data:", error)
-        localStorage.removeItem("adminAuth")
-        localStorage.removeItem("adminUser")
+    // En una aplicación real, esto se verificaría con una sesión de usuario persistente (cookies, tokens)
+    // Por ahora, simulamos una verificación rápida.
+    const checkAuth = async () => {
+      // Simular que el admin está logueado si hay un "token" o estado en localStorage
+      const adminEmail = localStorage.getItem("adminEmail")
+      if (adminEmail) {
+        const adminStatus = await checkIsAdmin(adminEmail)
+        setIsAuthenticated(adminStatus)
       }
+      setLoading(false)
     }
-    setIsLoading(false)
+    checkAuth()
   }, [])
 
-  const handleLogin = (success: boolean) => {
-    console.log("handleLogin de admin llamado con:", success)
-    if (success) {
-      setIsLoggedIn(true)
-    }
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true)
+    // En una aplicación real, guardarías un token o estado de sesión aquí
+    localStorage.setItem("adminEmail", "717days@gmail.com") // Simulación de sesión
   }
 
   const handleLogout = () => {
-    console.log("Cerrando sesión de admin...")
-    // Solo remover autenticación de admin, no de usuarios normales
-    localStorage.removeItem("adminAuth")
-    localStorage.removeItem("adminUser")
-    setIsLoggedIn(false)
+    setIsAuthenticated(false)
+    localStorage.removeItem("adminEmail") // Limpiar simulación de sesión
+    router.push("/admin") // Redirigir a la página de login
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-      </div>
-    )
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center bg-black text-white">Cargando...</div>
   }
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      {isLoggedIn ? <AdminDashboard onLogout={handleLogout} /> : <AdminLogin onLogin={handleLogin} />}
-    </div>
+  return isAuthenticated ? (
+    <AdminDashboard onLogout={handleLogout} />
+  ) : (
+    <AdminLogin onLoginSuccess={handleLoginSuccess} />
   )
 }

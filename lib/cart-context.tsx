@@ -1,79 +1,126 @@
 "use client"
 
-import type React from "react"
-import { createContext, useContext, useReducer, type ReactNode } from "react"
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
+import type { Product } from "./database"
 
-export interface CartItem {
-  id: string
+interface CartItem {
+  id: string // Product ID
   name: string
   price: number
-  size: string
   quantity: number
+  size: string
   image: string
+  color?: string
 }
 
-interface CartState {
-  items: CartItem[]
-  total: number
+interface CartContextType {
+  cart: CartItem[]
+  addToCart: (product: Product, quantity: number, size: string, color?: string) => void
+  removeFromCart: (id: string, size: string, color?: string) => void
+  updateQuantity: (id: string, size: string, newQuantity: number, color?: string) => void
+  clearCart: () => void
+  totalItems: number
+  totalPrice: number
 }
 
-type CartAction =
-  | { type: "ADD_ITEM"; payload: CartItem }
-  | { type: "REMOVE_ITEM"; payload: string }
-  | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
-  | { type: "CLEAR_CART" }
+const CartContext = createContext<CartContextType | undefined>(undefined)
 
-const CartContext = createContext<{
-  state: CartState
-  dispatch: React.Dispatch<CartAction>
-} | null>(null)
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = useState<CartItem[]>([])
 
-function cartReducer(state: CartState, action: CartAction): CartState {
-  switch (action.type) {
-    case "ADD_ITEM": {
-      const existingItemIndex = state.items.findIndex(
-        (item) => item.id === action.payload.id && item.size === action.payload.size,
+  // Load cart from localStorage on initial mount
+  useEffect(() => {
+    const storedCart = localStorage.getItem("717_cart")
+    if (storedCart) {
+      setCart(JSON.parse(storedCart))
+    }
+  }, [])
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("717_cart", JSON.stringify(cart))
+  }, [cart])
+
+  const addToCart = useCallback((product: Product, quantity: number, size: string, color?: string) => {
+    setCart((prevCart) => {
+      const existingItemIndex = prevCart.findIndex(
+        (item) => item.id === product.id && item.size === size && item.color === color,
       )
 
       if (existingItemIndex > -1) {
-        const updatedItems = [...state.items]
-        updatedItems[existingItemIndex].quantity += action.payload.quantity
-        const total = updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        return { items: updatedItems, total }
+        const updatedCart = [...prevCart]
+        updatedCart[existingItemIndex].quantity += quantity
+        toast.success(`Cantidad actualizada para ${product.name} (${size})`, {
+          description: `Ahora tienes ${updatedCart[existingItemIndex].quantity} unidades.`,
+        })
+        return updatedCart
       } else {
-        const newItems = [...state.items, action.payload]
-        const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        return { items: newItems, total }
+        const newItem: CartItem = {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity,
+          size,
+          image: product.imageUrl,
+          color,
+        }
+        toast.success(`${product.name} (${size}) añadido al carrito`, {
+          description: `Cantidad: ${quantity}`,
+        })
+        return [...prevCart, newItem]
       }
-    }
-    case "REMOVE_ITEM": {
-      const filteredItems = state.items.filter((item) => item.id !== action.payload)
-      const total = filteredItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      return { items: filteredItems, total }
-    }
-    case "UPDATE_QUANTITY": {
-      const updatedItems = state.items.map((item) =>
-        item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item,
+    })
+  }, [])
+
+  const removeFromCart = useCallback((id: string, size: string, color?: string) => {
+    setCart((prevCart) => {
+      const updatedCart = prevCart.filter((item) => !(item.id === id && item.size === size && item.color === color))
+      toast.info("Producto eliminado del carrito")
+      return updatedCart
+    })
+  }, [])
+
+  const updateQuantity = useCallback((id: string, size: string, newQuantity: number, color?: string) => {
+    setCart((prevCart) => {
+      if (newQuantity <= 0) {
+        return prevCart.filter((item) => !(item.id === id && item.size === size && item.color === color))
+      }
+      const updatedCart = prevCart.map((item) =>
+        item.id === id && item.size === size && item.color === color ? { ...item, quantity: newQuantity } : item,
       )
-      const total = updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      return { items: updatedItems, total }
-    }
-    case "CLEAR_CART":
-      return { items: [], total: 0 }
-    default:
-      return state
-  }
-}
+      toast.info("Cantidad del producto actualizada")
+      return updatedCart
+    })
+  }, [])
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 })
+  const clearCart = useCallback(() => {
+    setCart([])
+    toast.info("Carrito vaciado")
+  }, [])
 
-  return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  const value = React.useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      totalItems,
+      totalPrice,
+    }),
+    [cart, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice],
+  )
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 
 export function useCart() {
   const context = useContext(CartContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useCart must be used within a CartProvider")
   }
   return context

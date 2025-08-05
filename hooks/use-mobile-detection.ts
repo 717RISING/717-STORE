@@ -2,28 +2,15 @@
 
 import { useState, useEffect } from "react"
 
-interface MobileDetection {
-  isMobile: boolean
-  isTablet: boolean
-  isDesktop: boolean
-  touchSupport: boolean
-  screenWidth: number
-  screenHeight: number
-  orientation: "portrait" | "landscape"
-  deviceType: "mobile" | "tablet" | "desktop"
-}
-
-export function useMobileDetection(): MobileDetection {
-  const [detection, setDetection] = useState<MobileDetection>({
-    isMobile: false,
-    isTablet: false,
-    isDesktop: true,
-    touchSupport: false,
-    screenWidth: 1920,
-    screenHeight: 1080,
-    orientation: "landscape",
-    deviceType: "desktop",
-  })
+export function useMobileDetection() {
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(true)
+  const [touchSupport, setTouchSupport] = useState(false)
+  const [screenWidth, setScreenWidth] = useState(1920)
+  const [screenHeight, setScreenHeight] = useState(1080)
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">("landscape")
+  const [deviceType, setDeviceType] = useState<"mobile" | "tablet" | "desktop">("desktop")
 
   useEffect(() => {
     const updateDetection = () => {
@@ -39,16 +26,14 @@ export function useMobileDetection(): MobileDetection {
       if (isMobile) deviceType = "mobile"
       else if (isTablet) deviceType = "tablet"
 
-      setDetection({
-        isMobile,
-        isTablet,
-        isDesktop,
-        touchSupport,
-        screenWidth: width,
-        screenHeight: height,
-        orientation,
-        deviceType,
-      })
+      setIsMobile(isMobile)
+      setIsTablet(isTablet)
+      setIsDesktop(isDesktop)
+      setTouchSupport(touchSupport)
+      setScreenWidth(width)
+      setScreenHeight(height)
+      setOrientation(orientation)
+      setDeviceType(deviceType)
     }
 
     // Initial detection
@@ -64,5 +49,5 @@ export function useMobileDetection(): MobileDetection {
     }
   }, [])
 
-  return detection
+  return { isMobile, isTablet, isDesktop, touchSupport, screenWidth, screenHeight, orientation, deviceType }
 }

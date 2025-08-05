@@ -1,36 +1,30 @@
-// Script para configurar la base de datos inicial de 717 Store
-import { initializeDatabase, getDatabaseStats } from "../lib/database.js"
+// scripts/setup-database.js
+// Este script se puede usar para inicializar o resetear la base de datos mock.
+// Útil para desarrollo.
 
-async function setupDatabase() {
-  console.log("🚀 Configurando base de datos para 717 Store...")
+const { db, ADMIN_USER } = require("../lib/database")
 
-  try {
-    // Inicializar la base de datos
-    await initializeDatabase()
+function setupDatabase() {
+  console.log("Configurando la base de datos mock...")
 
-    // Obtener estadísticas
-    const stats = await getDatabaseStats()
+  // Resetear pedidos y usuarios (excepto el admin)
+  db.orders = []
+  db.users = [ADMIN_USER] // Asegurarse de que solo el admin esté presente
 
-    console.log("✅ Base de datos configurada exitosamente!")
-    console.log("📊 Estadísticas iniciales:")
-    console.log(`   - Usuarios: ${stats.totalUsers}`)
-    console.log(`   - Productos: ${stats.totalProducts}`)
-    console.log(`   - Pedidos: ${stats.totalOrders}`)
-    console.log(`   - Ingresos totales: $${stats.totalRevenue.toFixed(2)}`)
+  // Opcional: Resetear stock de productos si se desea
+  // db.products.forEach(product => {
+  //   for (const size in product.stock) {
+  //     product.stock[size] = 10; // O cualquier valor inicial
+  //   }
+  // });
 
-    console.log("\n🔧 Configuración de Edge Config:")
-    console.log(`   - ID: ${process.env.EDGE_CONFIG_ID || "ecfg_kupybbigsuqifbwn0sf5ru6hpltm"}`)
-    console.log("   - Estado: Conectado ✅")
-
-    console.log("\n📝 Próximos pasos:")
-    console.log("   1. Verificar que las variables de entorno estén configuradas")
-    console.log("   2. Probar el registro de usuarios")
-    console.log("   3. Realizar un pedido de prueba")
-    console.log("   4. Verificar el panel de administración")
-  } catch (error) {
-    console.error("❌ Error configurando la base de datos:", error)
-  }
+  console.log("Base de datos mock configurada. Pedidos vacíos, solo usuario admin.")
+  console.log(
+    "Productos disponibles:",
+    db.products.map((p) => p.name),
+  )
+  console.log("Usuario admin:", db.users[0].email)
 }
 
-// Ejecutar configuración
+// Ejecutar la función de configuración
 setupDatabase()

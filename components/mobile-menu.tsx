@@ -3,89 +3,129 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, User, Home, Package, Mail } from "lucide-react"
+import { X, Home, ShoppingBag, Phone, Truck, Ruler, Search, User, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import CartSidebar from "@/components/cart-sidebar"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { useCart } from "@/lib/cart-context"
 
-export default function MobileMenu() {
-  const [isOpen, setIsOpen] = useState(false)
+interface MobileMenuProps {
+  isOpen: boolean
+  onClose: () => void
+}
 
-  const closeMenu = () => setIsOpen(false)
+export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const { totalItems } = useCart()
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white hover:text-gray-300 md:hidden">
-          <Menu className="w-6 h-6" />
-        </Button>
-      </SheetTrigger>
+    <>
+      {/* Overlay */}
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-70 z-40 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+      ></div>
 
-      <SheetContent side="left" className="bg-black text-white border-gray-800 w-80">
-        <SheetHeader className="border-b border-gray-800 pb-6">
-          <SheetTitle className="text-white flex items-center justify-center">
-            <Link href="/" onClick={closeMenu} className="flex items-center">
-              <div className="w-12 h-12 relative">
-                <Image src="/logo.png" alt="717 Logo" fill className="object-contain filter invert" priority />
-              </div>
-            </Link>
-          </SheetTitle>
-        </SheetHeader>
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 w-64 bg-gray-900 text-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-gray-800">
+          <div className="flex items-center space-x-2">
+            <div className="relative h-8 w-8">
+              <Image src="/logo.png" alt="717 Store Logo" fill className="object-contain filter invert" />
+            </div>
+            <span className="text-xl font-bold">717 Store</span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Cerrar menú">
+            <X className="h-6 w-6 text-gray-400 hover:text-white" />
+          </Button>
+        </div>
 
-        <div className="flex flex-col h-full pt-6">
+        <div className="p-4 space-y-4">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-[#5D1A1D]"
+            />
+          </div>
+
           {/* Navigation Links */}
-          <nav className="flex-1 space-y-6">
+          <nav className="space-y-2">
             <Link
               href="/"
-              onClick={closeMenu}
-              className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
             >
-              <Home className="w-5 h-5" />
-              <span>INICIO</span>
+              <Home className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Inicio</span>
             </Link>
-
             <Link
               href="/productos"
-              onClick={closeMenu}
-              className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
             >
-              <Package className="w-5 h-5" />
-              <span>PRODUCTOS</span>
+              <ShoppingBag className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Productos</span>
             </Link>
-
             <Link
               href="/contacto"
-              onClick={closeMenu}
-              className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
             >
-              <Mail className="w-5 h-5" />
-              <span>CONTACTO</span>
+              <Phone className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Contacto</span>
+            </Link>
+            <Link
+              href="/envios-devoluciones"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
+            >
+              <Truck className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Envíos y Devoluciones</span>
+            </Link>
+            <Link
+              href="/tallas"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
+            >
+              <Ruler className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Guía de Tallas</span>
             </Link>
           </nav>
 
-          {/* Bottom Actions */}
-          <div className="border-t border-gray-800 pt-6 space-y-4">
+          <Separator className="bg-gray-800" />
+
+          {/* User and Cart Links */}
+          <div className="space-y-2">
             <Link
               href="/cuenta"
-              onClick={closeMenu}
-              className="flex items-center space-x-4 text-lg font-medium text-white hover:text-gray-300 transition-colors py-3 px-4 rounded-lg hover:bg-gray-800"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
             >
-              <User className="w-5 h-5" />
-              <span>MI CUENTA</span>
+              <User className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Mi Cuenta</span>
             </Link>
-
-            <div className="flex items-center justify-between py-3 px-4">
-              <span className="text-lg font-medium">CARRITO</span>
-              <CartSidebar />
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-gray-800 pt-4 pb-4">
-            <p className="text-center text-gray-400 text-sm">&copy; 2024 717 Store</p>
+            <Link
+              href="/checkout"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onClose}
+            >
+              <ShoppingCart className="h-5 w-5 text-gray-400" />
+              <span className="text-lg">Carrito ({totalItems})</span>
+            </Link>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </>
   )
 }

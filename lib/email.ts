@@ -1,221 +1,171 @@
-import nodemailer from "nodemailer"
-import type { Order, OrderItem } from "./database"
+// lib/email.ts
+// Este archivo contiene la lógica para el envío de correos electrónicos.
+// Utiliza Nodemailer para simular el envío a través de SMTP.
 
-// Configuración del transportador de correo (usando un mock para desarrollo)
-// En producción, usarías tus credenciales SMTP reales
+import nodemailer from "nodemailer"
+import type { Order } from "./database"
+
+// Configuración del transportador de Nodemailer
+// Asegúrate de que estas variables de entorno estén configuradas en tu .env.local o en Vercel
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.ethereal.email", // Ejemplo para desarrollo
+  host: process.env.SMTP_HOST,
   port: Number.parseInt(process.env.SMTP_PORT || "587"),
   secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER || "user@example.com", // Tu usuario SMTP
-    pass: process.env.SMTP_PASS || "password", // Tu contraseña SMTP
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 })
 
-const CORPORATE_EMAIL = process.env.EMAIL_FROM || "717days@gmail.com"
+const EMAIL_FROM = process.env.EMAIL_FROM || "717 Store <no-reply@717store.com>"
+const CORPORATE_EMAIL = "717days@gmail.com" // Correo corporativo fijo
 
-interface EmailTemplate {
-  subject: string
-  html: string
-  text: string
-}
+// --- Generación de Templates de Correo ---
 
-// Helper para formatear precios
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price)
-}
-
-// Genera el template HTML para la confirmación de pedido al cliente
-export function generateOrderConfirmationTemplate(order: Order): EmailTemplate {
+function generateOrderConfirmationTemplate(order: Order): { subject: string; html: string } {
   const itemsHtml = order.items
     .map(
-      (item: OrderItem) => `
-    <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-      <img src="${item.imageUrl}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px; margin-right: 15px;">
-      <div style="flex-grow: 1;">
-        <p style="margin: 0; font-weight: bold; color: #333;">${item.name}</p>
-        <p style="margin: 0; font-size: 12px; color: #666;">Talla: ${item.size || "N/A"} | Cantidad: ${item.quantity}</p>
-      </div>
-      <p style="margin: 0; font-weight: bold; color: #333;">${formatPrice(item.price * item.quantity)}</p>
-    </div>
-  `,
-    )
-    .join("")
-
-  const shippingInfoHtml = `
-    <p style="margin: 0; color: #555;"><strong>Nombre:</strong> ${order.shippingInfo.firstName} ${order.shippingInfo.lastName}</p>
-    <p style="margin: 0; color: #555;"><strong>Dirección:</strong> ${order.shippingInfo.address}, ${order.shippingInfo.city}, ${order.shippingInfo.state}, ${order.shippingInfo.zipCode}, ${order.shippingInfo.country}</p>
-    <p style="margin: 0; color: #555;"><strong>Teléfono:</strong> ${order.shippingInfo.phone}</p>
-    <p style="margin: 0; color: #555;"><strong>Email:</strong> ${order.shippingInfo.email}</p>
-  `
-
-  const subject = `Confirmación de tu pedido #${order.id} en 717 Store`
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-      <div style="background-color: #4A1518; padding: 20px; text-align: center; color: white;">
-        <h1 style="margin: 0;">¡Gracias por tu compra en 717 Store!</h1>
-        <p style="font-size: 14px;">Tu pedido #${order.id} ha sido confirmado.</p>
-      </div>
-      <div style="padding: 20px; background-color: #f9f9f9;">
-        <h2 style="color: #4A1518; border-bottom: 1px solid #eee; padding-bottom: 10px;">Detalles del Pedido</h2>
-        ${itemsHtml}
-        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-          <p style="display: flex; justify-content: space-between; margin: 5px 0; color: #333;"><span>Subtotal:</span> <span>${formatPrice(order.totalAmount - order.shippingInfo.cost)}</span></p>
-          <p style="display: flex; justify-content: space-between; margin: 5px 0; color: #333;"><span>Envío:</span> <span>${formatPrice(order.shippingInfo.cost)}</span></p>
-          <p style="display: flex; justify-content: space-between; margin: 5px 0; font-weight: bold; color: #4A1518; font-size: 18px;"><span>Total:</span> <span>${formatPrice(order.totalAmount)}</span></p>
+      (item) => `
+    <li style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center;">
+        <img src="${item.imageUrl}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 10px;">
+        <div>
+          <p style="margin: 0; font-weight: bold; color: #333;">${item.name}</p>
+          <p style="margin: 0; font-size: 12px; color: #666;">Cantidad: ${item.quantity} ${item.size ? `| Talla: ${item.size}` : ""}</p>
         </div>
-        <h2 style="color: #4A1518; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px;">Información de Envío</h2>
-        ${shippingInfoHtml}
-        <p style="margin-top: 20px; font-size: 14px; color: #666;">Te notificaremos cuando tu pedido sea enviado.</p>
       </div>
-      <div style="background-color: #eee; padding: 15px; text-align: center; font-size: 12px; color: #666;">
-        <p>&copy; ${new Date().getFullYear()} 717 Store. Todos los derechos reservados.</p>
-        <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:${CORPORATE_EMAIL}" style="color: #4A1518; text-decoration: none;">${CORPORATE_EMAIL}</a></p>
-      </div>
-    </div>
-  `
-  const text = `
-    ¡Gracias por tu compra en 717 Store!
-    Tu pedido #${order.id} ha sido confirmado.
-
-    Detalles del Pedido:
-    ${order.items.map((item: OrderItem) => `- ${item.name} (Talla: ${item.size || "N/A"}, Cantidad: ${item.quantity}) - ${formatPrice(item.price * item.quantity)}`).join("\n")}
-
-    Subtotal: ${formatPrice(order.totalAmount - order.shippingInfo.cost)}
-    Envío: ${formatPrice(order.shippingInfo.cost)}
-    Total: ${formatPrice(order.totalAmount)}
-
-    Información de Envío:
-    Nombre: ${order.shippingInfo.firstName} ${order.shippingInfo.lastName}
-    Dirección: ${order.shippingInfo.address}, ${order.shippingInfo.city}, ${order.shippingInfo.state}, ${order.shippingInfo.zipCode}, ${order.shippingInfo.country}
-    Teléfono: ${order.shippingInfo.phone}
-    Email: ${order.shippingInfo.email}
-
-    Te notificaremos cuando tu pedido sea enviado.
-    © ${new Date().getFullYear()} 717 Store. Todos los derechos reservados.
-    Si tienes alguna pregunta, contáctanos en ${CORPORATE_EMAIL}
-  `
-  return { subject, html, text }
-}
-
-// Genera el template HTML para la notificación de nuevo pedido al correo corporativo
-export function generateCorporateOrderNotificationTemplate(order: Order): EmailTemplate {
-  const itemsHtml = order.items
-    .map(
-      (item: OrderItem) => `
-    <li>
-      <strong>${item.name}</strong> (ID: ${item.productId}) - Talla: ${item.size || "N/A"}, Cantidad: ${item.quantity}, Precio Unitario: ${formatPrice(item.price)}
+      <span style="font-weight: bold; color: #333;">$${item.price.toLocaleString()}</span>
     </li>
   `,
     )
     .join("")
 
-  const subject = `NUEVO PEDIDO RECIBIDO: #${order.id} de ${order.shippingInfo.firstName} ${order.shippingInfo.lastName}`
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-      <div style="background-color: #5D1A1D; padding: 20px; text-align: center; color: white;">
-        <h1 style="margin: 0;">¡Nuevo Pedido en 717 Store!</h1>
-        <p style="font-size: 16px;">Se ha realizado un nuevo pedido en tu tienda.</p>
-      </div>
-      <div style="padding: 20px; background-color: #f9f9f9;">
-        <h2 style="color: #5D1A1D; border-bottom: 1px solid #eee; padding-bottom: 10px;">Detalles del Pedido #${order.id}</h2>
-        <p style="margin: 5px 0;"><strong>Fecha del Pedido:</strong> ${order.orderDate.toLocaleString("es-CO")}</p>
-        <p style="margin: 5px 0;"><strong>Estado del Pago:</strong> <span style="color: ${order.paymentStatus === "paid" ? "green" : "orange"}; font-weight: bold;">${order.paymentStatus.toUpperCase()}</span></p>
+  return {
+    subject: `Confirmación de Pedido #${order.id} - 717 Store`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="https://i.imgur.com/your-logo.png" alt="717 Store Logo" style="max-width: 150px; margin-bottom: 10px;">
+          <h1 style="color: #5D1A1D;">¡Gracias por tu compra!</h1>
+        </div>
+        <p>Hola ${order.customerName || order.customerEmail},</p>
+        <p>Tu pedido <strong>#${order.id}</strong> ha sido confirmado y está siendo procesado. Te notificaremos cuando sea enviado.</p>
         
-        <h3 style="color: #4A1518; margin-top: 20px;">Información del Cliente:</h3>
-        <p style="margin: 5px 0;"><strong>Nombre:</strong> ${order.shippingInfo.firstName} ${order.shippingInfo.lastName}</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> ${order.shippingInfo.email}</p>
-        <p style="margin: 5px 0;"><strong>Teléfono:</strong> ${order.shippingInfo.phone}</p>
-
-        <h3 style="color: #4A1518; margin-top: 20px;">Dirección de Envío:</h3>
-        <p style="margin: 5px 0;">${order.shippingInfo.address}</p>
-        <p style="margin: 5px 0;">${order.shippingInfo.city}, ${order.shippingInfo.state}, ${order.shippingInfo.zipCode}</p>
-        <p style="margin: 5px 0;">${order.shippingInfo.country}</p>
-
-        <h3 style="color: #4A1518; margin-top: 20px;">Artículos del Pedido:</h3>
+        <h2 style="color: #5D1A1D; border-bottom: 1px solid #eee; padding-bottom: 10px;">Resumen del Pedido</h2>
         <ul style="list-style: none; padding: 0;">
           ${itemsHtml}
         </ul>
-
-        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-          <p style="display: flex; justify-content: space-between; margin: 5px 0; color: #333;"><span>Subtotal:</span> <span>${formatPrice(order.totalAmount - order.shippingInfo.cost)}</span></p>
-          <p style="display: flex; justify-content: space-between; margin: 5px 0; color: #333;"><span>Costo de Envío:</span> <span>${formatPrice(order.shippingInfo.cost)}</span></p>
-          <p style="display: flex; justify-content: space-between; margin: 5px 0; font-weight: bold; color: #5D1A1D; font-size: 18px;"><span>Total del Pedido:</span> <span>${formatPrice(order.totalAmount)}</span></p>
+        
+        <div style="border-top: 1px solid #eee; padding-top: 10px; margin-top: 20px;">
+          <p style="display: flex; justify-content: space-between; font-weight: bold;"><span>Subtotal:</span><span>$${(order.totalAmount - order.shippingInfo.cost).toLocaleString()}</span></p>
+          <p style="display: flex; justify-content: space-between; font-weight: bold;"><span>Envío:</span><span>$${order.shippingInfo.cost.toLocaleString()}</span></p>
+          <p style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2em; color: #5D1A1D;"><span>Total:</span><span>$${order.totalAmount.toLocaleString()}</span></p>
         </div>
+
+        <h2 style="color: #5D1A1D; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Información de Envío</h2>
+        <p><strong>Nombre:</strong> ${order.shippingInfo.firstName} ${order.shippingInfo.lastName}</p>
+        <p><strong>Dirección:</strong> ${order.shippingInfo.address}, ${order.shippingInfo.city}, ${order.shippingInfo.state}, ${order.shippingInfo.zipCode}, ${order.shippingInfo.country}</p>
+        <p><strong>Teléfono:</strong> ${order.shippingInfo.phone}</p>
+        <p><strong>Email:</strong> ${order.shippingInfo.email}</p>
+
+        <p style="text-align: center; margin-top: 30px; font-size: 12px; color: #999;">
+          Si tienes alguna pregunta, por favor contáctanos en <a href="mailto:${CORPORATE_EMAIL}" style="color: #5D1A1D; text-decoration: none;">${CORPORATE_EMAIL}</a>.
+        </p>
+        <p style="text-align: center; font-size: 12px; color: #999;">
+          &copy; ${new Date().getFullYear()} 717 Store. Todos los derechos reservados.
+        </p>
       </div>
-      <div style="background-color: #eee; padding: 15px; text-align: center; font-size: 12px; color: #666;">
-        <p>Este es un correo de notificación automática. Por favor, no respondas a este email.</p>
-        <p>&copy; ${new Date().getFullYear()} 717 Store. Todos los derechos reservados.</p>
-      </div>
-    </div>
-  `
-  const text = `
-    NUEVO PEDIDO EN 717 STORE: #${order.id}
-
-    Se ha realizado un nuevo pedido en tu tienda.
-
-    Detalles del Pedido #${order.id}:
-    Fecha del Pedido: ${order.orderDate.toLocaleString("es-CO")}
-    Estado del Pago: ${order.paymentStatus.toUpperCase()}
-
-    Información del Cliente:
-    Nombre: ${order.shippingInfo.firstName} ${order.shippingInfo.lastName}
-    Email: ${order.shippingInfo.email}
-    Teléfono: ${order.shippingInfo.phone}
-
-    Dirección de Envío:
-    ${order.shippingInfo.address}
-    ${order.shippingInfo.city}, ${order.shippingInfo.state}, ${order.shippingInfo.zipCode}
-    ${order.shippingInfo.country}
-
-    Artículos del Pedido:
-    ${order.items.map((item: OrderItem) => `- ${item.name} (ID: ${item.productId}) - Talla: ${item.size || "N/A"}, Cantidad: ${item.quantity}, Precio Unitario: ${formatPrice(item.price)}`).join("\n")}
-
-    Subtotal: ${formatPrice(order.totalAmount - order.shippingInfo.cost)}
-    Costo de Envío: ${formatPrice(order.shippingInfo.cost)}
-    Total del Pedido: ${formatPrice(order.totalAmount)}
-
-    Este es un correo de notificación automática.
-  `
-  return { subject, html, text }
-}
-
-// Función para enviar correo de confirmación al cliente
-export async function sendOrderConfirmationToCustomer(order: Order) {
-  const { subject, html, text } = generateOrderConfirmationTemplate(order)
-  try {
-    await transporter.sendMail({
-      from: CORPORATE_EMAIL, // Remitente
-      to: order.customerEmail, // Destinatario (cliente)
-      subject: subject,
-      html: html,
-      text: text,
-    })
-    console.log(`Correo de confirmación enviado a: ${order.customerEmail}`)
-  } catch (error) {
-    console.error(`Error al enviar correo de confirmación a ${order.customerEmail}:`, error)
+    `,
   }
 }
 
-// Función para enviar notificación de nuevo pedido al correo corporativo
-export async function sendCorporateOrderNotification(order: Order) {
-  const { subject, html, text } = generateCorporateOrderNotificationTemplate(order)
+function generateCorporateOrderNotificationTemplate(order: Order): { subject: string; html: string } {
+  const itemsHtml = order.items
+    .map(
+      (item) => `
+    <li style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+      <span>${item.name} (${item.size || "N/A"}) x ${item.quantity}</span>
+      <span>$${item.price.toLocaleString()}</span>
+    </li>
+  `,
+    )
+    .join("")
+
+  return {
+    subject: `NUEVO PEDIDO #${order.id} - 717 Store`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="color: #5D1A1D;">¡Nuevo Pedido Recibido!</h1>
+          <p style="font-size: 14px; color: #666;">Se ha realizado un nuevo pedido en tu tienda 717 Store.</p>
+        </div>
+        
+        <p><strong>ID del Pedido:</strong> <span style="color: #5D1A1D; font-weight: bold;">#${order.id}</span></p>
+        <p><strong>Fecha del Pedido:</strong> ${order.orderDate.toLocaleDateString()} ${order.orderDate.toLocaleTimeString()}</p>
+        <p><strong>Estado de Pago:</strong> <span style="color: ${order.paymentStatus === "paid" ? "#28a745" : "#dc3545"}; font-weight: bold;">${order.paymentStatus.toUpperCase()}</span></p>
+        
+        <h2 style="color: #5D1A1D; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Detalles del Cliente</h2>
+        <p><strong>Nombre:</strong> ${order.customerName || "N/A"}</p>
+        <p><strong>Email:</strong> ${order.customerEmail}</p>
+        <p><strong>Teléfono:</strong> ${order.shippingInfo.phone}</p>
+
+        <h2 style="color: #5D1A1D; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Productos del Pedido</h2>
+        <ul style="list-style: none; padding: 0;">
+          ${itemsHtml}
+        </ul>
+        
+        <div style="border-top: 1px solid #eee; padding-top: 10px; margin-top: 20px;">
+          <p style="display: flex; justify-content: space-between; font-weight: bold;"><span>Subtotal:</span><span>$${(order.totalAmount - order.shippingInfo.cost).toLocaleString()}</span></p>
+          <p style="display: flex; justify-content: space-between; font-weight: bold;"><span>Envío:</span><span>$${order.shippingInfo.cost.toLocaleString()}</span></p>
+          <p style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2em; color: #5D1A1D;"><span>Total del Pedido:</span><span>$${order.totalAmount.toLocaleString()}</span></p>
+        </div>
+
+        <h2 style="color: #5D1A1D; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Dirección de Envío</h2>
+        <p>${order.shippingInfo.firstName} ${order.shippingInfo.lastName}</p>
+        <p>${order.shippingInfo.address}</p>
+        <p>${order.shippingInfo.city}, ${order.shippingInfo.state} ${order.shippingInfo.zipCode}</p>
+        <p>${order.shippingInfo.country}</p>
+
+        <p style="text-align: center; margin-top: 30px; font-size: 12px; color: #999;">
+          Este es un correo de notificación automática. Por favor, no respondas a este mensaje.
+        </p>
+      </div>
+    `,
+  }
+}
+
+// --- Funciones de Envío de Correo ---
+
+export async function sendCorporateOrderNotification(order: Order): Promise<boolean> {
   try {
+    const { subject, html } = generateCorporateOrderNotificationTemplate(order)
     await transporter.sendMail({
-      from: CORPORATE_EMAIL, // Remitente
-      to: CORPORATE_EMAIL, // Destinatario (correo corporativo)
+      from: EMAIL_FROM,
+      to: CORPORATE_EMAIL,
       subject: subject,
       html: html,
-      text: text,
     })
-    console.log(`Notificación de nuevo pedido enviada a: ${CORPORATE_EMAIL}`)
+    console.log(`Notificación de pedido #${order.id} enviada a ${CORPORATE_EMAIL}`)
+    return true
   } catch (error) {
-    console.error(`Error al enviar notificación de nuevo pedido a ${CORPORATE_EMAIL}:`, error)
+    console.error(`Error al enviar notificación corporativa para el pedido #${order.id}:`, error)
+    return false
+  }
+}
+
+export async function sendOrderConfirmationToCustomer(order: Order): Promise<boolean> {
+  try {
+    const { subject, html } = generateOrderConfirmationTemplate(order)
+    await transporter.sendMail({
+      from: EMAIL_FROM,
+      to: order.customerEmail,
+      subject: subject,
+      html: html,
+    })
+    console.log(`Confirmación de pedido #${order.id} enviada a ${order.customerEmail}`)
+    return true
+  } catch (error) {
+    console.error(`Error al enviar confirmación al cliente para el pedido #${order.id}:`, error)
+    return false
   }
 }

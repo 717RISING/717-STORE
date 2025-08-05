@@ -1,16 +1,16 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { Plus, Edit, Trash2, CreditCard, Shield } from "lucide-react"
+import { Plus, Edit, Trash2, CreditCard, Shield, ShoppingCartIcon as Paypal, Banknote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { toast } from "sonner"
 
 // Mock payment methods data
 const mockPaymentMethods = [
@@ -38,14 +38,14 @@ export default function PaymentTab() {
   const [paymentMethods, setPaymentMethods] = useState(mockPaymentMethods)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingMethod, setEditingMethod] = useState<any>(null)
-  const [formData, setFormData] = useState({
-    cardNumber: "",
-    expiryMonth: "",
-    expiryYear: "",
-    cvv: "",
-    holderName: "",
-  })
-  const { toast } = useToast()
+  const [paymentMethod, setPaymentMethod] = useState("card")
+  const [cardName, setCardName] = useState("")
+  const [cardNumber, setCardNumber] = useState("")
+  const [expiryDate, setExpiryDate] = useState("")
+  const [cvv, setCvv] = useState("")
+  const [paypalEmail, setPaypalEmail] = useState("")
+  const [bankName, setBankName] = useState("")
+  const [accountNumber, setAccountNumber] = useState("")
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -56,15 +56,26 @@ export default function PaymentTab() {
   }
 
   const handleAddPaymentMethod = () => {
-    setEditingMethod(null)
-    setFormData({
-      cardNumber: "",
-      expiryMonth: "",
-      expiryYear: "",
-      cvv: "",
-      holderName: "",
+    // Aquí iría la lógica para añadir el método de pago a la base de datos
+    console.log("Añadiendo método de pago:", {
+      paymentMethod,
+      cardName,
+      cardNumber,
+      expiryDate,
+      cvv,
+      paypalEmail,
+      bankName,
+      accountNumber,
     })
-    setIsDialogOpen(true)
+    toast.success("Método de pago añadido correctamente.")
+    // Limpiar campos después de añadir
+    setCardName("")
+    setCardNumber("")
+    setExpiryDate("")
+    setCvv("")
+    setPaypalEmail("")
+    setBankName("")
+    setAccountNumber("")
   }
 
   const handleEditPaymentMethod = (method: any) => {
@@ -98,10 +109,7 @@ export default function PaymentTab() {
             : method,
         ),
       )
-      toast({
-        title: "Método de pago actualizado",
-        description: "El método de pago ha sido actualizado exitosamente.",
-      })
+      toast.success("Método de pago actualizado")
     } else {
       const newMethod = {
         id: Date.now().toString(),
@@ -113,20 +121,14 @@ export default function PaymentTab() {
         isDefault: paymentMethods.length === 0,
       }
       setPaymentMethods((prev) => [...prev, newMethod])
-      toast({
-        title: "Método de pago agregado",
-        description: "El nuevo método de pago ha sido agregado exitosamente.",
-      })
+      toast.success("Método de pago agregado correctamente")
     }
     setIsDialogOpen(false)
   }
 
   const handleDeletePaymentMethod = (id: string) => {
     setPaymentMethods((prev) => prev.filter((method) => method.id !== id))
-    toast({
-      title: "Método de pago eliminado",
-      description: "El método de pago ha sido eliminado exitosamente.",
-    })
+    toast.success("Método de pago eliminado")
   }
 
   const handleSetDefault = (id: string) => {
@@ -136,10 +138,7 @@ export default function PaymentTab() {
         isDefault: method.id === id,
       })),
     )
-    toast({
-      title: "Método de pago predeterminado actualizado",
-      description: "El método de pago predeterminado ha sido cambiado.",
-    })
+    toast.success("Método de pago predeterminado actualizado")
   }
 
   const getCardType = (cardNumber: string) => {
@@ -207,6 +206,14 @@ export default function PaymentTab() {
     }))
   }
 
+  const [formData, setFormData] = useState({
+    cardNumber: "",
+    expiryMonth: "",
+    expiryYear: "",
+    cvv: "",
+    holderName: "",
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -226,89 +233,157 @@ export default function PaymentTab() {
               <DialogTitle>{editingMethod ? "Editar" : "Agregar"} Método de Pago</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="cardNumber" className="text-gray-300">
-                  Número de Tarjeta
-                </Label>
-                <Input
-                  id="cardNumber"
-                  name="cardNumber"
-                  value={formData.cardNumber}
-                  onChange={handleCardNumberChange}
-                  placeholder="1234-5678-9012-3456"
-                  maxLength={19}
-                  className="bg-gray-800 border-gray-700 text-white"
-                />
-              </div>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={setPaymentMethod}
+                className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="card" id="card" className="text-[#5D1A1D]" />
+                  <Label htmlFor="card" className="flex items-center space-x-2 text-gray-300">
+                    <CreditCard className="w-5 h-5" />
+                    <span>Tarjeta de Crédito/Débito</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="paypal" id="paypal" className="text-[#5D1A1D]" />
+                  <Label htmlFor="paypal" className="flex items-center space-x-2 text-gray-300">
+                    <Paypal className="w-5 h-5" />
+                    <span>PayPal</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="transfer" id="transfer" className="text-[#5D1A1D]" />
+                  <Label htmlFor="transfer" className="flex items-center space-x-2 text-gray-300">
+                    <Banknote className="w-5 h-5" />
+                    <span>Transferencia Bancaria</span>
+                  </Label>
+                </div>
+              </RadioGroup>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="expiryMonth" className="text-gray-300">
-                    Mes
-                  </Label>
-                  <select
-                    id="expiryMonth"
-                    name="expiryMonth"
-                    value={formData.expiryMonth}
-                    onChange={handleInputChange}
-                    className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
-                  >
-                    <option value="">Mes</option>
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <option key={i + 1} value={(i + 1).toString().padStart(2, "0")}>
-                        {(i + 1).toString().padStart(2, "0")}
-                      </option>
-                    ))}
-                  </select>
+              {paymentMethod === "card" && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="cardName" className="text-gray-300">
+                      Nombre en la Tarjeta
+                    </Label>
+                    <Input
+                      id="cardName"
+                      value={formData.holderName}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, holderName: e.target.value }))}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cardNumber" className="text-gray-300">
+                      Número de Tarjeta
+                    </Label>
+                    <Input
+                      id="cardNumber"
+                      name="cardNumber"
+                      value={formData.cardNumber}
+                      onChange={handleCardNumberChange}
+                      placeholder="1234-5678-9012-3456"
+                      maxLength={19}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="expiryMonth" className="text-gray-300">
+                      Mes
+                    </Label>
+                    <select
+                      id="expiryMonth"
+                      name="expiryMonth"
+                      value={formData.expiryMonth}
+                      onChange={handleInputChange}
+                      className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
+                    >
+                      <option value="">Mes</option>
+                      {Array.from({ length: 12 }, (_, i) => (
+                        <option key={i + 1} value={(i + 1).toString().padStart(2, "0")}>
+                          {(i + 1).toString().padStart(2, "0")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="expiryYear" className="text-gray-300">
+                      Año
+                    </Label>
+                    <select
+                      id="expiryYear"
+                      name="expiryYear"
+                      value={formData.expiryYear}
+                      onChange={handleInputChange}
+                      className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
+                    >
+                      <option value="">Año</option>
+                      {Array.from({ length: 10 }, (_, i) => (
+                        <option key={i} value={(new Date().getFullYear() + i).toString()}>
+                          {new Date().getFullYear() + i}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="cvv" className="text-gray-300">
+                      CVV
+                    </Label>
+                    <Input
+                      id="cvv"
+                      name="cvv"
+                      value={formData.cvv}
+                      onChange={handleInputChange}
+                      placeholder="123"
+                      maxLength={4}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
                 </div>
+              )}
+
+              {paymentMethod === "paypal" && (
                 <div>
-                  <Label htmlFor="expiryYear" className="text-gray-300">
-                    Año
-                  </Label>
-                  <select
-                    id="expiryYear"
-                    name="expiryYear"
-                    value={formData.expiryYear}
-                    onChange={handleInputChange}
-                    className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
-                  >
-                    <option value="">Año</option>
-                    {Array.from({ length: 10 }, (_, i) => (
-                      <option key={i} value={(new Date().getFullYear() + i).toString()}>
-                        {new Date().getFullYear() + i}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="cvv" className="text-gray-300">
-                    CVV
+                  <Label htmlFor="paypalEmail" className="text-gray-300">
+                    Correo Electrónico de PayPal
                   </Label>
                   <Input
-                    id="cvv"
-                    name="cvv"
-                    value={formData.cvv}
-                    onChange={handleInputChange}
-                    placeholder="123"
-                    maxLength={4}
+                    id="paypalEmail"
+                    type="email"
+                    value={paypalEmail}
+                    onChange={(e) => setPaypalEmail(e.target.value)}
                     className="bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
-              </div>
+              )}
 
-              <div>
-                <Label htmlFor="holderName" className="text-gray-300">
-                  Nombre del Titular
-                </Label>
-                <Input
-                  id="holderName"
-                  name="holderName"
-                  value={formData.holderName}
-                  onChange={handleInputChange}
-                  placeholder="Nombre como aparece en la tarjeta"
-                  className="bg-gray-800 border-gray-700 text-white"
-                />
-              </div>
+              {paymentMethod === "transfer" && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="bankName" className="text-gray-300">
+                      Nombre del Banco
+                    </Label>
+                    <Input
+                      id="bankName"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="accountNumber" className="text-gray-300">
+                      Número de Cuenta
+                    </Label>
+                    <Input
+                      id="accountNumber"
+                      value={accountNumber}
+                      onChange={(e) => setAccountNumber(e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center gap-2 p-3 bg-gray-800 rounded-lg">
                 <Shield className="w-5 h-5 text-green-400" />
