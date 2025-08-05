@@ -3,174 +3,168 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
+import ShippingForm from "@/components/checkout/shipping-form"
+import PaymentForm from "@/components/checkout/payment-form"
+import OrderSummary from "@/components/checkout/order-summary"
+import EnhancedButton from "@/components/enhanced-button"
 import { createOrder } from "@/lib/orders"
-import type { OrderItem, ShippingInfo, PaymentInfo } from "@/lib/database"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ShippingForm } from "@/components/checkout/shipping-form"
-import { PaymentForm } from "@/components/checkout/payment-form"
-import { OrderSummary } from "@/components/checkout/order-summary"
-import { toast } from "@/hooks/use-toast"
-import { AdaptiveLoader } from "@/components/loaders/adaptive-loader"
-import { useMobileDetection } from "@/hooks/use-mobile-detection"
+import type { CartItem, ShippingInfo, PaymentInfo } from "@/lib/database"
+import { formatPrice } from "@/lib/products"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 export default function CheckoutPage() {
-  const { cartItems, calculateTotal, clearCart } = useCart()
+  const { state: cartState, dispatch } = useCart()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("shipping")
-  const [shippingInfo, setShippingInfo] = useState<ShippingInfo | null>(null)
-  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const { isMobile } = useMobileDetection()
+
+  const [shippingData, setShippingData] = useState<ShippingInfo>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "Colombia",
+    cost: 0, // Default shipping cost
+  })
+
+  const [paymentData, setPaymentData] = useState<PaymentInfo>({
+    method: "card",
+    cardDetails: {
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardName: "",
+    },
+  })
+
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
+  const [loading, setLoading] = useState(false)
+
+  const subtotal = cartState.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const shippingCost = subtotal >= 300000 ? 0 : 10000 // Envío gratis para pedidos de 300.000 COP o más
+  const taxRate = 0.19 // 19% IVA
+  const tax = subtotal * taxRate
+  const total = subtotal + shippingCost + tax
 
   useEffect(() => {
-    if (cartItems.length === 0 && !isProcessing) {
-      router.push("/productos")
-      toast({
-        title: "Tu carrito está vacío",
-        description: "Por favor, añade productos antes de proceder al pago.",
-        variant: "destructive",
-      })
-    }
-  }, [cartItems, router, isProcessing])
+    // Update shipping cost in shippingData when subtotal changes
+    setShippingData((prev) => ({ ...prev, cost: shippingCost }))
+  }, [shippingCost])
 
-  const handleShippingSubmit = (data: ShippingInfo) => {
-    setShippingInfo(data)
-    setActiveTab("payment")
-  }
+  const handlePlaceOrder = async () => {
+    setLoading(true)
 
-  const handlePaymentSubmit = (data: PaymentInfo) => {
-    setPaymentInfo(data)
-    // Proceed to place order
-    handlePlaceOrder(data)
-  }
-
-  const handlePlaceOrder = async (paymentData: PaymentInfo) => {
-    if (!shippingInfo || cartItems.length === 0) {
-      toast({
-        title: "Error en el pedido",
-        description: "Faltan detalles de envío o productos en el carrito.",
-        variant: "destructive",
-      })
+    // Validar que el carrito no esté vacío
+    if (cartState.items.length === 0) {
+      toast.error("Tu carrito está vacío. Por favor, añade productos antes de continuar.")
+      setLoading(false)
       return
     }
 
-    setIsProcessing(true)
+    // Validar datos de envío
+    const requiredShippingFields: Array<keyof ShippingInfo> = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "address",
+      "city",
+      "state",
+      "zipCode",
+    ]
+    const missingShippingFields = requiredShippingFields.filter((field) => !shippingData[field])
 
-    const orderItems: OrderItem[] = cartItems.map((item) => ({
-      productId: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      size: item.size,
-      imageUrl: item.image,
-    }))
+    if (missingShippingFields.length > 0) {
+      toast.error(`Por favor, completa todos los campos de envío: ${missingShippingFields.join(", ")}.`)
+      setLoading(false)
+      return
+    }
 
-    const { subtotal, tax, shippingCost, total } = calculateTotal()
+    // Validar datos de pago según el método
+    if (paymentData.method === "card") {
+      const requiredCardFields = ["cardName", "cardNumber", "expiryDate", "cvv"]
+      const missingCardFields = requiredCardFields.filter(
+        (field) => !paymentData.cardDetails || !paymentData.cardDetails[field as keyof typeof paymentData.cardDetails],
+      )
+      if (missingCardFields.length > 0) {
+        toast.error(`Por favor, completa todos los campos de la tarjeta: ${missingCardFields.join(", ")}.`)
+        setLoading(false)
+        return
+      }
+    }
+    // Aquí podrías añadir validaciones para PayPal o Transferencia Bancaria si fueran necesarias
 
     try {
-      const newOrder = await createOrder({
-        customerEmail: shippingInfo.email,
-        items: orderItems,
-        subtotal: subtotal,
-        tax: tax,
-        shipping: {
-          ...shippingInfo,
-          cost: shippingCost,
-        },
-        payment: paymentData,
-        status: "Pendiente", // Initial status
-      })
+      // Simular el procesamiento del pago
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simula un retraso de 2 segundos
 
-      clearCart()
-      toast({
-        title: "¡Pedido realizado con éxito!",
-        description: `Tu pedido #${newOrder.id} ha sido confirmado.`,
-        variant: "success",
-      })
-      router.push(`/checkout/confirmacion?orderId=${newOrder.id}`)
+      // Crear el pedido en la "base de datos"
+      const orderItems: CartItem[] = cartState.items.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        imageUrl: item.imageUrl,
+        size: item.size,
+        color: item.color,
+      }))
+
+      const newOrder = await createOrder(orderItems, shippingData, total, shippingData.email)
+
+      if (newOrder) {
+        dispatch({ type: "CLEAR_CART" }) // Limpiar el carrito después de la compra exitosa
+        toast.success("¡Pedido realizado con éxito! Redirigiendo a la confirmación...")
+        router.push(`/checkout/confirmacion?orderId=${newOrder.id}&status=success`)
+      } else {
+        toast.error("Hubo un error al procesar tu pedido. Por favor, inténtalo de nuevo.")
+        router.push(`/checkout/confirmacion?status=failed`)
+      }
     } catch (error) {
-      console.error("Error al crear el pedido:", error)
-      toast({
-        title: "Error al procesar el pedido",
-        description: "Hubo un problema al finalizar tu compra. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      })
+      console.error("Error durante el proceso de compra:", error)
+      toast.error("Ocurrió un error inesperado. Por favor, inténtalo de nuevo.")
+      router.push(`/checkout/confirmacion?status=failed`)
     } finally {
-      setIsProcessing(false)
+      setLoading(false)
     }
   }
 
-  if (cartItems.length === 0 && !isProcessing) {
-    return null // Redirect handled by useEffect
-  }
-
-  if (isProcessing) {
-    return <AdaptiveLoader type={isMobile ? "mobile-checkout" : "checkout"} />
-  }
-
-  const { subtotal, tax, shippingCost, total } = calculateTotal()
-
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12 min-h-[calc(100vh-100px)]">
-      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100">
-        Finalizar Compra
-      </h1>
+    <div className="container mx-auto px-4 py-8 md:py-12 bg-gray-950 text-white min-h-[calc(100vh-100px)]">
+      <h1 className="text-4xl font-extrabold text-center mb-8 text-[#5D1A1D]">Finalizar Compra</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 dark:bg-gray-800">
-              <TabsTrigger value="shipping" className="data-[state=active]:bg-[#5D1A1D] data-[state=active]:text-white">
-                1. Envío
-              </TabsTrigger>
-              <TabsTrigger
-                value="payment"
-                className="data-[state=active]:bg-[#5D1A1D] data-[state=active]:text-white"
-                disabled={!shippingInfo}
-              >
-                2. Pago
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="shipping">
-              <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                  <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                    Información de Envío
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <ShippingForm onSubmit={handleShippingSubmit} initialData={shippingInfo || undefined} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="payment">
-              <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                  <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                    Información de Pago
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <PaymentForm onSubmit={handlePaymentSubmit} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+        {/* Shipping and Payment Forms */}
+        <div className="lg:col-span-2 space-y-8">
+          <ShippingForm
+            data={shippingData}
+            onChange={setShippingData}
+            onBillingSameAsShipping={setBillingSameAsShipping}
+          />
+          <PaymentForm data={paymentData} onChange={setPaymentData} />
         </div>
 
-        <div className="lg:col-span-1">
-          <OrderSummary
-            items={cartItems}
-            subtotal={subtotal}
-            tax={tax}
-            shippingCost={shippingCost}
-            total={total}
-            onPlaceOrder={() => handlePlaceOrder(paymentInfo!)} // This button is now handled by PaymentForm
-            isPlaceOrderDisabled={!shippingInfo || !paymentInfo || isProcessing}
-          />
+        {/* Order Summary and Place Order Button */}
+        <div className="lg:col-span-1 space-y-8">
+          <OrderSummary subtotal={subtotal} shipping={shippingCost} tax={tax} total={total} />
+          <EnhancedButton
+            onClick={handlePlaceOrder}
+            className="w-full py-3 text-lg font-semibold"
+            variant="modern"
+            loading={loading}
+            disabled={loading || cartState.items.length === 0}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              `Pagar ${formatPrice(total)}`
+            )}
+          </EnhancedButton>
         </div>
       </div>
     </div>

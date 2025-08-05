@@ -29,9 +29,9 @@ export default function OrderSummary({ subtotal, shipping, tax, total }: OrderSu
         {/* Items */}
         <div className="space-y-3">
           {state.items.map((item) => (
-            <div key={item.id} className="flex items-center space-x-3">
+            <div key={item.productId} className="flex items-center space-x-3">
               <div className="relative w-12 h-12 bg-gray-800 rounded-lg overflow-hidden">
-                <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                <Image src={item.imageUrl || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-medium truncate">{item.name}</p>

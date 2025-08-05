@@ -1,51 +1,60 @@
-import type { Order } from "./database"
+import { db, type Order, type OrderItem, type ShippingInfo } from "./database"
 import { sendCorporateOrderNotification, sendOrderConfirmationToCustomer } from "./email"
 
-// Simulación de base de datos de pedidos
-const orders: Order[] = []
-
-export async function createOrder(orderData: Omit<Order, "id" | "createdAt">): Promise<Order> {
-  const newOrder: Order = {
-    id: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    createdAt: new Date().toISOString(),
-    ...orderData,
-  }
-  orders.push(newOrder)
-
-  // Enviar notificación al correo corporativo
-  const corporateEmailSent = await sendCorporateOrderNotification(newOrder)
-  if (!corporateEmailSent) {
-    console.error("Error al enviar la notificación al correo corporativo.")
-    // Aquí podrías implementar un sistema de reintento o alerta
-  } else {
-    console.log("Notificación de pedido enviada al correo corporativo.")
-  }
-
-  // Enviar confirmación al cliente
-  const customerEmailSent = await sendOrderConfirmationToCustomer(newOrder)
-  if (!customerEmailSent) {
-    console.error("Error al enviar la confirmación al cliente.")
-    // Aquí podrías implementar un sistema de reintento o alerta
-  } else {
-    console.log("Confirmación de pedido enviada al cliente.")
-  }
-
-  return newOrder
+// Función para generar un ID único para el pedido
+function generateOrderId(): string {
+  return `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 }
 
-export async function getOrderById(id: string): Promise<Order | undefined> {
-  return orders.find((order) => order.id === id)
+// Función para crear un nuevo pedido
+export async function createOrder(
+  items: OrderItem[],
+  shippingInfo: ShippingInfo,
+  totalAmount: number,
+  customerEmail: string,
+): Promise<Order | null> {
+  try {
+    const newOrder: Order = {
+      id: generateOrderId(),
+      customerEmail: customerEmail,
+      items: items,
+      shippingInfo: shippingInfo,
+      totalAmount: totalAmount,
+      orderDate: new Date(),
+      status: "pending", // O "processing" dependiendo del flujo de pago
+      paymentStatus: "paid", // Asumimos que el pago ya se procesó
+    }
+
+    db.orders.push(newOrder) // Guardar en la base de datos mock
+
+    // Enviar notificaciones por correo
+    await sendCorporateOrderNotification(newOrder)
+    await sendOrderConfirmationToCustomer(newOrder)
+
+    console.log(`Pedido ${newOrder.id} creado y notificaciones enviadas.`)
+    return newOrder
+  } catch (error) {
+    console.error("Error al crear el pedido:", error)
+    return null
+  }
 }
 
+// Función para obtener un pedido por su ID
+export async function getOrderById(orderId: string): Promise<Order | null> {
+  return db.orders.find((order) => order.id === orderId) || null
+}
+
+// Función para obtener todos los pedidos (para el panel de administración)
 export async function getAllOrders(): Promise<Order[]> {
-  return orders
+  return db.orders
 }
 
-export async function updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
-  const orderIndex = orders.findIndex((order) => order.id === id)
-  if (orderIndex > -1) {
-    orders[orderIndex].status = status
-    return orders[orderIndex]
+// Función para actualizar el estado de un pedido
+export async function updateOrderStatus(orderId: string, newStatus: Order["status"]): Promise<boolean> {
+  const orderIndex = db.orders.findIndex((order) => order.id === orderId)
+  if (orderIndex !== -1) {
+    db.orders[orderIndex].status = newStatus
+    return true
   }
-  return undefined
+  return false
 }

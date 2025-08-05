@@ -4,26 +4,29 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { CreditCard, Smartphone, Building } from "lucide-react"
-
-interface PaymentData {
-  method: "card" | "paypal" | "transfer"
-  cardNumber: string
-  expiryDate: string
-  cvv: string
-  cardName: string
-}
+import type { PaymentInfo } from "@/lib/database" // Importar la interfaz PaymentInfo
 
 interface PaymentFormProps {
-  data: PaymentData
-  onChange: (data: PaymentData) => void
+  data: PaymentInfo
+  onChange: (data: PaymentInfo) => void
 }
 
 export default function PaymentForm({ data, onChange }: PaymentFormProps) {
-  const handleInputChange = (field: keyof PaymentData, value: string) => {
-    onChange({ ...data, [field]: value })
+  const handleInputChange = (field: string, value: string) => {
+    if (data.method === "card") {
+      onChange({
+        ...data,
+        cardDetails: {
+          ...data.cardDetails,
+          [field]: value,
+        },
+      })
+    } else if (data.method === "paypal") {
+      onChange({ ...data, paypalEmail: value })
+    }
   }
 
-  const handleMethodChange = (method: "card" | "paypal" | "transfer") => {
+  const handleMethodChange = (method: "card" | "paypal" | "bank_transfer") => {
     onChange({ ...data, method })
   }
 
@@ -51,7 +54,7 @@ export default function PaymentForm({ data, onChange }: PaymentFormProps) {
           </div>
 
           <div className="flex items-center space-x-2 p-4 border border-gray-700 rounded-lg">
-            <RadioGroupItem value="transfer" id="transfer" className="border-[#5D1A1D] text-[#5D1A1D]" />
+            <RadioGroupItem value="bank_transfer" id="transfer" className="border-[#5D1A1D] text-[#5D1A1D]" />
             <Label htmlFor="transfer" className="flex items-center gap-2 text-white cursor-pointer">
               <Building className="w-5 h-5" />
               Transferencia Bancaria
@@ -67,7 +70,7 @@ export default function PaymentForm({ data, onChange }: PaymentFormProps) {
               </Label>
               <Input
                 id="cardName"
-                value={data.cardName}
+                value={data.cardDetails?.cardName || ""}
                 onChange={(e) => handleInputChange("cardName", e.target.value)}
                 className="bg-gray-800 border-gray-700 text-white"
                 placeholder="Juan Pérez"
@@ -81,7 +84,7 @@ export default function PaymentForm({ data, onChange }: PaymentFormProps) {
               </Label>
               <Input
                 id="cardNumber"
-                value={data.cardNumber}
+                value={data.cardDetails?.cardNumber || ""}
                 onChange={(e) => handleInputChange("cardNumber", e.target.value)}
                 className="bg-gray-800 border-gray-700 text-white"
                 placeholder="1234 5678 9012 3456"
@@ -97,7 +100,7 @@ export default function PaymentForm({ data, onChange }: PaymentFormProps) {
                 </Label>
                 <Input
                   id="expiryDate"
-                  value={data.expiryDate}
+                  value={data.cardDetails?.expiryDate || ""}
                   onChange={(e) => handleInputChange("expiryDate", e.target.value)}
                   className="bg-gray-800 border-gray-700 text-white"
                   placeholder="MM/AA"
@@ -111,7 +114,7 @@ export default function PaymentForm({ data, onChange }: PaymentFormProps) {
                 </Label>
                 <Input
                   id="cvv"
-                  value={data.cvv}
+                  value={data.cardDetails?.cvv || ""}
                   onChange={(e) => handleInputChange("cvv", e.target.value)}
                   className="bg-gray-800 border-gray-700 text-white"
                   placeholder="123"
@@ -129,7 +132,7 @@ export default function PaymentForm({ data, onChange }: PaymentFormProps) {
           </div>
         )}
 
-        {data.method === "transfer" && (
+        {data.method === "bank_transfer" && (
           <div className="p-4 bg-gray-800 rounded-lg space-y-2">
             <p className="text-white text-sm font-medium">Datos para transferencia:</p>
             <p className="text-gray-400 text-sm">Banco: 717 Bank</p>

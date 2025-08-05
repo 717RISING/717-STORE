@@ -7,22 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Truck } from "lucide-react"
-
-interface ShippingData {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  address: string
-  city: string
-  state: string
-  zipCode: string
-  country: string
-}
+import type { ShippingInfo } from "@/lib/database" // Importar la interfaz ShippingInfo
 
 interface ShippingFormProps {
-  data: ShippingData
-  onChange: (data: ShippingData) => void
+  data: ShippingInfo
+  onChange: (data: ShippingInfo) => void
   onBillingSameAsShipping: (same: boolean) => void
 }
 
@@ -88,7 +77,7 @@ const MAIN_CITIES = [
 export default function ShippingForm({ data, onChange, onBillingSameAsShipping }: ShippingFormProps) {
   const [billingSame, setBillingSame] = useState(true)
 
-  const handleInputChange = (field: keyof ShippingData, value: string) => {
+  const handleInputChange = (field: keyof ShippingInfo, value: string) => {
     onChange({
       ...data,
       [field]: value,
