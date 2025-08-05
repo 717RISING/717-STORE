@@ -1,80 +1,73 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useCart } from "@/lib/cart-context"
-import { formatPrice } from "@/lib/products"
-import { ShoppingBag } from "lucide-react"
 import Image from "next/image"
+import { formatPrice } from "@/lib/products" // Assuming this utility exists
+
+interface CartItem {
+  productId: string
+  name: string
+  price: number
+  quantity: number
+  imageUrl: string
+  size?: string
+  color?: string
+}
 
 interface OrderSummaryProps {
   subtotal: number
   shipping: number
   tax: number
   total: number
+  cartItems?: CartItem[] // Optional: to display items in summary
 }
 
-export default function OrderSummary({ subtotal, shipping, tax, total }: OrderSummaryProps) {
-  const { state } = useCart()
-
+export default function OrderSummary({ subtotal, shipping, tax, total, cartItems }: OrderSummaryProps) {
   return (
-    <Card className="bg-gray-900 border-gray-800">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <ShoppingBag className="w-5 h-5 text-[#5D1A1D]" />
-          Resumen del Pedido
-        </CardTitle>
+    <Card className="shadow-lg bg-gray-800 border-gray-700 text-white">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-semibold text-[#5D1A1D]">Resumen del Pedido</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Items */}
-        <div className="space-y-3">
-          {state.items.map((item) => (
-            <div key={item.productId} className="flex items-center space-x-3">
-              <div className="relative w-12 h-12 bg-gray-800 rounded-lg overflow-hidden">
-                <Image src={item.imageUrl || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+      <CardContent className="p-6">
+        {cartItems && cartItems.length > 0 && (
+          <div className="mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            {cartItems.map((item) => (
+              <div key={item.productId + item.size + item.color} className="flex items-center mb-4 last:mb-0">
+                <Image
+                  src={item.imageUrl || "/placeholder.svg"}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="rounded-md object-cover mr-4"
+                />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-100">{item.name}</p>
+                  <p className="text-sm text-gray-400">
+                    Cantidad: {item.quantity} {item.size && `| Talla: ${item.size}`}
+                  </p>
+                </div>
+                <p className="font-semibold text-gray-100">{formatPrice(item.price * item.quantity)}</p>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{item.name}</p>
-                <p className="text-gray-400 text-xs">
-                  Talla: {item.size} • Cantidad: {item.quantity}
-                </p>
-              </div>
-              <p className="text-white text-sm font-semibold">{formatPrice(item.price * item.quantity)}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        <Separator className="bg-gray-700" />
-
-        {/* Totals */}
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-gray-700 pt-4">
           <div className="flex justify-between text-gray-300">
-            <span>Subtotal</span>
+            <span>Subtotal:</span>
             <span>{formatPrice(subtotal)}</span>
           </div>
           <div className="flex justify-between text-gray-300">
-            <span>Envío</span>
-            <span>{shipping === 0 ? "GRATIS" : formatPrice(shipping)}</span>
+            <span>Envío:</span>
+            <span>{formatPrice(shipping)}</span>
           </div>
           <div className="flex justify-between text-gray-300">
-            <span>IVA (19%)</span>
+            <span>Impuestos (IVA 19%):</span>
             <span>{formatPrice(tax)}</span>
           </div>
-          <Separator className="bg-gray-700" />
-          <div className="flex justify-between text-white text-lg font-bold">
-            <span>Total</span>
+          <div className="flex justify-between text-xl font-bold text-[#5D1A1D] border-t border-gray-700 pt-4 mt-4">
+            <span>Total:</span>
             <span>{formatPrice(total)}</span>
-          </div>
-        </div>
-
-        {/* Shipping Info */}
-        <div className="bg-gray-800 p-3 rounded-lg">
-          <h4 className="text-white text-sm font-semibold mb-2">Información de Envío</h4>
-          <div className="text-gray-300 text-xs space-y-1">
-            <p>• Medellín: 2-3 días hábiles</p>
-            <p>• Ciudades principales: 3-5 días hábiles</p>
-            <p>• Resto del país: 5-7 días hábiles</p>
-            <p className="text-[#5D1A1D] font-semibold">• Envío GRATIS en pedidos sobre {formatPrice(300000)}</p>
           </div>
         </div>
       </CardContent>

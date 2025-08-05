@@ -1,18 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { CreditCard, Shield, CheckCircle, Smartphone } from "lucide-react"
+import { CreditCard, Shield, CheckCircle, Smartphone, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface MobileCheckoutLoaderProps {
   size?: "sm" | "md" | "lg"
   step?: "processing" | "validating" | "confirming"
   touchFeedback?: boolean
+  className?: string
 }
 
 export default function MobileCheckoutLoader({
   size = "md",
   step = "processing",
   touchFeedback = true,
+  className,
 }: MobileCheckoutLoaderProps) {
   const [progress, setProgress] = useState(0)
   const [currentIcon, setCurrentIcon] = useState(0)
@@ -59,7 +62,12 @@ export default function MobileCheckoutLoader({
   const IconComponent = icons[currentIcon]
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-6 p-6 touch-manipulation">
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center space-y-6 p-6 touch-manipulation h-screen bg-gray-950 text-white",
+        className,
+      )}
+    >
       {/* Mobile Payment Interface */}
       <div className="relative">
         {/* Phone Frame */}
@@ -71,7 +79,11 @@ export default function MobileCheckoutLoader({
                 touchPulse ? "scale-95" : "scale-100"
               }`}
             >
-              <IconComponent className="w-10 h-10 text-white" />
+              {step === "processing" ? (
+                <IconComponent className="w-10 h-10 text-white" />
+              ) : (
+                <Loader2 className="h-12 w-12 text-[#5D1A1D] animate-spin" />
+              )}
             </div>
 
             {/* Mobile Progress Ring - Thicker for visibility */}

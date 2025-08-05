@@ -36,13 +36,13 @@
   }
 
   .dark {
-    --background: 222.2 47.4% 11.2%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 47.4% 11.2%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 47.4% 11.2%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
@@ -62,7 +62,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 210 40% 98%;
   }
 }
 
@@ -75,44 +75,37 @@
   }
 }
 
-/* Custom Chat Scrollbar */
-.chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #5d1a1d #2d2d2d;
-}
-
-.chat-scrollbar::-webkit-scrollbar {
+/* Custom scrollbar for Webkit browsers */
+::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
-.chat-scrollbar::-webkit-scrollbar-track {
-  background: #2d2d2d;
-  border-radius: 4px;
+::-webkit-scrollbar-track {
+  background: #1a1a1a; /* Dark background for the track */
+  border-radius: 10px;
 }
 
-.chat-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #5d1a1d 0%, #8b2635 100%);
-  border-radius: 4px;
-  border: 1px solid #404040;
+::-webkit-scrollbar-thumb {
+  background: #5d1a1d; /* Vinotinto color for the thumb */
+  border-radius: 10px;
 }
 
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #6b1e22 0%, #9b2a3a 100%);
+::-webkit-scrollbar-thumb:hover {
+  background: #4a1518; /* Slightly darker vinotinto on hover */
 }
 
-.chat-scrollbar::-webkit-scrollbar-corner {
-  background: #2d2d2d;
+/* Focus ring utility class */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-[#4a1518] focus:ring-offset-2;
 }
 
-/* Mobile Chat Scrollbar */
-@media (max-width: 768px) {
-  .chat-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
+.focus-ring-dark {
+  @apply focus:outline-none focus:ring-2 focus:ring-[#5D1A1D] focus:ring-offset-2;
 }
 
-/* Custom Animations */
-@keyframes fade-in {
+/* Animations */
+@keyframes fade-in-up {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -123,562 +116,112 @@
   }
 }
 
-@keyframes slide-up {
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+@keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
 }
 
 @keyframes slide-in-right {
   from {
+    transform: translateX(100%);
     opacity: 0;
-    transform: translateX(30px);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0% {
-    box-shadow: 0 0 0 0 rgba(74, 21, 24, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(74, 21, 24, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(74, 21, 24, 0);
-  }
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes bounce-subtle {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
     opacity: 1;
   }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes neon-glow-dark {
-  0%,
-  100% {
-    box-shadow: 0 0 5px #5d1a1d, 0 0 10px #5d1a1d, 0 0 15px #5d1a1d;
-  }
-  50% {
-    box-shadow: 0 0 10px #5d1a1d, 0 0 20px #5d1a1d, 0 0 30px #5d1a1d;
-  }
-}
-
-@keyframes neon-glow-light {
-  0%,
-  100% {
-    box-shadow: 0 0 3px #5d1a1d, 0 0 6px #5d1a1d, 0 0 9px #5d1a1d;
-  }
-  50% {
-    box-shadow: 0 0 6px #5d1a1d, 0 0 12px #5d1a1d, 0 0 18px #5d1a1d;
-  }
-}
-
-@keyframes cyber-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 5px #4a1518, 0 0 10px #4a1518, 0 0 15px #4a1518;
-  }
-  50% {
-    box-shadow: 0 0 10px #6b1e22, 0 0 20px #6b1e22, 0 0 30px #6b1e22;
-  }
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@keyframes orbit {
-  0% {
-    transform: rotate(0deg) translateX(20px) translateY(0px) rotate(0deg);
-    opacity: 0.6;
-  }
-  25% {
-    transform: rotate(90deg) translateX(20px) translateY(0px) rotate(-90deg);
-    opacity: 0.8;
-  }
-  50% {
-    transform: rotate(180deg) translateX(20px) translateY(0px) rotate(-180deg);
-    opacity: 1;
-  }
-  75% {
-    transform: rotate(270deg) translateX(20px) translateY(0px) rotate(-270deg);
-    opacity: 0.8;
-  }
-  100% {
-    transform: rotate(360deg) translateX(20px) translateY(0px) rotate(-360deg);
-    opacity: 0.6;
-  }
-}
-
-/* Animation Classes */
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.8s ease-out forwards;
-}
-
-.animate-slide-in-left {
-  animation: slide-in-left 0.6s ease-out forwards;
 }
 
 .animate-slide-in-right {
-  animation: slide-in-right 0.6s ease-out forwards;
+  animation: slide-in-right 0.3s ease-out forwards;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
-.animate-twinkle {
-  animation: twinkle 1.5s ease-in-out infinite;
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-out forwards;
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-bounce-subtle {
-  animation: bounce-subtle 2s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s linear infinite;
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-neon-glow-dark {
-  animation: neon-glow-dark 1.5s ease-in-out infinite alternate;
-}
-
-.animate-neon-glow-light {
-  animation: neon-glow-light 1.5s ease-in-out infinite alternate;
-}
-
-.animate-cyber-glow {
-  animation: cyber-glow 2s ease-in-out infinite alternate;
-}
-
-.animate-ripple {
-  animation: ripple 0.6s linear forwards;
-}
-
-.animate-orbit {
-  animation: orbit 4s linear infinite;
-}
-
-/* Modern Border Radius */
-.rounded-modern {
-  border-radius: 8px;
-}
-
+/* Modern border radius */
 .rounded-modern-lg {
-  border-radius: 12px;
+  border-radius: 1rem; /* Adjust as needed for desired "modern" look */
 }
 
-.rounded-modern-xl {
-  border-radius: 16px;
+/* Chatbot specific styles */
+.chat-message-user {
+  background-color: #5d1a1d; /* Vinotinto */
+  color: white;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+  max-width: 80%;
+  align-self: flex-end;
 }
 
-.rounded-modern-2xl {
-  border-radius: 20px;
+.chat-message-ai {
+  background-color: #333; /* Dark gray */
+  color: white;
+  border-radius: 1rem 1rem 1rem 0.25rem;
+  padding: 0.75rem 1rem;
+  max-width: 80%;
+  align-self: flex-start;
 }
 
-/* Rounded Corners for Dark Mode */
-.dark .rounded-modern {
-  border-radius: 8px;
+.chat-input-container {
+  background-color: #1a1a1a; /* Darker background for input */
+  border-top: 1px solid #444;
+  padding: 1rem;
 }
 
-.dark .rounded-modern-lg {
-  border-radius: 12px;
+.chat-input {
+  background-color: #2a2a2a; /* Even darker for input field */
+  color: white;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
 }
 
-.dark .rounded-modern-xl {
-  border-radius: 16px;
+.chat-send-button {
+  background-color: #5d1a1d; /* Vinotinto */
+  color: white;
 }
 
-.dark .rounded-modern-2xl {
-  border-radius: 20px;
+.chat-send-button:hover {
+  background-color: #4a1518; /* Darker vinotinto on hover */
 }
 
-/* Shadows */
-.shadow-dark {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+.chat-suggestions-container {
+  background-color: #1a1a1a;
+  border-top: 1px solid #444;
+  padding: 0.5rem 1rem;
 }
 
-.shadow-light {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.chat-suggestion-button {
+  background-color: #333;
+  color: white;
+  border: 1px solid #5d1a1d;
 }
 
-.shadow-glow-dark {
-  box-shadow: 0 0 10px rgba(74, 21, 24, 0.5);
-}
-
-.shadow-glow-light {
-  box-shadow: 0 0 10px rgba(74, 21, 24, 0.3);
-}
-
-.shadow-pulse-dark {
-  box-shadow: 0 0 15px rgba(74, 21, 24, 0.7);
-}
-
-.shadow-pulse-light {
-  box-shadow: 0 0 15px rgba(74, 21, 24, 0.4);
-}
-
-.shadow-modern-dark {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-}
-
-.shadow-modern-light {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Glass Effects */
-.glass-effect {
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.glass-dark {
-  backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Card Styles */
-.card-light {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.card-dark {
-  background: rgba(17, 24, 39, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.card-modern {
-  background: rgba(17, 24, 39, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-}
-
-.hover-glassmorphism-dark:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-}
-
-.hover-glassmorphism-light:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
-
-/* Button Effects */
-.button-press {
-  transition: all 0.1s ease;
-}
-
-.button-press:active {
-  transform: scale(0.95);
-}
-
-.button-modern {
-  transition: all 0.3s ease-in-out;
-}
-
-.hover-lift-modern:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-.hover-magnetic-modern:hover {
-  transform: scale(1.02);
-}
-
-.hover-glow-modern:hover {
-  box-shadow: 0 0 15px rgba(74, 21, 24, 0.6);
-}
-
-.hover-neon-modern:hover {
-  box-shadow: 0 0 10px #5d1a1d, 0 0 20px #5d1a1d, 0 0 30px #5d1a1d;
-}
-
-.hover-3d-modern:hover {
-  transform: perspective(1000px) rotateX(5deg) translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* General Scrollbar Styles */
-::-webkit-scrollbar {
-  width: 8px; /* Width of the scrollbar */
-  height: 8px; /* Height of the scrollbar for horizontal scroll */
-}
-
-::-webkit-scrollbar-track {
-  background: #2a0a0c; /* Darker background for the track */
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #5d1a1d; /* Vinotinto color for the scrollbar handle */
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #4a1518; /* Slightly darker vinotinto on hover */
-}
-
-html {
-  scrollbar-width: thin; /* "auto" or "thin" */
-  scrollbar-color: #5d1a1d #2a0a0c; /* thumb color track color */
-}
-
-/* Focus States */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-[#4a1518] focus:ring-offset-2;
-}
-
-.focus-ring-dark {
-  @apply focus:outline-none focus:ring-2 focus:ring-[#5d1a1d] focus:ring-offset-2;
-}
-
-.focus-visible:focus-visible {
-  outline: 2px solid #5d1a1d;
-  outline-offset: 2px;
-}
-
-/* Utility Classes */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Mobile-specific responsive design */
-@media (max-width: 768px) {
-  /* Disable hover effects on mobile */
-  .hover-lift-modern:hover {
-    transform: none;
-    box-shadow: none;
-  }
-
-  .hover-glow:hover {
-    box-shadow: none;
-  }
-
-  /* Optimize animations for mobile */
-  .animate-fade-in {
-    animation-duration: 0.4s;
-  }
-
-  .animate-slide-up {
-    animation-duration: 0.5s;
-  }
-
-  /* Better touch targets */
-  button {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Reduce backdrop blur for performance */
-  .card-light,
-  .card-dark,
-  .card-modern {
-    backdrop-filter: blur(5px);
-  }
-
-  .glass-effect,
-  .glass-dark {
-    backdrop-filter: blur(5px);
-  }
-
-  /* Mobile typography */
-  body {
-    font-size: 16px; /* Prevents zoom on iOS */
-    -webkit-text-size-adjust: 100%;
-  }
-}
-
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .card-light {
-    border: 2px solid #000;
-  }
-
-  .card-dark {
-    border: 2px solid #fff;
-  }
-}
-
-/* Reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .hover-lift-modern:hover {
-    transform: none;
-  }
-}
-
-/* Estilos personalizados para 717 Store */
-.brand-gradient {
-  background: linear-gradient(135deg, #5d1a1d 0%, #8b2635 100%);
-}
-
-.text-brand {
-  color: #5d1a1d;
-}
-
-.bg-brand {
-  background-color: #5d1a1d;
-}
-
-.border-brand {
-  border-color: #5d1a1d;
-}
-
-/* Estilos para el chat */
-.chat-message {
-  animation: fadeInUp 0.3s ease-out;
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-}
-
-/* Ensure full height for layout */
-html,
-body,
-#__next {
-  height: 100%;
-  min-height: 100vh;
-}
-
-/* For chat widget positioning */
-.chat-widget-container {
-  position: fixed;
-  bottom: 1rem; /* Adjust as needed */
-  right: 1rem; /* Adjust as needed */
-  z-index: 1000; /* Ensure it's above other content */
-}
-
-/* Responsive adjustments for chat widget */
-@media (max-width: 768px) {
-  .chat-widget-container {
-    bottom: 0.5rem;
-    right: 0.5rem;
-  }
+.chat-suggestion-button:hover {
+  background-color: #4a1518;
 }

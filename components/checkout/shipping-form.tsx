@@ -1,13 +1,28 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type React from "react"
+
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Truck } from "lucide-react"
-import type { ShippingInfo } from "@/lib/database" // Importar la interfaz ShippingInfo
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "sonner"
+
+interface ShippingInfo {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  cost: number // Costo de envío
+}
 
 interface ShippingFormProps {
   data: ShippingInfo
@@ -15,230 +30,220 @@ interface ShippingFormProps {
   onBillingSameAsShipping: (same: boolean) => void
 }
 
-const COLOMBIA_DEPARTMENTS = [
-  "Amazonas",
-  "Antioquia",
-  "Arauca",
-  "Atlántico",
-  "Bolívar",
-  "Boyacá",
-  "Caldas",
-  "Caquetá",
-  "Casanare",
-  "Cauca",
-  "Cesar",
-  "Chocó",
-  "Córdoba",
-  "Cundinamarca",
-  "Guainía",
-  "Guaviare",
-  "Huila",
-  "La Guajira",
-  "Magdalena",
-  "Meta",
-  "Nariño",
-  "Norte de Santander",
-  "Putumayo",
-  "Quindío",
-  "Risaralda",
-  "San Andrés y Providencia",
-  "Santander",
-  "Sucre",
-  "Tolima",
-  "Valle del Cauca",
-  "Vaupés",
-  "Vichada",
-  "Bogotá D.C.",
-]
-
-const MAIN_CITIES = [
-  "Medellín",
-  "Bogotá",
-  "Cali",
-  "Barranquilla",
-  "Cartagena",
-  "Bucaramanga",
-  "Pereira",
-  "Santa Marta",
-  "Ibagué",
-  "Cúcuta",
-  "Villavicencio",
-  "Manizales",
-  "Neiva",
-  "Soledad",
-  "Armenia",
-  "Valledupar",
-  "Montería",
-  "Itagüí",
-  "Pasto",
-  "Palmira",
-]
-
 export default function ShippingForm({ data, onChange, onBillingSameAsShipping }: ShippingFormProps) {
-  const [billingSame, setBillingSame] = useState(true)
+  const [billingChecked, setBillingChecked] = useState(true)
 
-  const handleInputChange = (field: keyof ShippingInfo, value: string) => {
-    onChange({
-      ...data,
-      [field]: value,
-    })
+  useEffect(() => {
+    onBillingSameAsShipping(billingChecked)
+  }, [billingChecked, onBillingSameAsShipping])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    onChange({ ...data, [name]: value })
   }
 
-  const handleBillingSameChange = (checked: boolean) => {
-    setBillingSame(checked)
-    onBillingSameAsShipping(checked)
+  const handleSelectChange = (name: string, value: string) => {
+    onChange({ ...data, [name]: value })
   }
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(String(email).toLowerCase())
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Basic validation
+    if (
+      !data.firstName ||
+      !data.lastName ||
+      !data.email ||
+      !data.phone ||
+      !data.address ||
+      !data.city ||
+      !data.state ||
+      !data.zipCode
+    ) {
+      toast.error("Por favor, completa todos los campos de envío.")
+      return
+    }
+    if (!validateEmail(data.email)) {
+      toast.error("Por favor, introduce un email válido.")
+      return
+    }
+    // If validation passes, the parent component will handle the next step
+    toast.success("Información de envío guardada.")
+  }
+
+  const colombianStates = [
+    "Amazonas",
+    "Antioquia",
+    "Arauca",
+    "Atlántico",
+    "Bolívar",
+    "Boyacá",
+    "Caldas",
+    "Caquetá",
+    "Casanare",
+    "Cauca",
+    "Cesar",
+    "Chocó",
+    "Córdoba",
+    "Cundinamarca",
+    "Guainía",
+    "Guaviare",
+    "Huila",
+    "La Guajira",
+    "Magdalena",
+    "Meta",
+    "Nariño",
+    "Norte de Santander",
+    "Putumayo",
+    "Quindío",
+    "Risaralda",
+    "San Andrés y Providencia",
+    "Santander",
+    "Sucre",
+    "Tolima",
+    "Valle del Cauca",
+    "Vaupés",
+    "Vichada",
+  ]
 
   return (
-    <Card className="bg-gray-900 border-gray-800">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Truck className="w-5 h-5 text-[#5D1A1D]" />
-          Información de Envío
-        </CardTitle>
+    <Card className="shadow-lg bg-gray-800 border-gray-700 text-white">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-semibold text-[#5D1A1D]">Información de Envío</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="firstName" className="text-white">
-              Nombre *
-            </Label>
+      <CardContent className="p-6">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">Nombre</Label>
             <Input
               id="firstName"
+              name="firstName"
               value={data.firstName}
-              onChange={(e) => handleInputChange("firstName", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
+              onChange={handleChange}
               required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
-          <div>
-            <Label htmlFor="lastName" className="text-white">
-              Apellido *
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Apellido</Label>
             <Input
               id="lastName"
+              name="lastName"
               value={data.lastName}
-              onChange={(e) => handleInputChange("lastName", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
+              onChange={handleChange}
               required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="email" className="text-white">
-              Email *
-            </Label>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               value={data.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
+              onChange={handleChange}
               required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
-          <div>
-            <Label htmlFor="phone" className="text-white">
-              Teléfono *
-            </Label>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="phone">Teléfono</Label>
             <Input
               id="phone"
+              name="phone"
               type="tel"
               value={data.phone}
-              onChange={(e) => handleInputChange("phone", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-              placeholder="+57 300 123 4567"
+              onChange={handleChange}
               required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
-        </div>
-
-        <div>
-          <Label htmlFor="address" className="text-white">
-            Dirección *
-          </Label>
-          <Input
-            id="address"
-            value={data.address}
-            onChange={(e) => handleInputChange("address", e.target.value)}
-            className="bg-gray-800 border-gray-700 text-white"
-            placeholder="Carrera 70 #45-32"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="city" className="text-white">
-              Ciudad *
-            </Label>
-            <Select value={data.city} onValueChange={(value) => handleInputChange("city", value)}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                <SelectValue placeholder="Selecciona tu ciudad" />
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="address">Dirección</Label>
+            <Input
+              id="address"
+              name="address"
+              value={data.address}
+              onChange={handleChange}
+              required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="city">Ciudad</Label>
+            <Input
+              id="city"
+              name="city"
+              value={data.city}
+              onChange={handleChange}
+              required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="state">Departamento</Label>
+            <Select
+              name="state"
+              value={data.state}
+              onValueChange={(value) => handleSelectChange("state", value)}
+              required
+            >
+              <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white focus-ring">
+                <SelectValue placeholder="Selecciona un departamento" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                {MAIN_CITIES.map((city) => (
-                  <SelectItem key={city} value={city} className="text-white hover:bg-gray-700">
-                    {city}
+              <SelectContent className="bg-gray-800 text-white border-gray-700">
+                {colombianStates.map((state) => (
+                  <SelectItem key={state} value={state} className="hover:bg-gray-700">
+                    {state}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="state" className="text-white">
-              Departamento *
-            </Label>
-            <Select value={data.state} onValueChange={(value) => handleInputChange("state", value)}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                <SelectValue placeholder="Selecciona tu departamento" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                {COLOMBIA_DEPARTMENTS.map((dept) => (
-                  <SelectItem key={dept} value={dept} className="text-white hover:bg-gray-700">
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="zipCode" className="text-white">
-              Código Postal *
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="zipCode">Código Postal</Label>
             <Input
               id="zipCode"
+              name="zipCode"
               value={data.zipCode}
-              onChange={(e) => handleInputChange("zipCode", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-              placeholder="050001"
+              onChange={handleChange}
               required
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
             />
           </div>
-          <div>
-            <Label htmlFor="country" className="text-white">
-              País
-            </Label>
-            <Input id="country" value="Colombia" disabled className="bg-gray-800 border-gray-700 text-gray-400" />
+          <div className="space-y-2">
+            <Label htmlFor="country">País</Label>
+            <Input
+              id="country"
+              name="country"
+              value={data.country}
+              onChange={handleChange}
+              readOnly
+              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
+            />
           </div>
-        </div>
-
-        <div className="flex items-center space-x-2 pt-4">
-          <Checkbox
-            id="billingSame"
-            checked={billingSame}
-            onCheckedChange={handleBillingSameChange}
-            className="border-gray-600 data-[state=checked]:bg-[#5D1A1D]"
-          />
-          <Label htmlFor="billingSame" className="text-white text-sm">
-            La dirección de facturación es la misma que la de envío
-          </Label>
-        </div>
+          <div className="md:col-span-2 flex items-center space-x-2 mt-4">
+            <Checkbox
+              id="billingSameAsShipping"
+              checked={billingChecked}
+              onCheckedChange={(checked) => setBillingChecked(checked as boolean)}
+              className="border-[#5D1A1D] data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:text-white"
+            />
+            <Label htmlFor="billingSameAsShipping" className="text-gray-300">
+              La dirección de facturación es la misma que la de envío
+            </Label>
+          </div>
+          <div className="md:col-span-2 mt-6">
+            <Button type="submit" className="w-full bg-[#5D1A1D] hover:bg-[#4a1518] text-white py-2">
+              Continuar al Pago
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   )

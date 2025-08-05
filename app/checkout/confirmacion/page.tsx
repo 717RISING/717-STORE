@@ -2,178 +2,150 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { CheckCircle, XCircle, Home, ShoppingBag } from "lucide-react"
+import { getOrderById } from "@/lib/orders"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
-import type { Order } from "@/lib/database"
-import { formatPrice } from "@/lib/products"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { formatPrice } from "@/lib/products" // Assuming this utility exists
 import Image from "next/image"
-import EnhancedButton from "@/components/enhanced-button" // Asegúrate de que EnhancedButton se exporta por defecto
 
 export default function ConfirmationPage() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get("orderId")
-  const status = searchParams.get("status") // 'success' o 'failed'
-
-  const [order, setOrder] = useState<Order | null>(null)
+  const status = searchParams.get("status") // 'success' or 'failed'
+  const [order, setOrder] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (orderId) {
-      // Simular la obtención del pedido de la base de datos
-      // En una aplicación real, harías una llamada a la API aquí
-      const fetchOrder = async () => {
-        setLoading(true)
-        // Simular un retraso de red
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock de datos de pedido
-        const mockOrder: Order = {
-          id: orderId,
-          customerEmail: "cliente@example.com", // Email del cliente para la confirmación
-          items: [
-            {
-              productId: "1",
-              name: 'Camiseta "Big Dreams"',
-              quantity: 1,
-              price: 25000,
-              imageUrl: "/products/camisetas/big-dreams-tshirt.jpg",
-              size: "M",
-            },
-            {
-              productId: "2",
-              name: 'Oversized Tee "Urban"',
-              quantity: 1,
-              price: 30000,
-              imageUrl: "/products/camisetas/oversized-tee.jpg",
-              size: "L",
-            },
-          ],
-          shippingInfo: {
-            firstName: "Juan",
-            lastName: "Pérez",
-            address: "Carrera 70 #45-32",
-            city: "Medellín",
-            state: "Antioquia",
-            zipCode: "050001",
-            country: "Colombia",
-            phone: "3001234567",
-            email: "cliente@example.com",
-            cost: 10000, // Costo de envío simulado
-          },
-          totalAmount: 65000, // 25000 + 30000 + 10000 (envío)
-          orderDate: new Date(),
-          status: "pending",
-          paymentStatus: status === "success" ? "paid" : "failed",
-        }
-        setOrder(mockOrder)
-        setLoading(false)
+    const fetchOrder = async () => {
+      if (orderId) {
+        const fetchedOrder = await getOrderById(orderId)
+        setOrder(fetchedOrder)
       }
-      fetchOrder()
-    } else {
       setLoading(false)
     }
-  }, [orderId, status])
+    fetchOrder()
+  }, [orderId])
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-950 text-white p-4">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#5D1A1D]"></div>
-        <p className="mt-4 text-lg">Cargando confirmación de pedido...</p>
+      <div className="min-h-[calc(100vh-100px)] flex items-center justify-center bg-gray-950 text-white">
+        <Loader2 className="h-16 w-16 text-[#5D1A1D] animate-spin" />
+        <p className="ml-4 text-xl">Cargando confirmación...</p>
       </div>
     )
   }
 
-  if (!order) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-950 text-white p-4 text-center">
-        <XCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Error al cargar el pedido</h1>
-        <p className="text-gray-400 mb-6">No se pudo encontrar la información de tu pedido.</p>
-        <Link href="/">
-          <EnhancedButton variant="modern" size="lg">
-            <Home className="w-5 h-5 mr-2" />
-            Volver al inicio
-          </EnhancedButton>
-        </Link>
-      </div>
-    )
-  }
-
-  const isSuccess = order.paymentStatus === "paid"
+  const isSuccess = status === "success" && order
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-950 text-white p-4">
-      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-full max-w-2xl text-center border border-gray-800">
-        {isSuccess ? (
-          <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6 animate-bounce" />
-        ) : (
-          <XCircle className="w-20 h-20 text-red-500 mx-auto mb-6 animate-shake" />
+    <div className="min-h-[calc(100vh-100px)] flex items-center justify-center bg-gray-950 text-white p-4">
+      <Card
+        className={cn(
+          "w-full max-w-2xl shadow-lg animate-fade-in-up",
+          isSuccess ? "border-[#5D1A1D]" : "border-red-600",
+          "bg-gray-800 text-white",
         )}
+      >
+        <CardHeader className={cn("text-center py-6 rounded-t-lg", isSuccess ? "bg-[#5D1A1D]" : "bg-red-600")}>
+          {isSuccess ? (
+            <CheckCircle2 className="mx-auto h-16 w-16 text-white mb-4" />
+          ) : (
+            <XCircle className="mx-auto h-16 w-16 text-white mb-4" />
+          )}
+          <CardTitle className="text-3xl font-bold text-white">
+            {isSuccess ? "¡Pedido Confirmado!" : "Error en el Pedido"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 text-center">
+          {isSuccess ? (
+            <>
+              <p className="text-lg mb-4 text-gray-200">
+                Gracias por tu compra, <span className="font-semibold">{order.shippingInfo.firstName}</span>. Tu pedido{" "}
+                <span className="font-bold text-[#5D1A1D]">#{order.id}</span> ha sido recibido y está siendo procesado.
+              </p>
+              <p className="text-gray-300 mb-6">
+                Recibirás un correo electrónico de confirmación en{" "}
+                <span className="font-semibold">{order.customerEmail}</span> con los detalles de tu pedido.
+              </p>
 
-        <h1 className="text-4xl font-extrabold mb-3 text-[#5D1A1D]">
-          {isSuccess ? "¡Pedido Confirmado!" : "¡Pago Fallido!"}
-        </h1>
-        <p className="text-gray-300 text-lg mb-6">
-          {isSuccess
-            ? `Gracias por tu compra, ${order.shippingInfo.firstName}. Tu pedido #${order.id} ha sido procesado exitosamente.`
-            : `Lo sentimos, ${order.shippingInfo.firstName}. Tu pago para el pedido #${order.id} no pudo ser procesado.`}
-        </p>
-
-        {isSuccess && (
-          <div className="bg-gray-800 p-6 rounded-lg mb-6 text-left">
-            <h2 className="text-2xl font-bold text-white mb-4">Resumen del Pedido</h2>
-            <div className="space-y-3 mb-4">
-              {order.items.map((item) => (
-                <div key={item.productId} className="flex items-center space-x-4">
-                  <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border border-gray-700">
-                    <Image src={item.imageUrl || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+              {order.items && order.items.length > 0 && (
+                <div className="mb-6 text-left">
+                  <h3 className="text-xl font-semibold text-[#5D1A1D] mb-3 border-b border-gray-700 pb-2">
+                    Artículos del Pedido:
+                  </h3>
+                  <div className="max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                    {order.items.map((item: any) => (
+                      <div key={item.productId} className="flex items-center mb-3">
+                        <Image
+                          src={item.imageUrl || "/placeholder.svg"}
+                          alt={item.name}
+                          width={48}
+                          height={48}
+                          className="rounded-md object-cover mr-3"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-100">{item.name}</p>
+                          <p className="text-sm text-gray-400">
+                            Cant: {item.quantity} {item.size && `| Talla: ${item.size}`}
+                          </p>
+                        </div>
+                        <p className="font-semibold text-gray-100">{formatPrice(item.price * item.quantity)}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-medium text-white">{item.name}</p>
-                    <p className="text-gray-400 text-sm">
-                      Talla: {item.size} • Cantidad: {item.quantity}
-                    </p>
+                  <div className="border-t border-gray-700 pt-3 mt-3">
+                    <div className="flex justify-between text-lg font-bold text-[#5D1A1D]">
+                      <span>Total:</span>
+                      <span>{formatPrice(order.totalAmount)}</span>
+                    </div>
                   </div>
-                  <p className="text-white font-semibold">{formatPrice(item.price * item.quantity)}</p>
                 </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-700 pt-4 space-y-2">
-              <div className="flex justify-between text-gray-300">
-                <span>Subtotal</span>
-                <span>{formatPrice(order.totalAmount - order.shippingInfo.cost)}</span>
-              </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Envío</span>
-                <span>{formatPrice(order.shippingInfo.cost)}</span>
-              </div>
-              <div className="flex justify-between text-white text-xl font-bold mt-4">
-                <span>Total</span>
-                <span>{formatPrice(order.totalAmount)}</span>
-              </div>
-            </div>
-            <p className="text-gray-400 text-sm mt-4">
-              Se ha enviado una confirmación a tu correo:{" "}
-              <span className="font-semibold text-[#5D1A1D]">{order.customerEmail}</span>
-            </p>
-          </div>
-        )}
+              )}
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link href="/">
-            <EnhancedButton variant="modern" size="lg" className="w-full sm:w-auto">
-              <Home className="w-5 h-5 mr-2" />
-              Volver al inicio
-            </EnhancedButton>
-          </Link>
-          <Link href="/productos">
-            <EnhancedButton variant="outline" size="lg" className="w-full sm:w-auto">
-              <ShoppingBag className="w-5 h-5 mr-2" />
-              Seguir comprando
-            </EnhancedButton>
-          </Link>
-        </div>
-      </div>
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+                <Link href="/productos">
+                  <Button className="w-full sm:w-auto bg-[#5D1A1D] hover:bg-[#4a1518] text-white py-2 px-6">
+                    Seguir Comprando
+                  </Button>
+                </Link>
+                <Link href="/cuenta/pedidos">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto border-[#5D1A1D] text-[#5D1A1D] hover:bg-[#5D1A1D] hover:text-white py-2 px-6 bg-transparent"
+                  >
+                    Ver Mis Pedidos
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-lg mb-4 text-gray-200">Lo sentimos, hubo un problema al procesar tu pedido.</p>
+              <p className="text-gray-300 mb-6">
+                Por favor, inténtalo de nuevo o contacta a soporte si el problema persiste.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+                <Link href="/checkout">
+                  <Button className="w-full sm:w-auto bg-[#5D1A1D] hover:bg-[#4a1518] text-white py-2 px-6">
+                    Reintentar Pago
+                  </Button>
+                </Link>
+                <Link href="/contacto">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto border-[#5D1A1D] text-[#5D1A1D] hover:bg-[#5D1A1D] hover:text-white py-2 px-6 bg-transparent"
+                  >
+                    Contactar Soporte
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

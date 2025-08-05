@@ -1,6 +1,8 @@
-// This is a mock database for demonstration purposes.
-// In a real application, you would use a proper database like PostgreSQL, MongoDB, etc.
+// lib/database.ts
+// Este archivo simula una base de datos en memoria para el proyecto.
+// En una aplicación real, esto se reemplazaría con una base de datos persistente (PostgreSQL, MongoDB, etc.).
 
+// Interfaces para los tipos de datos
 export interface Product {
   id: string
   name: string
@@ -9,58 +11,42 @@ export interface Product {
   imageUrl: string
   category: string
   sizes: string[]
-  colors: string[]
-  stock: number
-  rating: number
-  reviews: number
+  colors?: string[]
+  stock: { [size: string]: number }
 }
 
 export interface CartItem {
   productId: string
   name: string
   price: number
-  imageUrl: string
   quantity: number
-  size?: string
+  imageUrl: string
+  size: string
   color?: string
-}
-
-export interface User {
-  id: string
-  email: string
-  passwordHash: string
-  name: string
-  isAdmin: boolean
-}
-
-export interface Address {
-  id: string
-  street: string
-  city: string
-  state: string
-  zipCode: string
-  country: string
-  isDefault: boolean
-}
-
-export interface PaymentMethod {
-  id: string
-  type: "card" | "paypal" | "bank_transfer"
-  details: string // e.g., last 4 digits of card, PayPal email
-  isDefault: boolean
 }
 
 export interface ShippingInfo {
   firstName: string
   lastName: string
+  email: string
+  phone: string
   address: string
   city: string
   state: string
   zipCode: string
   country: string
-  phone: string
-  email: string // Added email to shipping info
-  cost: number // Added cost to shipping info
+  cost: number // Costo de envío
+}
+
+export interface PaymentInfo {
+  method: "card" | "paypal" | "transfer"
+  cardDetails?: {
+    cardNumber: string
+    expiryDate: string
+    cvv: string
+    cardName: string
+  }
+  // Otros detalles de pago si se añaden más métodos
 }
 
 export interface OrderItem {
@@ -75,9 +61,8 @@ export interface OrderItem {
 
 export interface Order {
   id: string
-  userId?: string
-  customerName?: string
-  customerEmail: string // Added for sending confirmation emails
+  userId?: string // Opcional, si el usuario está logueado
+  customerEmail: string // Email del cliente para confirmaciones
   items: OrderItem[]
   shippingInfo: ShippingInfo
   totalAmount: number
@@ -86,106 +71,93 @@ export interface Order {
   paymentStatus: "pending" | "paid" | "failed"
 }
 
-export interface Review {
+export interface User {
   id: string
-  productId: string
-  userId: string
-  userName: string
-  rating: number // 1-5 stars
-  comment: string
-  createdAt: string // ISO string date
+  email: string
+  passwordHash: string
+  name: string
+  addresses: ShippingInfo[]
+  wishlist: string[] // Array de IDs de productos
+  isAdmin: boolean
 }
 
-// Mock database for demonstration purposes
-interface MockDB {
+// Simulación de la base de datos en memoria
+interface Database {
   products: Product[]
-  users: User[]
   orders: Order[]
+  users: User[]
 }
 
-export const db: MockDB = {
+export const db: Database = {
   products: [
     {
-      id: "1",
-      name: 'Camiseta "Big Dreams"',
-      description: 'Camiseta de algodón suave con estampado "Big Dreams". Ideal para el día a día.',
-      price: 25000,
+      id: "camiseta-big-dreams",
+      name: "Camiseta 'Big Dreams'",
+      description: "Camiseta de algodón premium con estampado 'Big Dreams'.",
+      price: 85000,
       imageUrl: "/products/camisetas/big-dreams-tshirt.jpg",
       category: "Camisetas",
       sizes: ["S", "M", "L", "XL"],
       colors: ["Negro", "Blanco"],
-      stock: 50,
-      rating: 4.5,
-      reviews: 120,
+      stock: { S: 10, M: 15, L: 12, XL: 8 },
     },
     {
-      id: "2",
-      name: 'Oversized Tee "Urban"',
-      description: "Camiseta oversized de estilo urbano, perfecta para un look relajado y moderno.",
-      price: 30000,
+      id: "camiseta-oversized-tee",
+      name: "Oversized Tee 'Street'",
+      description: "Camiseta oversized de estilo urbano, ideal para un look relajado.",
+      price: 95000,
       imageUrl: "/products/camisetas/oversized-tee.jpg",
       category: "Camisetas",
       sizes: ["M", "L", "XL"],
       colors: ["Gris", "Negro"],
-      stock: 30,
-      rating: 4.7,
-      reviews: 85,
+      stock: { M: 8, L: 10, XL: 7 },
     },
     {
-      id: "3",
-      name: 'Graphic Tee "Blood"',
-      description: 'Camiseta con gráfico impactante "Blood", para quienes buscan destacar.',
-      price: 28000,
+      id: "camiseta-graphic-blood",
+      name: "Graphic Tee 'Blood'",
+      description: "Camiseta con diseño gráfico audaz y tejido suave.",
+      price: 89000,
       imageUrl: "/products/camisetas/graphic-tee-blood.jpg",
       category: "Camisetas",
       sizes: ["S", "M", "L"],
-      colors: ["Rojo", "Negro"],
-      stock: 40,
-      rating: 4.3,
-      reviews: 95,
+      colors: ["Negro"],
+      stock: { S: 5, M: 9, L: 6 },
     },
     {
-      id: "4",
-      name: 'Graphic Tee "Pain"',
-      description: 'Camiseta con diseño "Pain", que combina arte y comodidad.',
-      price: 28000,
+      id: "camiseta-graphic-pain",
+      name: "Graphic Tee 'Pain'",
+      description: "Camiseta con estampado 'Pain' para un estilo único.",
+      price: 89000,
       imageUrl: "/products/camisetas/graphic-tee-pain.jpg",
       category: "Camisetas",
       sizes: ["M", "L", "XL"],
-      colors: ["Blanco", "Negro"],
-      stock: 35,
-      rating: 4.6,
-      reviews: 110,
+      colors: ["Blanco"],
+      stock: { M: 7, L: 11, XL: 4 },
     },
-    // Add more products as needed
+    // Puedes añadir más productos aquí
   ],
-  users: [],
   orders: [],
+  users: [],
 }
 
-// Function to initialize or reset the database (for development)
-export function initializeDB() {
-  db.users = []
-  db.orders = []
-  // You might want to reset product stock here if it's mutable
-  console.log("Mock database initialized.")
+// Funciones de utilidad para la "base de datos"
+export async function getProductById(id: string): Promise<Product | undefined> {
+  return db.products.find((p) => p.id === id)
 }
 
-// Mock user functions
-export async function getUserFromDatabase(email: string): Promise<User | null> {
-  // Simulate async operation
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  return db.users.find((user) => user.email === email) || null
+export async function getAllProducts(): Promise<Product[]> {
+  return db.products
 }
 
-export async function saveUserToDatabase(user: User): Promise<boolean> {
-  // Simulate async operation
-  await new Promise((resolve) => setTimeout(resolve, 100))
+export async function getUserFromDatabase(email: string): Promise<User | undefined> {
+  return db.users.find((user) => user.email === email)
+}
+
+export async function saveUserToDatabase(user: User): Promise<void> {
   const index = db.users.findIndex((u) => u.id === user.id)
   if (index !== -1) {
     db.users[index] = user
   } else {
     db.users.push(user)
   }
-  return true
 }

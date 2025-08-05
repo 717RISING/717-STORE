@@ -1,42 +1,36 @@
+// lib/orders.ts
+// Este archivo contendrá las funciones para interactuar con la "base de datos" de pedidos.
+// La lógica de envío de correos se ha movido a las Server Actions.
+
 import { db, type Order, type OrderItem, type ShippingInfo } from "./database"
-import { sendCorporateOrderNotification, sendOrderConfirmationToCustomer } from "./email"
 
 // Función para generar un ID único para el pedido
 function generateOrderId(): string {
   return `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 }
 
-// Función para crear un nuevo pedido
-export async function createOrder(
+// Función para guardar un nuevo pedido en la "base de datos"
+// Esta función es interna y no envía correos directamente.
+export async function _saveOrderToDatabase(
   items: OrderItem[],
   shippingInfo: ShippingInfo,
   totalAmount: number,
   customerEmail: string,
-): Promise<Order | null> {
-  try {
-    const newOrder: Order = {
-      id: generateOrderId(),
-      customerEmail: customerEmail,
-      items: items,
-      shippingInfo: shippingInfo,
-      totalAmount: totalAmount,
-      orderDate: new Date(),
-      status: "pending", // O "processing" dependiendo del flujo de pago
-      paymentStatus: "paid", // Asumimos que el pago ya se procesó
-    }
-
-    db.orders.push(newOrder) // Guardar en la base de datos mock
-
-    // Enviar notificaciones por correo
-    await sendCorporateOrderNotification(newOrder)
-    await sendOrderConfirmationToCustomer(newOrder)
-
-    console.log(`Pedido ${newOrder.id} creado y notificaciones enviadas.`)
-    return newOrder
-  } catch (error) {
-    console.error("Error al crear el pedido:", error)
-    return null
+): Promise<Order> {
+  const newOrder: Order = {
+    id: generateOrderId(),
+    customerEmail: customerEmail,
+    items: items,
+    shippingInfo: shippingInfo,
+    totalAmount: totalAmount,
+    orderDate: new Date(),
+    status: "pending", // Estado inicial
+    paymentStatus: "paid", // Asumimos que el pago ya se procesó antes de llamar a esta función
   }
+
+  db.orders.push(newOrder)
+  console.log(`Pedido ${newOrder.id} guardado en la base de datos mock.`)
+  return newOrder
 }
 
 // Función para obtener un pedido por su ID
@@ -54,6 +48,21 @@ export async function updateOrderStatus(orderId: string, newStatus: Order["statu
   const orderIndex = db.orders.findIndex((order) => order.id === orderId)
   if (orderIndex !== -1) {
     db.orders[orderIndex].status = newStatus
+    console.log(`Estado del pedido ${orderId} actualizado a ${newStatus}.`)
+    return true
+  }
+  return false
+}
+
+// Función para actualizar el estado de pago de un pedido
+export async function updateOrderPaymentStatus(
+  orderId: string,
+  newPaymentStatus: Order["paymentStatus"],
+): Promise<boolean> {
+  const orderIndex = db.orders.findIndex((order) => order.id === orderId)
+  if (orderIndex !== -1) {
+    db.orders[orderIndex].paymentStatus = newPaymentStatus
+    console.log(`Estado de pago del pedido ${orderId} actualizado a ${newPaymentStatus}.`)
     return true
   }
   return false
