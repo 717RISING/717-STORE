@@ -1,50 +1,45 @@
 "use client"
 
-import { Scatter, ScatterChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 
-interface ProductPerformanceChartProps {
-  data: { name: string; sales: number; views: number; rating: number }[]
-}
+const data = [
+  { name: "Camisetas", value: 400, color: "#4A1518" },
+  { name: "Hoodies", value: 300, color: "#6B1E22" },
+  { name: "Accesorios", value: 200, color: "#8B2635" },
+  { name: "Otros", value: 100, color: "#AB2E48" },
+]
 
-export function ProductPerformanceChart({ data }: ProductPerformanceChartProps) {
+export function ProductPerformanceChart() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Rendimiento del Producto</CardTitle>
-        <CardDescription>Ventas vs. Vistas por producto (el tamaño del punto indica la calificación)</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={{
-            sales: {
-              label: "Ventas",
-              color: "hsl(var(--chart-1))",
-            },
-            views: {
-              label: "Vistas",
-              color: "hsl(var(--chart-2))",
-            },
-            rating: {
-              label: "Calificación",
-              color: "hsl(var(--chart-3))",
-            },
-          }}
-          className="h-[300px]"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              <CartesianGrid />
-              <XAxis type="number" dataKey="views" name="Vistas" unit="" />
-              <YAxis type="number" dataKey="sales" name="Ventas" unit="" />
-              <ZAxis type="number" dataKey="rating" range={[60, 400]} name="Calificación" />
-              <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ChartTooltipContent />} />
-              <Scatter name="Productos" data={data} fill="var(--color-sales)" />
-            </ScatterChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+    <CardHeader>
+      <CardTitle className="text-white">Rendimiento por Categoría</CardTitle>
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={120}
+              paddingAngle={5}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1f2937', 
+                border: '1px solid #374151',
+                borderRadius: '8px'
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       </CardContent>
-    </Card>
+    </CardHeader>
   )
 }

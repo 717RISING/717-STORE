@@ -1,79 +1,219 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Truck, Package, RotateCcw, Shield, Clock, MapPin } from 'lucide-react'
 
-export default function ShippingReturnsPage() {
+export default function EnviosDevolucionesPage() {
   return (
-    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
-      <h1 className="mb-8 text-3xl font-bold text-center">Envíos y Devoluciones</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Envíos y Devoluciones
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400">
+              Toda la información sobre nuestros servicios de envío y política de devoluciones
+            </p>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="p-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-semibold">Información de Envío</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>¿Cuáles son las opciones de envío?</AccordionTrigger>
-                <AccordionContent>
-                  Ofrecemos envío estándar y envío express. El envío estándar suele tardar de 3 a 5 días hábiles, mientras que el envío express llega en 1-2 días hábiles. Los tiempos pueden variar según el destino.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>¿Cuánto cuesta el envío?</AccordionTrigger>
-                <AccordionContent>
-                  El costo del envío estándar es de 5€ para pedidos inferiores a 50€. Para pedidos superiores a 50€, el envío estándar es gratuito. El envío express tiene un costo fijo de 10€.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>¿Realizan envíos internacionales?</AccordionTrigger>
-                <AccordionContent>
-                  Sí, realizamos envíos a la mayoría de los países. Los costos y tiempos de envío internacional se calcularán en la página de pago, dependiendo del destino.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>¿Cómo puedo rastrear mi pedido?</AccordionTrigger>
-                <AccordionContent>
-                  Una vez que tu pedido sea enviado, recibirás un correo electrónico con un número de seguimiento y un enlace para rastrear tu paquete.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
+          <div className="space-y-8">
+            {/* Shipping Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="h-6 w-6 text-primary" />
+                  Información de Envíos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <Clock className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                        <h3 className="font-semibold">Tiempos de Entrega</h3>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          <li>• Bogotá: 1-2 días hábiles</li>
+                          <li>• Ciudades principales: 3-5 días hábiles</li>
+                          <li>• Resto del país: 5-7 días hábiles</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Package className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                        <h3 className="font-semibold">Empaque</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Todos nuestros productos se envían en empaques ecológicos y seguros.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <MapPin className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                        <h3 className="font-semibold">Cobertura</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Realizamos envíos a todo Colombia. Consulta disponibilidad en tu ciudad.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Shield className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                        <h3 className="font-semibold">Seguimiento</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Recibirás un código de seguimiento para rastrear tu pedido en tiempo real.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="p-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-semibold">Política de Devoluciones</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>¿Cuál es su política de devoluciones?</AccordionTrigger>
-                <AccordionContent>
-                  Aceptamos devoluciones de productos sin usar y en su estado original dentro de los 30 días posteriores a la compra. Los artículos deben tener todas las etiquetas y empaques originales.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>¿Cómo inicio una devolución?</AccordionTrigger>
-                <AccordionContent>
-                  Para iniciar una devolución, por favor, visita nuestra sección de "Mi Cuenta" y selecciona el pedido que deseas devolver. Sigue las instrucciones para generar una etiqueta de envío de devolución.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>¿Cuándo recibiré mi reembolso?</AccordionTrigger>
-                <AccordionContent>
-                  Una vez que recibamos y verifiquemos el artículo devuelto, procesaremos tu reembolso en un plazo de 5 a 7 días hábiles. El reembolso se realizará al método de pago original.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>¿Puedo cambiar un producto?</AccordionTrigger>
-                <AccordionContent>
-                  Actualmente, no ofrecemos cambios directos. Si deseas un producto diferente, te recomendamos devolver el artículo original para un reembolso y realizar un nuevo pedido.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
+            {/* Shipping Costs */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Costos de Envío</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div>
+                      <h3 className="font-semibold text-green-800 dark:text-green-400">
+                        Envío Gratis
+                      </h3>
+                      <p className="text-sm text-green-600 dark:text-green-500">
+                        En compras superiores a $200.000 COP
+                      </p>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      $0
+                    </Badge>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Bogotá</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">1-2 días hábiles</p>
+                      </div>
+                      <Badge variant="outline">$8.000</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Ciudades Principales</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">3-5 días hábiles</p>
+                      </div>
+                      <Badge variant="outline">$12.000</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Resto del País</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">5-7 días hábiles</p>
+                      </div>
+                      <Badge variant="outline">$15.000</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Express</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">24-48 horas</p>
+                      </div>
+                      <Badge variant="outline">$25.000</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Returns Policy */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <RotateCcw className="h-6 w-6 text-primary" />
+                  Política de Devoluciones
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-800 dark:text-blue-400 mb-2">
+                    30 Días para Devoluciones
+                  </h3>
+                  <p className="text-sm text-blue-600 dark:text-blue-500">
+                    Tienes 30 días calendario desde la fecha de entrega para solicitar una devolución.
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Condiciones para Devoluciones:</h3>
+                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                    <li className="flex items-start space-x-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>El producto debe estar sin usar y con etiquetas originales</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>Debe incluir el empaque original</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>No debe tener olores, manchas o daños</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>Debe incluir la factura de compra</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Proceso de Devolución:</h3>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                        1
+                      </div>
+                      <h4 className="font-semibold text-sm">Solicita</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        Contacta nuestro servicio al cliente
+                      </p>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                        2
+                      </div>
+                      <h4 className="font-semibold text-sm">Envía</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        Empaca y envía el producto
+                      </p>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                        3
+                      </div>
+                      <h4 className="font-semibold text-sm">Recibe</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        Reembolso en 5-10 días hábiles
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                  <h3 className="font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
+                    Productos No Retornables
+                  </h3>
+                  <ul className="text-sm text-yellow-600 dark:text-yellow-500 space-y-1">
+                    <li>• Productos personalizados o hechos a medida</li>
+                    <li>• Ropa interior y productos de higiene personal</li>
+                    <li>• Productos en oferta o liquidación (salvo defecto de fábrica)</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -3,23 +3,75 @@
 
 'use server'
 
-export async function sendMessage(message: string): Promise<string> {
-  // Simulate a delay for AI processing
-  await new Promise(resolve => setTimeout(resolve, 1000))
+interface ChatMessage {
+  id: string
+  text: string
+  sender: 'user' | 'bot'
+  timestamp: Date
+}
 
-  // Simple rule-based response for demonstration
-  if (message.toLowerCase().includes('envío')) {
-    return 'El envío estándar tarda de 3 a 5 días hábiles. Para más detalles, visita nuestra sección de Envíos y Devoluciones.'
-  } else if (message.toLowerCase().includes('devolución')) {
-    return 'Nuestra política de devoluciones permite devolver productos sin usar en 30 días. Puedes iniciar una devolución desde tu cuenta.'
-  } else if (message.toLowerCase().includes('producto')) {
-    return '¿Qué tipo de producto te interesa? Tenemos camisetas, sudaderas y accesorios.'
-  } else if (message.toLowerCase().includes('hola')) {
-    return '¡Hola! ¿En qué puedo ayudarte hoy?'
-  } else if (message.toLowerCase().includes('gracias')) {
-    return 'De nada. Estoy aquí para ayudarte.'
-  } else {
-    return 'Gracias por tu mensaje. Un agente de soporte se pondrá en contacto contigo pronto.'
+export class ChatService {
+  private static instance: ChatService
+  private messages: ChatMessage[] = []
+
+  private constructor() {}
+
+  static getInstance(): ChatService {
+    if (!ChatService.instance) {
+      ChatService.instance = new ChatService()
+    }
+    return ChatService.instance
+  }
+
+  async sendMessage(text: string): Promise<ChatMessage> {
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      text,
+      sender: 'user',
+      timestamp: new Date()
+    }
+
+    this.messages.push(userMessage)
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    const botResponse: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      text: this.generateBotResponse(text),
+      sender: 'bot',
+      timestamp: new Date()
+    }
+
+    this.messages.push(botResponse)
+    return botResponse
+  }
+
+  private generateBotResponse(userInput: string): string {
+    const input = userInput.toLowerCase()
+    
+    if (input.includes('envío') || input.includes('envio')) {
+      return 'Los envíos nacionales tardan entre 3-7 días hábiles. ¡Envío gratis en compras superiores a $200.000!'
+    }
+    if (input.includes('devolución') || input.includes('devolucion')) {
+      return 'Aceptamos devoluciones dentro de 30 días. El producto debe estar sin usar y con etiquetas originales.'
+    }
+    if (input.includes('talla') || input.includes('size')) {
+      return 'Tenemos tallas desde S hasta XXL. Puedes consultar nuestra guía de tallas en cada producto.'
+    }
+    if (input.includes('precio') || input.includes('costo')) {
+      return 'Nuestros precios van desde $89.000. ¿Hay algún producto específico que te interese?'
+    }
+    
+    return 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto. ¿Hay algo más en lo que pueda ayudarte?'
+  }
+
+  getMessages(): ChatMessage[] {
+    return [...this.messages]
+  }
+
+  clearMessages(): void {
+    this.messages = []
   }
 }
 

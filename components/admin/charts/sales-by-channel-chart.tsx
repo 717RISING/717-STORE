@@ -1,34 +1,43 @@
 "use client"
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 
 const data = [
-  { name: 'Tienda Online', value: 65, color: '#8884d8' },
-  { name: 'Redes Sociales', value: 25, color: '#82ca9d' },
-  { name: 'Marketplace', value: 10, color: '#ffc658' }
+  { name: "Online", value: 65, color: "#4A1518" },
+  { name: "Tienda Física", value: 25, color: "#6B1E22" },
+  { name: "Redes Sociales", value: 10, color: "#8B2635" },
 ]
 
-export default function SalesByChannelChart() {
+export function SalesByChannelChart() {
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value"
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
+    <CardHeader>
+      <CardTitle className="text-white">Ventas por Canal</CardTitle>
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              dataKey="value"
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1f2937', 
+                border: '1px solid #374151',
+                borderRadius: '8px'
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </CardHeader>
   )
 }

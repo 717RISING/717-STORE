@@ -1,40 +1,44 @@
-'use client'
+"use client"
 
-import { Message } from '@/hooks/use-chat'
-import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Bot, User } from 'lucide-react'
+
+interface Message {
+  id: string
+  text: string
+  sender: 'user' | 'bot'
+  timestamp: Date
+}
 
 interface ChatMessageProps {
   message: Message
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  const isUser = message.role === 'user'
-
   return (
-    <div className={cn("flex items-end gap-2", isUser ? "justify-end" : "justify-start")}>
-      {!isUser && (
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/placeholder.svg?height=32&width=32" />
-          <AvatarFallback>AI</AvatarFallback>
-        </Avatar>
-      )}
+    <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={cn(
-          "max-w-[70%] rounded-lg p-3 text-sm",
-          isUser
-            ? "bg-primary text-primary-foreground rounded-br-none"
-            : "bg-muted rounded-bl-none"
-        )}
+        className={`max-w-[80%] p-3 rounded-lg ${
+          message.sender === 'user'
+            ? 'bg-primary text-white'
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+        }`}
       >
-        {message.content}
+        <div className="flex items-start space-x-2">
+          {message.sender === 'bot' && (
+            <Bot className="h-4 w-4 mt-0.5 text-primary" />
+          )}
+          {message.sender === 'user' && (
+            <User className="h-4 w-4 mt-0.5" />
+          )}
+          <p className="text-sm">{message.text}</p>
+        </div>
+        <p className="text-xs opacity-70 mt-1">
+          {message.timestamp.toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })}
+        </p>
       </div>
-      {isUser && (
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/placeholder.svg?height=32&width=32" />
-          <AvatarFallback>You</AvatarFallback>
-        </Avatar>
-      )}
     </div>
   )
 }

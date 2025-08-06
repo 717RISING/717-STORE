@@ -1,71 +1,60 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { MessageSquare, X } from 'lucide-react'
-import { ChatInterface } from './chat-interface'
-import { useChat } from '@/hooks/use-chat'
-import { cn } from '@/lib/utils'
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { MessageCircle, X } from 'lucide-react'
+import { ChatInterface } from "./chat-interface"
+import { motion, AnimatePresence } from "framer-motion"
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
-  const { messages, sendMessage, isLoading } = useChat()
-
-  const toggleChat = () => {
-    setIsOpen(!isOpen)
-  }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {!isOpen && (
-        <Button
-          onClick={toggleChat}
-          className="rounded-full p-4 shadow-lg"
-          aria-label="Open chat widget"
-        >
-          <MessageSquare className="h-6 w-6" />
-        </Button>
-      )}
-
-      <Card
-        className={cn(
-          "w-80 md:w-96 max-h-[80vh] flex flex-col",
-          isOpen ? "block" : "hidden"
-        )}
-      >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 border-b">
-          <CardTitle className="text-lg">Soporte en Vivo</CardTitle>
-          <Button variant="ghost" size="icon" onClick={toggleChat} aria-label="Close chat widget">
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent className="flex-1 p-4 overflow-y-auto">
-          <ChatInterface messages={messages} isLoading={isLoading} />
-        </CardContent>
-        <CardFooter className="p-4 border-t">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              const form = e.currentTarget
-              const input = form.elements.namedItem('message') as HTMLInputElement
-              if (input.value.trim()) {
-                sendMessage(input.value)
-                input.value = ''
-              }
-            }}
-            className="flex w-full space-x-2"
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-20 right-4 z-50 w-80 h-96 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700"
           >
-            <input
-              name="message"
-              placeholder="Escribe tu mensaje..."
-              className="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={isLoading}
-            />
-            <Button type="submit" disabled={isLoading}>Enviar</Button>
-          </form>
-        </CardFooter>
-      </Card>
-    </div>
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Chat de Soporte
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <ChatInterface />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-4 right-4 z-40"
+      >
+        <Button
+          onClick={() => setIsOpen(!isOpen)}
+          className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+          size="icon"
+        >
+          {isOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <MessageCircle className="h-6 w-6" />
+          )}
+        </Button>
+      </motion.div>
+    </>
   )
 }

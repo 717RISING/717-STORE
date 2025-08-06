@@ -1,136 +1,130 @@
-export interface Product {
-  id: string
-  name: string
-  price: number
-  originalPrice?: number
-  image: string
-  category: string
-  description: string
-  stock: number
-  isNew?: boolean
-  isSale?: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+import { createClient } from '@supabase/supabase-js'
 
-export interface Order {
-  id: string
-  userId: string
-  items: OrderItem[]
-  total: number
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  createdAt: Date
-  updatedAt: Date
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export interface OrderItem {
-  productId: string
-  quantity: number
-  price: number
-}
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Simulated database functions
-export async function getAllProducts(): Promise<Product[]> {
-  return [
-    {
-      id: '1',
-      name: 'Camiseta Big Dreams',
-      price: 25000,
-      originalPrice: 30000,
-      image: '/products/camisetas/big-dreams-tshirt.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta de algodón con diseño exclusivo Big Dreams',
-      stock: 50,
-      isNew: true,
-      isSale: true,
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+// Mock data for development
+const mockProducts = [
+  {
+    id: "1",
+    name: "Camiseta Big Dreams",
+    description: "Camiseta de algodón premium con diseño exclusivo",
+    price: 89000,
+    image: "/products/camisetas/big-dreams-tshirt.jpg",
+    category: "camisetas",
+    stock: 15
+  },
+  {
+    id: "2", 
+    name: "Oversized Tee",
+    description: "Camiseta oversized cómoda y moderna",
+    price: 95000,
+    image: "/products/camisetas/oversized-tee.jpg",
+    category: "camisetas",
+    stock: 8
+  }
+]
+
+const mockOrders = [
+  {
+    id: "ORD-001",
+    userId: "user1",
+    customerName: "Juan Pérez",
+    customerEmail: "juan@email.com",
+    orderDate: "2024-01-15",
+    totalAmount: 89000,
+    status: "pending" as const,
+    paymentStatus: "paid" as const,
+    shippingAddress: {
+      street: "Calle 123 #45-67",
+      city: "Bogotá",
+      zip: "110111",
+      country: "Colombia"
     },
-    {
-      id: '2',
-      name: 'Camiseta Oversized',
-      price: 28000,
-      image: '/products/camisetas/oversized-tee.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta oversized de corte moderno',
-      stock: 30,
-      isNew: false,
-      isSale: false,
-      createdAt: new Date('2024-01-02'),
-      updatedAt: new Date('2024-01-02')
-    },
-    {
-      id: '3',
-      name: 'Graphic Tee Blood',
-      price: 32000,
-      image: '/products/camisetas/graphic-tee-blood.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta con diseño gráfico exclusivo',
-      stock: 25,
-      isNew: true,
-      isSale: false,
-      createdAt: new Date('2024-01-03'),
-      updatedAt: new Date('2024-01-03')
-    },
-    {
-      id: '4',
-      name: 'Graphic Tee Pain',
-      price: 32000,
-      originalPrice: 35000,
-      image: '/products/camisetas/graphic-tee-pain.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta con diseño gráfico Pain',
-      stock: 20,
-      isNew: false,
-      isSale: true,
-      createdAt: new Date('2024-01-04'),
-      updatedAt: new Date('2024-01-04')
-    }
-  ]
+    items: [
+      {
+        productId: "1",
+        name: "Camiseta Big Dreams",
+        quantity: 1,
+        price: 89000,
+        size: "M"
+      }
+    ]
+  }
+]
+
+const mockUsers = [
+  {
+    id: "user1",
+    email: "juan@email.com",
+    role: "customer" as const,
+    name: "Juan Pérez",
+    createdAt: "2024-01-01"
+  },
+  {
+    id: "admin1",
+    email: "admin@717store.com",
+    role: "admin" as const,
+    name: "Admin",
+    createdAt: "2024-01-01"
+  }
+]
+
+export async function getProducts() {
+  return mockProducts
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  const products = await getAllProducts()
-  return products.find(product => product.id === id) || null
+export async function addProduct(product: any) {
+  mockProducts.push(product)
+  return product
 }
 
-export async function getProductsByCategory(category: string): Promise<Product[]> {
-  const products = await getAllProducts()
-  return products.filter(product => product.category === category)
+export async function updateProduct(product: any) {
+  const index = mockProducts.findIndex(p => p.id === product.id)
+  if (index !== -1) {
+    mockProducts[index] = product
+  }
+  return product
 }
 
-export async function searchProducts(query: string): Promise<Product[]> {
-  const products = await getAllProducts()
-  return products.filter(product => 
-    product.name.toLowerCase().includes(query.toLowerCase()) ||
-    product.description.toLowerCase().includes(query.toLowerCase())
-  )
+export async function deleteProduct(id: string) {
+  const index = mockProducts.findIndex(p => p.id === id)
+  if (index !== -1) {
+    mockProducts.splice(index, 1)
+  }
+  return true
 }
 
-export async function getOrders(): Promise<Order[]> {
-  return [
-    {
-      id: '1',
-      userId: '1',
-      items: [
-        { productId: '1', quantity: 2, price: 25000 },
-        { productId: '2', quantity: 1, price: 28000 }
-      ],
-      total: 78000,
-      status: 'delivered',
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-20')
-    },
-    {
-      id: '2',
-      userId: '2',
-      items: [
-        { productId: '3', quantity: 1, price: 32000 }
-      ],
-      total: 32000,
-      status: 'processing',
-      createdAt: new Date('2024-01-18'),
-      updatedAt: new Date('2024-01-18')
-    }
-  ]
+export async function getOrders() {
+  return mockOrders
+}
+
+export async function updateOrderStatus(orderId: string, status: string) {
+  const order = mockOrders.find(o => o.id === orderId)
+  if (order) {
+    order.status = status as any
+  }
+  return order
+}
+
+export async function getUsers() {
+  return mockUsers
+}
+
+export async function updateUserRole(userId: string, role: string) {
+  const user = mockUsers.find(u => u.id === userId)
+  if (user) {
+    user.role = role as any
+  }
+  return user
+}
+
+export async function deleteUser(userId: string) {
+  const index = mockUsers.findIndex(u => u.id === userId)
+  if (index !== -1) {
+    mockUsers.splice(index, 1)
+  }
+  return true
 }

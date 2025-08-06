@@ -1,135 +1,155 @@
 "use client"
 
-import { useState } from 'react'
+import { useState } from "react"
+import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Heart, ShoppingCart, Eye } from 'lucide-react'
+import { Heart, ShoppingCart, Star } from 'lucide-react'
+import { formatPrice, type Product } from "@/lib/products"
 import { motion } from "framer-motion"
-import Image from "next/image"
-
-interface Product {
-  id: string
-  name: string
-  price: number
-  originalPrice?: number
-  image: string
-  category: string
-  isNew?: boolean
-  isSale?: boolean
-}
 
 interface InteractiveProductCardProps {
   product: Product
   onAddToCart?: (product: Product) => void
-  onAddToWishlist?: (product: Product) => void
-  onQuickView?: (product: Product) => void
+  onToggleWishlist?: (product: Product) => void
+  isInWishlist?: boolean
 }
 
 export function InteractiveProductCard({ 
   product, 
   onAddToCart, 
-  onAddToWishlist, 
-  onQuickView 
+  onToggleWishlist, 
+  isInWishlist = false 
 }: InteractiveProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const [isInWishlist, setIsInWishlist] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
-  const handleAddToWishlist = () => {
-    setIsInWishlist(!isInWishlist)
-    onAddToWishlist?.(product)
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onAddToCart?.(product)
   }
 
-  const discount = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggleWishlist?.(product)
+  }
 
   return (
     <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       whileHover={{ y: -5 }}
-      transition={{ duration: 0.2 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
     >
-      <Card 
-        className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className="relative aspect-square overflow-hidden">
+      <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
             src={product.image || "/placeholder.svg"}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            className={`object-cover transition-all duration-500 ${
+              imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            } ${isHovered ? 'scale-110' : 'scale-100'}`}
+            onLoad={() => setImageLoaded(true)}
           />
           
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {product.isNew && (
-              <Badge variant="secondary" className="bg-green-500 text-white">
-                Nuevo
-              </Badge>
-            )}
-            {product.isSale && discount > 0 && (
-              <Badge variant="destructive">
-                -{discount}%
-              </Badge>
-            )}
-          </div>
-
-          {/* Wishlist Button */}
-          <Button
-            size="icon"
-            variant="ghost"
-            className={`absolute top-2 right-2 transition-all duration-200 ${
-              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}
-            onClick={handleAddToWishlist}
-          >
-            <Heart 
-              className={`h-4 w-4 ${
-                isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'
-              }`} 
-            />
-          </Button>
-
-          {/* Quick Actions */}
-          <div className={`absolute bottom-2 left-2 right-2 flex gap-2 transition-all duration-200 ${
-            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          {/* Overlay with actions */}
+          <div className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
+            isHovered ? 'opacity-100' : 'opacity-0'
           }`}>
-            <Button
-              size="sm"
-              className="flex-1"
-              onClick={() => onAddToCart?.(product)}
-            >
-              <ShoppingCart className="h-4 w-4 mr-1" />
-              Agregar
-            </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => onQuickView?.(product)}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
+            <div className="absolute top-4 right-4 space-y-2">
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-8 w-8 rounded-full bg-white/90 hover:bg-white"
+                onClick={handleToggleWishlist}
+              >
+                <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />
+              </Button>
+            </div>
+            
+            <div className="absolute bottom-4 left-4 right-4">
+              <Button
+                onClick={handleAddToCart}
+                className="w-full bg-white text-black hover:bg-gray-100 transition-all duration-300"
+                size="sm"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Agregar al Carrito
+              </Button>
+            </div>
           </div>
+
+          {/* Stock badge */}
+          {product.stock <= 5 && product.stock > 0 && (
+            <Badge variant="destructive" className="absolute top-4 left-4">
+              ¡Últimas {product.stock}!
+            </Badge>
+          )}
+          
+          {product.stock === 0 && (
+            <Badge variant="secondary" className="absolute top-4 left-4">
+              Agotado
+            </Badge>
+          )}
         </div>
 
         <CardContent className="p-4">
           <div className="space-y-2">
-            <Badge variant="outline" className="text-xs">
-              {product.category}
-            </Badge>
-            <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
               {product.name}
             </h3>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg">
-                ${product.price.toLocaleString()}
-              </span>
-              {product.originalPrice && (
-                <span className="text-sm text-muted-foreground line-through">
-                  ${product.originalPrice.toLocaleString()}
+            
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {product.description}
+            </p>
+
+            {/* Rating */}
+            {product.rating && (
+              <div className="flex items-center gap-1">
+                <div className="flex">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-3 w-3 ${
+                        i < Math.floor(product.rating!) 
+                          ? 'fill-yellow-400 text-yellow-400' 
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  ({product.reviews})
                 </span>
+              </div>
+            )}
+
+            {/* Price */}
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-bold text-primary">
+                {formatPrice(product.price)}
+              </span>
+              
+              {/* Available sizes */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="flex gap-1">
+                  {product.sizes.slice(0, 3).map((size) => (
+                    <Badge key={size} variant="outline" className="text-xs">
+                      {size}
+                    </Badge>
+                  ))}
+                  {product.sizes.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{product.sizes.length - 3}
+                    </Badge>
+                  )}
+                </div>
               )}
             </div>
           </div>

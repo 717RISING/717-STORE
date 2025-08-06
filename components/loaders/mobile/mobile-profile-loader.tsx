@@ -1,65 +1,37 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { User, Loader2, Settings, Lock } from 'lucide-react'
 import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
-interface MobileProfileLoaderProps {
-  message?: string
-}
-
-export default function MobileProfileLoader({ message = "Cargando perfil de usuario..." }: MobileProfileLoaderProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const steps = ["Autenticando...", "Obteniendo datos...", "Personalizando...", "¡Listo!"]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length)
-    }, 1500)
-    return () => clearInterval(interval)
-  }, [steps.length])
-
-  const getIcon = (step: number) => {
-    switch (step) {
-      case 0:
-        return <Lock className="w-8 h-8 text-white animate-pulse" />
-      case 1:
-        return <User className="w-8 h-8 text-white animate-pulse" />
-      case 2:
-        return <Settings className="w-8 h-8 text-white animate-pulse" />
-      case 3:
-        return <Loader2 className="w-8 h-8 text-white animate-spin" />
-      default:
-        return <User className="w-8 h-8 text-white animate-pulse" />
-    }
-  }
-
+export function MobileProfileLoader() {
   return (
-    <div className="flex flex-col items-center space-y-4 p-4">
-      <div className="relative mb-8">
-        <div className="w-24 h-24 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
-          {getIcon(currentStep)}
-        </div>
-        <div className="absolute inset-0 border-4 border-[#4A1518] rounded-full animate-ping opacity-40" />
-      </div>
-
-      <div className="text-center max-w-xs">
-        <p className="text-xl font-semibold mb-2">{steps[currentStep]}</p>
-        <p className="text-gray-400 text-sm">{message}</p>
-      </div>
-
-      <div className="grid w-full grid-cols-1 gap-3">
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 rounded-full ${
-              i === currentStep ? "bg-[#6B1E22]" : "bg-gray-700"
-            } transition-colors duration-300`}
-          />
-        ))}
-      </div>
-
-      <Skeleton className="h-3 w-20" />
+    <div className="px-4 py-6 space-y-4">
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center space-x-3">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+          <Skeleton className="h-9 w-28" />
+        </CardContent>
+      </Card>
     </div>
   )
 }

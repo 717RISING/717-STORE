@@ -1,113 +1,104 @@
 export interface Product {
   id: string
   name: string
+  description: string
   price: number
-  originalPrice?: number
   image: string
   category: string
-  description: string
   stock: number
-  isNew?: boolean
-  isSale?: boolean
   sizes?: string[]
   colors?: string[]
-  tags?: string[]
+  rating?: number
+  reviews?: number
+}
+
+export const products: Product[] = [
+  {
+    id: "1",
+    name: "Camiseta Big Dreams",
+    description: "Camiseta de algodón 100% con diseño exclusivo Big Dreams",
+    price: 89000,
+    image: "/products/camisetas/big-dreams-tshirt.png",
+    category: "camisetas",
+    stock: 15,
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Negro", "Blanco"],
+    rating: 4.5,
+    reviews: 23
+  },
+  {
+    id: "2",
+    name: "Camiseta Oversized",
+    description: "Camiseta oversized de corte relajado, perfecta para el día a día",
+    price: 95000,
+    image: "/products/camisetas/oversized-tee.png",
+    category: "camisetas",
+    stock: 8,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: ["Negro", "Gris", "Blanco"],
+    rating: 4.7,
+    reviews: 31
+  },
+  {
+    id: "3",
+    name: "Graphic Tee Blood",
+    description: "Camiseta con diseño gráfico exclusivo Blood, edición limitada",
+    price: 105000,
+    image: "/products/camisetas/graphic-tee-blood.png",
+    category: "camisetas",
+    stock: 5,
+    sizes: ["M", "L", "XL"],
+    colors: ["Negro", "Rojo"],
+    rating: 4.8,
+    reviews: 18
+  },
+  {
+    id: "4",
+    name: "Graphic Tee Pain",
+    description: "Camiseta con diseño gráfico Pain, para los verdaderos fanáticos",
+    price: 105000,
+    image: "/products/camisetas/graphic-tee-pain.png",
+    category: "camisetas",
+    stock: 12,
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Negro", "Blanco"],
+    rating: 4.6,
+    reviews: 27
+  }
+]
+
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price)
 }
 
 export async function getProducts(): Promise<Product[]> {
-  // Simulated API call
-  return [
-    {
-      id: '1',
-      name: 'Camiseta Big Dreams',
-      price: 25000,
-      originalPrice: 30000,
-      image: '/products/camisetas/big-dreams-tshirt.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta de algodón 100% con diseño exclusivo Big Dreams. Perfecta para el uso diario con un estilo urbano único.',
-      stock: 50,
-      isNew: true,
-      isSale: true,
-      sizes: ['S', 'M', 'L', 'XL'],
-      colors: ['Negro', 'Blanco'],
-      tags: ['streetwear', 'urban', 'dreams']
-    },
-    {
-      id: '2',
-      name: 'Camiseta Oversized',
-      price: 28000,
-      image: '/products/camisetas/oversized-tee.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta oversized de corte moderno y cómodo. Ideal para un look relajado y contemporáneo.',
-      stock: 30,
-      isNew: false,
-      isSale: false,
-      sizes: ['M', 'L', 'XL', 'XXL'],
-      colors: ['Negro', 'Gris', 'Blanco'],
-      tags: ['oversized', 'comfort', 'modern']
-    },
-    {
-      id: '3',
-      name: 'Graphic Tee Blood',
-      price: 32000,
-      image: '/products/camisetas/graphic-tee-blood.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta con diseño gráfico exclusivo Blood. Arte urbano plasmado en una prenda de alta calidad.',
-      stock: 25,
-      isNew: true,
-      isSale: false,
-      sizes: ['S', 'M', 'L', 'XL'],
-      colors: ['Negro', 'Rojo'],
-      tags: ['graphic', 'art', 'exclusive']
-    },
-    {
-      id: '4',
-      name: 'Graphic Tee Pain',
-      price: 32000,
-      originalPrice: 35000,
-      image: '/products/camisetas/graphic-tee-pain.jpg',
-      category: 'Camisetas',
-      description: 'Camiseta con diseño gráfico Pain. Expresión artística que combina estilo y actitud.',
-      stock: 20,
-      isNew: false,
-      isSale: true,
-      sizes: ['S', 'M', 'L', 'XL'],
-      colors: ['Negro', 'Blanco'],
-      tags: ['graphic', 'pain', 'attitude']
-    }
-  ]
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 100))
+  return products
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  const products = await getProducts()
-  return products.find(product => product.id === id) || null
+export async function getProductById(id: string): Promise<Product | undefined> {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 100))
+  return products.find(product => product.id === id)
 }
 
 export async function getProductsByCategory(category: string): Promise<Product[]> {
-  const products = await getProducts()
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 100))
   return products.filter(product => product.category === category)
 }
 
-export async function searchProducts(query: string): Promise<Product[]> {
-  const products = await getProducts()
+export function searchProducts(query: string): Product[] {
   const lowercaseQuery = query.toLowerCase()
-  
-  return products.filter(product => 
+  return products.filter(product =>
     product.name.toLowerCase().includes(lowercaseQuery) ||
     product.description.toLowerCase().includes(lowercaseQuery) ||
-    product.category.toLowerCase().includes(lowercaseQuery) ||
-    product.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+    product.category.toLowerCase().includes(lowercaseQuery)
   )
-}
-
-export async function getFeaturedProducts(): Promise<Product[]> {
-  const products = await getProducts()
-  return products.filter(product => product.isNew || product.isSale)
-}
-
-export async function getRelatedProducts(productId: string, category: string): Promise<Product[]> {
-  const products = await getProducts()
-  return products
-    .filter(product => product.id !== productId && product.category === category)
-    .slice(0, 4)
 }

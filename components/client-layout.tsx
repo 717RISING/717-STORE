@@ -1,22 +1,24 @@
-'use client'
+"use client"
 
-import { ThemeProvider } from 'next-themes'
-import { CartProvider } from '@/lib/cart-context'
-import { PageTransitionProvider } from '@/lib/page-transition-context'
-import { MobileDebugPanel } from './mobile-debug-panel'
-import { useMobileDetection } from '@/hooks/use-mobile-detection'
+import { ThemeProvider } from "next-themes"
+import { Toaster } from "@/components/ui/toaster"
+import { ChatWidget } from "@/components/live-chat/chat-widget"
 
-export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const { isMobile } = useMobileDetection()
+interface ClientLayoutProps {
+  children: React.ReactNode
+}
 
+export function ClientLayout({ children }: ClientLayoutProps) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <CartProvider>
-        <PageTransitionProvider>
-          {children}
-          {isMobile && <MobileDebugPanel />}
-        </PageTransitionProvider>
-      </CartProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {children}
+      <ChatWidget />
+      <Toaster />
     </ThemeProvider>
   )
 }

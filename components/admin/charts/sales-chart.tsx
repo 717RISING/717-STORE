@@ -1,40 +1,56 @@
 "use client"
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 const data = [
-  { name: 'Ene', sales: 4000, orders: 240 },
-  { name: 'Feb', sales: 3000, orders: 139 },
-  { name: 'Mar', sales: 2000, orders: 980 },
-  { name: 'Abr', sales: 2780, orders: 390 },
-  { name: 'May', sales: 1890, orders: 480 },
-  { name: 'Jun', sales: 2390, orders: 380 },
-  { name: 'Jul', sales: 3490, orders: 430 },
+  { name: "Ene", total: 1200000 },
+  { name: "Feb", total: 1900000 },
+  { name: "Mar", total: 1600000 },
+  { name: "Abr", total: 2100000 },
+  { name: "May", total: 1800000 },
+  { name: "Jun", total: 2400000 },
 ]
 
-export function SalesChart() {
+export default function SalesChart() {
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Line 
-          type="monotone" 
-          dataKey="sales" 
-          stroke="#8884d8" 
-          strokeWidth={2}
-          dot={{ fill: '#8884d8' }}
-        />
-        <Line 
-          type="monotone" 
-          dataKey="orders" 
-          stroke="#82ca9d" 
-          strokeWidth={2}
-          dot={{ fill: '#82ca9d' }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <CardHeader>
+      <CardTitle className="text-white">Ventas Mensuales</CardTitle>
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={data}>
+            <XAxis 
+              dataKey="name" 
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `$${value}`}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1f2937', 
+                border: '1px solid #374151',
+                borderRadius: '8px'
+              }}
+              labelStyle={{ color: '#f9fafb' }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="total" 
+              stroke="#4A1518" 
+              strokeWidth={2}
+              dot={{ fill: '#4A1518' }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </CardHeader>
   )
 }

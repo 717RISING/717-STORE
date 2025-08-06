@@ -1,41 +1,42 @@
 "use client"
 
-import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 
-interface VisitorsChartProps {
-  data: { name: string; visitors: number }[]
-}
+const data = [
+  { name: "Lun", visitors: 400 },
+  { name: "Mar", visitors: 300 },
+  { name: "Mié", visitors: 500 },
+  { name: "Jue", visitors: 280 },
+  { name: "Vie", visitors: 590 },
+  { name: "Sáb", visitors: 320 },
+  { name: "Dom", visitors: 450 },
+]
 
-export function VisitorsChart({ data }: VisitorsChartProps) {
+export function VisitorsChart() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Visitantes del Sitio Web</CardTitle>
-        <CardDescription>Número de visitantes únicos a lo largo del tiempo</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={{
-            visitors: {
-              label: "Visitantes",
-              color: "hsl(var(--chart-1))",
-            },
-          }}
-          className="h-[300px]"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Area type="monotone" dataKey="visitors" stroke="var(--color-visitors)" fill="var(--color-visitors)" name="Visitantes" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+    <CardHeader>
+      <CardTitle className="text-white">Visitantes Semanales</CardTitle>
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={data}>
+            <XAxis
+              dataKey="name"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Bar dataKey="visitors" fill="#4A1518" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </CardContent>
-    </Card>
+    </CardHeader>
   )
 }

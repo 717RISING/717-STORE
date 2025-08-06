@@ -183,7 +183,15 @@ export default async function ProductsPage() {
 
       {/* Products Section */}
       <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8 animate-slide-up">
-        <h1 className="mb-8 text-3xl font-bold">Nuestros Productos</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Nuestros Productos
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Descubre nuestra colección exclusiva de ropa urbana
+          </p>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters */}
           <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>

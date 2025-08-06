@@ -1,47 +1,50 @@
 "use client"
 
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 
-interface CustomerAcquisitionChartProps {
-  data: { name: string; newCustomers: number; totalCustomers: number }[]
-}
+const data = [
+  { month: "Ene", nuevos: 120, returning: 80 },
+  { month: "Feb", nuevos: 190, returning: 130 },
+  { month: "Mar", nuevos: 160, returning: 110 },
+  { month: "Abr", nuevos: 210, returning: 140 },
+  { month: "May", nuevos: 180, returning: 120 },
+  { month: "Jun", nuevos: 240, returning: 160 },
+]
 
-export function CustomerAcquisitionChart({ data }: CustomerAcquisitionChartProps) {
+export function CustomerAcquisitionChart() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Adquisición de Clientes</CardTitle>
-        <CardDescription>Nuevos clientes y total de clientes por mes</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={{
-            newCustomers: {
-              label: "Nuevos Clientes",
-              color: "hsl(var(--chart-1))",
-            },
-            totalCustomers: {
-              label: "Total Clientes",
-              color: "hsl(var(--chart-2))",
-            },
-          }}
-          className="h-[300px]"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Legend />
-              <Bar dataKey="newCustomers" fill="var(--color-newCustomers)" name="Nuevos Clientes" />
-              <Bar dataKey="totalCustomers" fill="var(--color-totalCustomers)" name="Total Clientes" />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+    <CardHeader>
+      <CardTitle className="text-white">Adquisición de Clientes</CardTitle>
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <XAxis dataKey="month" stroke="#888888" fontSize={12} />
+            <YAxis stroke="#888888" fontSize={12} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1f2937', 
+                border: '1px solid #374151',
+                borderRadius: '8px'
+              }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="nuevos" 
+              stroke="#4A1518" 
+              strokeWidth={2}
+              name="Nuevos Clientes"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="returning" 
+              stroke="#6B1E22" 
+              strokeWidth={2}
+              name="Clientes Recurrentes"
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </CardContent>
-    </Card>
+    </CardHeader>
   )
 }

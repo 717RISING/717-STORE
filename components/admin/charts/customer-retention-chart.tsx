@@ -1,42 +1,41 @@
 "use client"
 
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 
-interface CustomerRetentionChartProps {
-  data: { name: string; retentionRate: number }[]
-}
+const data = [
+  { period: "Mes 1", retention: 100 },
+  { period: "Mes 2", retention: 85 },
+  { period: "Mes 3", retention: 72 },
+  { period: "Mes 6", retention: 58 },
+  { period: "Año 1", retention: 45 },
+]
 
-export function CustomerRetentionChart({ data }: CustomerRetentionChartProps) {
+export function CustomerRetentionChart() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Retención de Clientes</CardTitle>
-        <CardDescription>Tasa de retención de clientes a lo largo del tiempo</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={{
-            retentionRate: {
-              label: "Tasa de Retención",
-              color: "hsl(var(--chart-1))",
-            },
-          }}
-          className="h-[300px]"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis domain={[0, 100]} unit="%" />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Legend />
-              <Line type="monotone" dataKey="retentionRate" stroke="var(--color-retentionRate)" name="Tasa de Retención" />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+    <CardHeader>
+      <CardTitle className="text-white">Retención de Clientes</CardTitle>
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <XAxis dataKey="period" stroke="#888888" fontSize={12} />
+            <YAxis stroke="#888888" fontSize={12} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1f2937', 
+                border: '1px solid #374151',
+                borderRadius: '8px'
+              }}
+              formatter={(value) => [`${value}%`, 'Retención']}
+            />
+            <Bar 
+              dataKey="retention" 
+              fill="#4A1518" 
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
       </CardContent>
-    </Card>
+    </CardHeader>
   )
 }
