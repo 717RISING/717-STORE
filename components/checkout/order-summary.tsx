@@ -1,125 +1,81 @@
-"use client"
+'use client'
 
-import { useCart } from "@/lib/cart-context"
-import { formatPrice } from "@/lib/products"
-import Image from "next/image"
-import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
-import { submitOrder } from "@/app/actions" // Import the server action
-import { useFormStatus, useFormState } from "react-dom"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import Image from 'next/image'
+import { Product } from '@/lib/products'
 
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  return (
-    <Button type="submit" className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white py-3 text-lg" disabled={pending}>
-      {pending ? "Procesando..." : "Realizar Pedido"}
-    </Button>
-  )
+interface CartItem extends Product {
+  quantity: number
+  size: string
 }
 
-export default function OrderSummary() {
-  const { cartItems, cartTotal, clearCart } = useCart()
-  const router = useRouter()
-  const { toast } = useToast()
+interface OrderSummaryProps {
+  shippingData: any
+  paymentData: any
+  cartItems: CartItem[]
+  cartTotal: number
+}
 
-  // Initial state for useFormState
-  const initialState = {
-    success: false,
-    message: "",
-    orderId: "",
-  }
-
-  const [state, formAction] = useFormState(submitOrder, initialState)
-
-  useEffect(() => {
-    if (state.success) {
-      toast({
-        title: "¡Pedido Confirmado!",
-        description: state.message,
-        variant: "success",
-      })
-      clearCart() // Clear cart after successful order
-      router.push(`/checkout/confirmacion?orderId=${state.orderId}`)
-    } else if (state.message && !state.success) {
-      toast({
-        title: "Error al Procesar Pedido",
-        description: state.message,
-        variant: "destructive",
-      })
-    }
-  }, [state, router, clearCart, toast])
-
-  if (cartItems.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-        <p className="text-lg font-semibold mb-2">Tu carrito está vacío.</p>
-        <p className="text-sm">Añade algunos productos para ver el resumen de tu pedido.</p>
-        <Button onClick={() => router.push("/productos")} className="mt-4 bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-          Ir a Comprar
-        </Button>
-      </div>
-    )
-  }
-
+export default function OrderSummary({ shippingData, paymentData, cartItems, cartTotal }: OrderSummaryProps) {
   return (
-    <form action={formAction}>
-      <input type="hidden" name="cartItems" value={JSON.stringify(cartItems)} />
-      <input type="hidden" name="totalAmount" value={cartTotal.toFixed(2)} />
-      {/* These hidden inputs will be populated by the ShippingForm and PaymentForm */}
-      <input type="hidden" name="name" id="hidden-name" />
-      <input type="hidden" name="email" id="hidden-email" />
-      <input type="hidden" name="address" id="hidden-address" />
-      <input type="hidden" name="city" id="hidden-city" />
-      <input type="hidden" name="zip" id="hidden-zip" />
-      <input type="hidden" name="country" id="hidden-country" />
-      <input type="hidden" name="paymentMethod" id="hidden-payment-method" />
-
-      <div className="space-y-4">
-        {cartItems.map((item) => (
-          <div key={item.id + item.size} className="flex items-center gap-4">
-            <Image
-              src={item.image || "/placeholder.svg"}
-              alt={item.name}
-              width={64}
-              height={64}
-              className="rounded-md object-cover"
-            />
-            <div className="flex-1">
-              <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Talla: {item.size} | Cantidad: {item.quantity}
-              </p>
-            </div>
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {formatPrice(item.price * item.quantity)}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <Separator className="my-4 bg-gray-200 dark:bg-gray-700" />
-
-      <div className="space-y-2 text-gray-700 dark:text-gray-300">
-        <div className="flex justify-between">
-          <span>Subtotal:</span>
-          <span>{formatPrice(cartTotal)}</span>
+    <Card className="p-6 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+      <CardHeader className="p-0 mb-4">
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Resumen del Pedido</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información de Envío</h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            {shippingData?.name} ({shippingData?.email})<br />
+            {shippingData?.address}, {shippingData?.city}, {shippingData?.zip}<br />
+            {shippingData?.country}
+          </p>
         </div>
-        <div className="flex justify-between">
-          <span>Envío:</span>
-          <span>{formatPrice(0)}</span> {/* Assuming free shipping for now */}
-        </div>
-        <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white">
-          <span>Total:</span>
-          <span>{formatPrice(cartTotal)}</span>
-        </div>
-      </div>
 
-      <Separator className="my-4 bg-gray-200 dark:bg-gray-700" />
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Método de Pago</h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            {paymentData?.paymentMethod === 'credit-card' && `Tarjeta de Crédito (**** ${paymentData?.cardNumber.slice(-4)})`}
+            {paymentData?.paymentMethod === 'paypal' && 'PayPal'}
+            {paymentData?.paymentMethod === 'bank-transfer' && 'Transferencia Bancaria'}
+          </p>
+        </div>
 
-      <SubmitButton />
-    </form>
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Artículos en el Carrito</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[80px]">Imagen</TableHead>
+                <TableHead>Producto</TableHead>
+                <TableHead>Talla</TableHead>
+                <TableHead>Cantidad</TableHead>
+                <TableHead className="text-right">Precio</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {cartItems.map((item) => (
+                <TableRow key={`${item.id}-${item.size}`}>
+                  <TableCell>
+                    <Image src={item.image || "/placeholder.svg"} alt={item.name} width={60} height={60} className="rounded-md object-cover" />
+                  </TableCell>
+                  <TableCell className="font-medium text-gray-900 dark:text-white">{item.name}</TableCell>
+                  <TableCell className="text-gray-700 dark:text-gray-300">{item.size}</TableCell>
+                  <TableCell className="text-gray-700 dark:text-gray-300">{item.quantity}</TableCell>
+                  <TableCell className="text-right text-gray-900 dark:text-white">
+                    ${(item.price * item.quantity).toLocaleString('es-CO')} COP
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="text-right text-2xl font-bold text-gray-900 dark:text-white">
+          Total: ${cartTotal.toLocaleString('es-CO')} COP
+        </div>
+      </CardContent>
+    </Card>
   )
 }

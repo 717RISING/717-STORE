@@ -1,107 +1,124 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { CreditCard, Banknote, Wallet } from 'lucide-react'
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Card, CardContent } from '@/components/ui/card'
 
-export default function PaymentForm() {
-  const [paymentMethod, setPaymentMethod] = useState("credit-card")
-  const [saveCard, setSaveCard] = useState(false)
-  const { toast } = useToast()
+interface PaymentFormProps {
+  onSubmit: (data: any) => void
+  initialData?: any
+}
+
+export default function PaymentForm({ onSubmit, initialData }: PaymentFormProps) {
+  const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || 'credit-card')
+  const [cardNumber, setCardNumber] = useState(initialData?.cardNumber || '')
+  const [cardName, setCardName] = useState(initialData?.cardName || '')
+  const [expiryDate, setExpiryDate] = useState(initialData?.expiryDate || '')
+  const [cvv, setCvv] = useState(initialData?.cvv || '')
+  const [errors, setErrors] = useState<any>({})
+
+  const validate = () => {
+    const newErrors: any = {}
+    if (paymentMethod === 'credit-card') {
+      if (!cardNumber) newErrors.cardNumber = 'Número de tarjeta es requerido.'
+      else if (!/^\d{16}$/.test(cardNumber)) newErrors.cardNumber = 'Número de tarjeta inválido (16 dígitos).'
+      if (!cardName) newErrors.cardName = 'Nombre en la tarjeta es requerido.'
+      if (!expiryDate) newErrors.expiryDate = 'Fecha de vencimiento es requerida.'
+      else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryDate)) newErrors.expiryDate = 'Formato de fecha inválido (MM/AA).'
+      if (!cvv) newErrors.cvv = 'CVV es requerido.'
+      else if (!/^\d{3,4}$/.test(cvv)) newErrors.cvv = 'CVV inválido (3 o 4 dígitos).'
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Simulate payment processing
-    toast({
-      title: "Procesando Pago",
-      description: `Método seleccionado: ${paymentMethod === "credit-card" ? "Tarjeta de Crédito" : "PayPal"}.`,
-    })
-    console.log("Payment method:", paymentMethod)
-    console.log("Save card:", saveCard)
-    // In a real app, you'd send this data to a payment gateway
+    if (validate()) {
+      onSubmit({ paymentMethod, cardNumber, cardName, expiryDate, cvv })
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Label
-          htmlFor="credit-card"
-          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-        >
-          <RadioGroupItem id="credit-card" value="credit-card" className="sr-only" />
-          <CreditCard className="mb-3 h-6 w-6" />
-          Tarjeta de Crédito
-        </Label>
-        <Label
-          htmlFor="paypal"
-          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-        >
-          <RadioGroupItem id="paypal" value="paypal" className="sr-only" />
-          <Wallet className="mb-3 h-6 w-6" />
-          PayPal
-        </Label>
-      </RadioGroup>
-
-      {paymentMethod === "credit-card" && (
-        <Card className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-          <CardContent className="p-6 space-y-4">
-            <div>
-              <Label htmlFor="card-number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Número de Tarjeta
-              </Label>
-              <Input id="card-number" type="text" placeholder="XXXX XXXX XXXX XXXX" className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiry-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Fecha de Vencimiento (MM/AA)
-                </Label>
-                <Input id="expiry-date" type="text" placeholder="MM/AA" className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
-              </div>
-              <div>
-                <Label htmlFor="cvv" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  CVV
-                </Label>
-                <Input id="cvv" type="text" placeholder="XXX" className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="card-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nombre en la Tarjeta
-              </Label>
-              <Input id="card-name" type="text" placeholder="Nombre Completo" className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
+    <Card className="p-6 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+      <CardContent className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col space-y-2">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="credit-card" id="credit-card" />
+              <Label htmlFor="credit-card" className="text-gray-700 dark:text-gray-300">Tarjeta de Crédito</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="save-card" checked={saveCard} onCheckedChange={(checked) => setSaveCard(!!checked)} />
-              <Label htmlFor="save-card" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Guardar esta tarjeta para futuras compras
-              </Label>
+              <RadioGroupItem value="paypal" id="paypal" />
+              <Label htmlFor="paypal" className="text-gray-700 dark:text-gray-300">PayPal</Label>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="bank-transfer" id="bank-transfer" />
+              <Label htmlFor="bank-transfer" className="text-gray-700 dark:text-gray-300">Transferencia Bancaria</Label>
+            </div>
+          </RadioGroup>
 
-      {paymentMethod === "paypal" && (
-        <div className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
-            Serás redirigido a PayPal para completar tu compra de forma segura.
-          </p>
-          <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Banknote className="mr-2 h-5 w-5" />
-            Pagar con PayPal
+          {paymentMethod === 'credit-card' && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="cardNumber" className="text-gray-700 dark:text-gray-300">Número de Tarjeta</Label>
+                <Input
+                  id="cardNumber"
+                  type="text"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  placeholder="XXXX XXXX XXXX XXXX"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                {errors.cardNumber && <p className="text-red-500 text-sm">{errors.cardNumber}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cardName" className="text-gray-700 dark:text-gray-300">Nombre en la Tarjeta</Label>
+                <Input
+                  id="cardName"
+                  type="text"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
+                  placeholder="Nombre Apellido"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                {errors.cardName && <p className="text-red-500 text-sm">{errors.cardName}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expiryDate" className="text-gray-700 dark:text-gray-300">Fecha de Vencimiento (MM/AA)</Label>
+                <Input
+                  id="expiryDate"
+                  type="text"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  placeholder="MM/AA"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                {errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cvv" className="text-gray-700 dark:text-gray-300">CVV</Label>
+                <Input
+                  id="cvv"
+                  type="text"
+                  value={cvv}
+                  onChange={(e) => setCvv(e.target.value)}
+                  placeholder="XXX"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                {errors.cvv && <p className="text-red-500 text-sm">{errors.cvv}</p>}
+              </div>
+            </div>
+          )}
+
+          <Button type="submit" className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+            Continuar al Resumen
           </Button>
-        </div>
-      )}
-
-      <Button type="submit" className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white py-3 text-lg">
-        Confirmar Pedido
-      </Button>
-    </form>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

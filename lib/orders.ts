@@ -6,8 +6,8 @@ export interface OrderItem {
   name: string
   quantity: number
   price: number
-  size: string
-  image: string
+  size?: string
+  image?: string
 }
 
 export interface Order {
@@ -17,8 +17,8 @@ export interface Order {
   customerEmail: string
   orderDate: string // ISO string
   totalAmount: number
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
-  paymentStatus: "paid" | "pending" | "refunded"
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  paymentStatus: 'paid' | 'pending' | 'refunded'
   shippingAddress: {
     street: string
     city: string
@@ -26,7 +26,7 @@ export interface Order {
     country: string
   }
   items: OrderItem[]
-  channel?: string // e.g., "Web", "Mobile App", "In-store"
+  channel: string
 }
 
 // Mock data for orders (can be empty initially or pre-populated)
@@ -159,3 +159,14 @@ export async function _saveOrderToDatabase(order: Order): Promise<Order> {
     resolve(order);
   });
 }
+
+// Example of a function that might live here if not in lib/database.ts
+// export async function getOrdersForUser(userId: string): Promise<Order[]> {
+//   // Logic to fetch orders for a specific user
+//   return [];
+// }
+
+// export async function cancelOrder(orderId: string): Promise<boolean> {
+//   // Logic to cancel an order
+//   return true;
+// }

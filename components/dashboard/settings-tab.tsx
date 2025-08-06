@@ -11,9 +11,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { useTheme } from "@/lib/theme-context" // Named import for useTheme
+import { useTheme } from 'next-themes'
+import { useFormState } from 'react-dom'
+import { updateProfile, changePassword } from '@/app/actions'
+import { Loader2 } from 'lucide-react'
+
+function SubmitButton({ text }: { text: string }) {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" className="bg-[#4A1518] hover:bg-[#6B1E22] text-white" disabled={pending}>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Cargando...
+        </>
+      ) : (
+        text
+      )}
+    </Button>
+  )
+}
 
 export default function SettingsTab() {
+  const { theme, setTheme } = useTheme()
+  const [profileState, profileAction] = useFormState(updateProfile, null)
+  const [passwordState, passwordAction] = useFormState(changePassword, null)
   const [settings, setSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,
@@ -35,7 +57,6 @@ export default function SettingsTab() {
   const [freeShippingThreshold, setFreeShippingThreshold] = useState("100.00")
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const { toast } = useToast()
-  const { theme, setTheme } = useTheme() // Use named import
 
   const handleSettingChange = (key: string, value: boolean | string) => {
     setSettings((prev) => ({
@@ -117,7 +138,7 @@ export default function SettingsTab() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Configuración de la Tienda</h1>
@@ -125,86 +146,49 @@ export default function SettingsTab() {
       </div>
 
       {/* Account Actions */}
-      <h2 className="text-2xl font-bold text-white">Configuración de la Cuenta</h2>
-
-      <Card className="bg-gray-800 text-white border-gray-700">
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle>Información Personal</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Configuración de Perfil</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="first-name" className="text-gray-300">
-              Nombre
-            </Label>
-            <Input id="first-name" defaultValue="Juan" className="bg-gray-700 border-gray-600 text-white" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="last-name" className="text-gray-300">
-              Apellido
-            </Label>
-            <Input id="last-name" defaultValue="Pérez" className="bg-gray-700 border-gray-600 text-white" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email" className="text-gray-300">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              defaultValue="juan.perez@example.com"
-              className="bg-gray-700 border-gray-600 text-white"
-            />
-          </div>
-          <Button className="bg-[#5D1A1D] hover:bg-[#4a1518] text-white">Guardar Cambios</Button>
+        <CardContent>
+          <form action={profileAction} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Nombre Completo</Label>
+              <Input id="name" name="name" type="text" defaultValue="Juan Pérez" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
+              <Input id="email" name="email" type="email" defaultValue="juan@email.com" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
+            </div>
+            {profileState?.success && <p className="text-green-500 text-sm">{profileState.message}</p>}
+            {profileState?.error && <p className="text-red-500 text-sm">{profileState.error}</p>}
+            <SubmitButton text="Actualizar Perfil" />
+          </form>
         </CardContent>
       </Card>
 
       {/* Security */}
       <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Seguridad de la Cuenta</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Cambiar Contraseña</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handlePasswordChange} className="space-y-4">
-            <div>
-              <Label htmlFor="current-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Contraseña Actual
-              </Label>
-              <Input
-                id="current-password"
-                type="password"
-                value={settings.currentPassword}
-                onChange={(e) => setSettings((prev) => ({ ...prev, currentPassword: e.target.value }))}
-                className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-              />
+          <form action={passwordAction} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword" className="text-gray-700 dark:text-gray-300">Contraseña Actual</Label>
+              <Input id="currentPassword" name="currentPassword" type="password" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
             </div>
-            <div>
-              <Label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nueva Contraseña
-              </Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={settings.newPassword}
-                onChange={(e) => setSettings((prev) => ({ ...prev, newPassword: e.target.value }))}
-                className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="newPassword" className="text-gray-700 dark:text-gray-300">Nueva Contraseña</Label>
+              <Input id="newPassword" name="newPassword" type="password" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
             </div>
-            <div>
-              <Label htmlFor="confirm-new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirmar Nueva Contraseña
-              </Label>
-              <Input
-                id="confirm-new-password"
-                type="password"
-                value={settings.confirmNewPassword}
-                onChange={(e) => setSettings((prev) => ({ ...prev, confirmNewPassword: e.target.value }))}
-                className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-gray-700 dark:text-gray-300">Confirmar Nueva Contraseña</Label>
+              <Input id="confirmPassword" name="confirmPassword" type="password" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
             </div>
-            <Button type="submit" className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              Cambiar Contraseña
-            </Button>
+            {passwordState?.success && <p className="text-green-500 text-sm">{passwordState.message}</p>}
+            {passwordState?.error && <p className="text-red-500 text-sm">{passwordState.error}</p>}
+            <SubmitButton text="Cambiar Contraseña" />
           </form>
         </CardContent>
       </Card>
@@ -438,6 +422,27 @@ export default function SettingsTab() {
               className="data-[state=checked]:bg-[#5D1A1D]"
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme Preferences */}
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Preferencias de Tema</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="dark-mode" className="text-gray-700 dark:text-gray-300">Modo Oscuro</Label>
+            <Switch
+              id="dark-mode"
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              className="data-[state=checked]:bg-[#4A1518]"
+            />
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Cambia entre el tema claro y oscuro para la interfaz de usuario.
+          </p>
         </CardContent>
       </Card>
     </div>

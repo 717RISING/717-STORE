@@ -26,7 +26,7 @@ export default function AdminPage() {
           <AdminDashboard />
         </Suspense>
       ) : (
-        <AdminLogin />
+        <AdminLogin onLogin={() => {}} /> // Pass a dummy onLogin for now, as it's handled by server action redirect
       )}
     </div>
   )

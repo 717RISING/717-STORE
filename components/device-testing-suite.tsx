@@ -1,141 +1,73 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { Label } from "@/components/ui/label"
-import { useMobileDetection } from "@/hooks/use-mobile-detection"
-import { cn } from "@/lib/utils"
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { useMobileDetection } from '@/hooks/use-mobile-detection'
+import MobileDebugPanel from '@/components/mobile-debug-panel'
 
 export default function DeviceTestingSuite() {
-  const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0)
-  const [height, setHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0)
   const { isMobile, isTablet, isDesktop } = useMobileDetection()
+  const [screenWidth, setScreenWidth] = useState(0)
+  const [screenHeight, setScreenHeight] = useState(0)
+  const [userAgent, setUserAgent] = useState('')
 
   useEffect(() => {
-    const handleResize = () => {
-      setWidth(window.innerWidth)
-      setHeight(window.innerHeight)
+    const updateInfo = () => {
+      setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
+      setUserAgent(navigator.userAgent)
     }
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("resize", handleResize)
-      return () => window.removeEventListener("resize", handleResize)
-    }
+    updateInfo()
+    window.addEventListener('resize', updateInfo)
+    return () => window.removeEventListener('resize', updateInfo)
   }, [])
 
-  const handleWidthChange = (value: number[]) => {
-    if (typeof window !== "undefined") {
-      // This will only work if the window is a popup or if the browser allows it
-      try {
-        window.resizeTo(value[0], window.innerHeight)
-      } catch (e) {
-        console.warn("Window.resizeTo is blocked by browser security policies.", e)
-      }
-      setWidth(value[0]) // Update state immediately for UI feedback
-    }
-  }
-
-  const handleHeightChange = (value: number[]) => {
-    if (typeof window !== "undefined") {
-      try {
-        window.resizeTo(window.innerWidth, value[0])
-      } catch (e) {
-        console.warn("Window.resizeTo is blocked by browser security policies.", e)
-      }
-      setHeight(value[0]) // Update state immediately for UI feedback
-    }
-  }
-
-  const setPreset = (w: number, h: number) => {
-    if (typeof window !== "undefined") {
-      try {
-        window.resizeTo(w, h)
-      } catch (e) {
-        console.warn("Window.resizeTo is blocked by browser security policies.", e)
-      }
-      setWidth(w)
-      setHeight(h)
-    }
-  }
-
   const getDeviceType = () => {
-    if (isMobile) return "Móvil"
-    if (isTablet) return "Tableta"
-    if (isDesktop) return "Escritorio"
-    return "Desconocido"
+    if (isMobile) return 'Móvil'
+    if (isTablet) return 'Tablet'
+    if (isDesktop) return 'Escritorio'
+    return 'Desconocido'
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
-      <Card className="w-full max-w-2xl shadow-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Suite de Pruebas de Dispositivos</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Información del Dispositivo</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center text-lg font-medium">
-            <p>
-              Ancho Actual: <span className="font-bold">{width}px</span>
-            </p>
-            <p>
-              Alto Actual: <span className="font-bold">{height}px</span>
-            </p>
-            <p>
-              Tipo de Dispositivo Detectado: <span className="font-bold">{getDeviceType()}</span>
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <Label htmlFor="width-slider" className="text-gray-700 dark:text-gray-300">Ajustar Ancho</Label>
-            <Slider
-              id="width-slider"
-              min={320}
-              max={1920}
-              step={10}
-              value={[width]}
-              onValueChange={handleWidthChange}
-              className="w-full"
-            />
-            <Label htmlFor="height-slider" className="text-gray-700 dark:text-gray-300">Ajustar Alto</Label>
-            <Slider
-              id="height-slider"
-              min={480}
-              max={1080}
-              step={10}
-              value={[height]}
-              onValueChange={handleHeightChange}
-              className="w-full"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button onClick={() => setPreset(375, 667)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              iPhone 8 (375x667)
-            </Button>
-            <Button onClick={() => setPreset(414, 896)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              iPhone XR (414x896)
-            </Button>
-            <Button onClick={() => setPreset(768, 1024)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              iPad (768x1024)
-            </Button>
-            <Button onClick={() => setPreset(1024, 768)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              iPad Horizontal (1024x768)
-            </Button>
-            <Button onClick={() => setPreset(1280, 800)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              Laptop (1280x800)
-            </Button>
-            <Button onClick={() => setPreset(1920, 1080)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              Full HD (1920x1080)
-            </Button>
-          </div>
-
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-            Nota: La funcionalidad de redimensionamiento de la ventana puede ser limitada o comportarse de manera
-            diferente en algunos entornos de navegador o si no se ejecuta en una ventana de navegador independiente.
-          </p>
+        <CardContent className="space-y-2 text-gray-700 dark:text-gray-300">
+          <p><strong>Tipo de Dispositivo Detectado:</strong> <span className="font-semibold text-[#4A1518] dark:text-[#FFD700]">{getDeviceType()}</span></p>
+          <p><strong>Ancho de la Ventana:</strong> {screenWidth}px</p>
+          <p><strong>Alto de la Ventana:</strong> {screenHeight}px</p>
+          <p className="break-words"><strong>User Agent:</strong> {userAgent}</p>
         </CardContent>
       </Card>
+
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Pruebas de Interfaz</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-4">
+            <Button className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">Botón Primario</Button>
+            <Button variant="outline" className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">Botón Secundario</Button>
+            <Button variant="ghost" className="text-gray-700 dark:text-gray-300">Botón Fantasma</Button>
+            <Button variant="destructive">Botón Destructivo</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input placeholder="Campo de texto" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
+            <Input type="number" placeholder="Campo numérico" className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" />
+          </div>
+          <div className="p-4 border border-dashed border-gray-400 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300">
+            <p>Este es un bloque de contenido de prueba para verificar el espaciado y la tipografía en diferentes dispositivos.</p>
+            <p className="mt-2">Asegúrate de que el texto sea legible y los elementos estén bien alineados.</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <MobileDebugPanel />
     </div>
   )
 }

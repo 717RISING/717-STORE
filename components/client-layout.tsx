@@ -1,24 +1,25 @@
 "use client"
 
-import { ThemeProvider } from "next-themes"
+import { ThemeProvider } from "@/lib/theme-context"
+import { CartProvider } from "@/lib/cart-context"
+import { PageTransitionProvider } from "@/lib/page-transition-context"
 import { Toaster } from "@/components/ui/toaster"
-import { ChatWidget } from "@/components/live-chat/chat-widget"
+import { EnhancedChatWidget } from "@/components/live-chat/enhanced-chat-widget"
 
-interface ClientLayoutProps {
+export default function ClientLayout({
+  children,
+}: {
   children: React.ReactNode
-}
-
-export function ClientLayout({ children }: ClientLayoutProps) {
+}) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {children}
-      <ChatWidget />
-      <Toaster />
+    <ThemeProvider>
+      <CartProvider>
+        <PageTransitionProvider>
+          {children}
+          <EnhancedChatWidget />
+          <Toaster />
+        </PageTransitionProvider>
+      </CartProvider>
     </ThemeProvider>
   )
 }

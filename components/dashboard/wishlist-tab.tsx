@@ -1,62 +1,58 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Trash2, ShoppingCart } from 'lucide-react'
-import Image from "next/image"
-import Link from "next/link"
-import { useToast } from "@/hooks/use-toast"
-import { formatPrice } from "@/lib/products"
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Image from 'next/image'
+import Link from 'next/link'
+import { HeartCrack, ShoppingCart } from 'lucide-react'
+import { Product } from '@/lib/products' // Assuming Product interface is defined
+import { useCart } from '@/lib/cart-context'
 
-interface WishlistItem {
-  id: string
-  name: string
-  price: number
-  image: string
-  link: string
+interface WishlistItem extends Product {
+  addedAt: string // Date when added to wishlist
 }
 
-const initialWishlist: WishlistItem[] = [
-  {
-    id: "camiseta-graphic-pain",
-    name: "Graphic Tee 'Pain'",
-    price: 89000,
-    image: "/products/camisetas/graphic-tee-pain.png",
-    link: "/productos/camiseta-graphic-pain",
-  },
-  {
-    id: "denim-jacket",
-    name: "Denim Jacket",
-    price: 150000,
-    image: "/placeholder.svg?height=400&width=400&text=Denim+Jacket",
-    link: "/productos/denim-jacket",
-  },
-]
+export default function WishlistTab() {
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
+  const { addToCart } = useCart()
 
-export function WishlistTab() {
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(initialWishlist)
-  const { toast } = useToast()
+  useEffect(() => {
+    // Simulate fetching wishlist items from a backend or local storage
+    const mockWishlist: WishlistItem[] = [
+      {
+        id: '3',
+        name: 'Graphic Tee Blood',
+        description: 'Camiseta con diseño gráfico exclusivo',
+        price: 92000,
+        image: '/products/camisetas/graphic-tee-blood.png',
+        category: 'camisetas',
+        stock: 12,
+        addedAt: new Date().toISOString(),
+      },
+      {
+        id: '4',
+        name: 'Graphic Tee Pain',
+        description: 'Camiseta con diseño gráfico único',
+        price: 92000,
+        image: '/products/camisetas/graphic-tee-pain.png',
+        category: 'camisetas',
+        stock: 10,
+        addedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+      },
+    ]
+    setWishlistItems(mockWishlist)
+  }, [])
 
-  const handleRemoveFromWishlist = (id: string) => {
-    setWishlistItems(wishlistItems.filter((item) => item.id !== id))
-    toast({
-      title: "Eliminado de la lista de deseos",
-      description: "El artículo ha sido eliminado de tu lista.",
-      variant: "default",
-    })
+  const handleRemoveFromWishlist = (productId: string) => {
+    setWishlistItems((prev) => prev.filter((item) => item.id !== productId))
   }
 
-  const handleAddToCart = (item: WishlistItem) => {
-    // In a real app, you'd add this to the actual cart context/state
-    toast({
-      title: "Añadido al carrito",
-      description: `${item.name} ha sido añadido a tu carrito.`,
-      variant: "success",
-    })
-    console.log("Add to cart:", item)
-    // Optionally remove from wishlist after adding to cart
-    handleRemoveFromWishlist(item.id)
+  const handleAddToCartFromWishlist = (item: WishlistItem) => {
+    // For simplicity, adding default size 'M' and quantity 1
+    addToCart({ ...item, quantity: 1, size: 'M' })
+    handleRemoveFromWishlist(item.id) // Remove from wishlist after adding to cart
+    alert(`${item.name} añadido al carrito!`)
   }
 
   return (
@@ -64,55 +60,51 @@ export function WishlistTab() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Mi Lista de Deseos</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         {wishlistItems.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="text-lg font-semibold mb-2">Tu lista de deseos está vacía.</p>
-            <p className="text-sm">Añade productos que te encanten para guardarlos aquí.</p>
-            <Button asChild className="mt-4 bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              <Link href="/productos">Explorar Productos</Link>
-            </Button>
-          </div>
+          <p className="text-gray-700 dark:text-gray-300">Tu lista de deseos está vacía.</p>
         ) : (
           <div className="grid gap-4">
             {wishlistItems.map((item) => (
-              <Card key={item.id} className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <Image
-                    src={item.image || "/placeholder.svg"}
-                    alt={item.name}
-                    width={80}
-                    height={80}
-                    className="rounded-md object-cover"
-                  />
-                  <div className="flex-1">
-                    <Link href={item.link} className="hover:underline">
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{item.name}</h3>
-                    </Link>
-                    <p className="text-sm font-medium text-[#5D1A1D]">{formatPrice(item.price)}</p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-[#4A1518] hover:bg-[#6B1E22] text-white"
-                      onClick={() => handleAddToCart(item)}
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Añadir al Carrito
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      onClick={() => handleRemoveFromWishlist(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div
+                key={item.id}
+                className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700"
+              >
+                <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
+                  <Image src={item.image || "/placeholder.svg"} alt={item.name} layout="fill" objectFit="cover" />
+                </div>
+                <div className="flex-grow">
+                  <Link href={`/productos/${item.id}`} className="font-semibold text-lg text-gray-900 hover:text-[#4A1518] dark:text-white dark:hover:text-[#FFD700]">
+                    {item.name}
+                  </Link>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    ${item.price.toLocaleString('es-CO')} COP
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Añadido el: {new Date(item.addedAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddToCartFromWishlist(item)}
+                    className="bg-[#4A1518] hover:bg-[#6B1E22] text-white"
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Añadir al Carrito
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveFromWishlist(item.id)}
+                    className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20"
+                  >
+                    <HeartCrack className="mr-2 h-4 w-4" />
+                    Eliminar
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         )}

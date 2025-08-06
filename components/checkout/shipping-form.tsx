@@ -1,158 +1,122 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
-export default function ShippingForm() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    address: "",
-    city: "",
-    zip: "",
-    country: "Colombia", // Default country
-  })
-  const [saveInfo, setSaveInfo] = useState(false)
-  const { toast } = useToast()
+interface ShippingFormProps {
+  onSubmit: (data: any) => void
+  initialData?: any
+}
 
-  useEffect(() => {
-    // Populate hidden inputs for server action
-    const nameInput = document.getElementById("hidden-name") as HTMLInputElement
-    const emailInput = document.getElementById("hidden-email") as HTMLInputElement
-    const addressInput = document.getElementById("hidden-address") as HTMLInputElement
-    const cityInput = document.getElementById("hidden-city") as HTMLInputElement
-    const zipInput = document.getElementById("hidden-zip") as HTMLInputElement
-    const countryInput = document.getElementById("hidden-country") as HTMLInputElement
+export default function ShippingForm({ onSubmit, initialData }: ShippingFormProps) {
+  const [name, setName] = useState(initialData?.name || '')
+  const [email, setEmail] = useState(initialData?.email || '')
+  const [address, setAddress] = useState(initialData?.address || '')
+  const [city, setCity] = useState(initialData?.city || '')
+  const [zip, setZip] = useState(initialData?.zip || '')
+  const [country, setCountry] = useState(initialData?.country || '')
+  const [errors, setErrors] = useState<any>({})
 
-    if (nameInput) nameInput.value = formData.name
-    if (emailInput) emailInput.value = formData.email
-    if (addressInput) addressInput.value = formData.address
-    if (cityInput) cityInput.value = formData.city
-    if (zipInput) zipInput.value = formData.zip
-    if (countryInput) countryInput.value = formData.country
-  }, [formData])
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({ ...prev, [id]: value }))
+  const validate = () => {
+    const newErrors: any = {}
+    if (!name) newErrors.name = 'Nombre es requerido.'
+    if (!email) newErrors.email = 'Email es requerido.'
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Email inválido.'
+    if (!address) newErrors.address = 'Dirección es requerida.'
+    if (!city) newErrors.city = 'Ciudad es requerida.'
+    if (!zip) newErrors.zip = 'Código Postal es requerido.'
+    if (!country) newErrors.country = 'País es requerido.'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
-  const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, country: value }))
-  }
-
-  const handleSaveInfoChange = (checked: boolean) => {
-    setSaveInfo(checked)
-    if (checked) {
-      toast({
-        title: "Información Guardada",
-        description: "Tu información de envío se guardará para futuras compras.",
-      })
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validate()) {
+      onSubmit({ name, email, address, city, zip, country })
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Nombre Completo
-          </Label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="Tu nombre"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-          />
-        </div>
-        <div>
-          <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Correo Electrónico
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="tu@ejemplo.com"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-          />
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Dirección
-        </Label>
-        <Input
-          id="address"
-          type="text"
-          placeholder="Calle, número, apartamento, etc."
-          value={formData.address}
-          onChange={handleInputChange}
-          required
-          className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-        />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Ciudad
-          </Label>
-          <Input
-            id="city"
-            type="text"
-            placeholder="Ciudad"
-            value={formData.city}
-            onChange={handleInputChange}
-            required
-            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-          />
-        </div>
-        <div>
-          <Label htmlFor="zip" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Código Postal
-          </Label>
-          <Input
-            id="zip"
-            type="text"
-            placeholder="XXXXX"
-            value={formData.zip}
-            onChange={handleInputChange}
-            required
-            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-          />
-        </div>
-        <div>
-          <Label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            País
-          </Label>
-          <Select value={formData.country} onValueChange={handleSelectChange}>
-            <SelectTrigger id="country" className="w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-              <SelectValue placeholder="Selecciona un país" />
-            </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border-gray-700 text-gray-900 dark:text-white">
-              <SelectItem value="Colombia">Colombia</SelectItem>
-              <SelectItem value="Mexico">México</SelectItem>
-              <SelectItem value="Spain">España</SelectItem>
-              <SelectItem value="USA">Estados Unidos</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Checkbox id="save-info" checked={saveInfo} onCheckedChange={(checked) => handleSaveInfoChange(!!checked)} />
-        <Label htmlFor="save-info" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Guardar esta información para futuras compras
-        </Label>
-      </div>
-    </div>
+    <Card className="p-6 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+      <CardContent className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Nombre Completo</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+            </div>
+            <div className="space-y-2 col-span-full">
+              <Label htmlFor="address" className="text-gray-700 dark:text-gray-300">Dirección</Label>
+              <Input
+                id="address"
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+              {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="city" className="text-gray-700 dark:text-gray-300">Ciudad</Label>
+              <Input
+                id="city"
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+              {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="zip" className="text-gray-700 dark:text-gray-300">Código Postal</Label>
+              <Input
+                id="zip"
+                type="text"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+              {errors.zip && <p className="text-red-500 text-sm">{errors.zip}</p>}
+            </div>
+            <div className="space-y-2 col-span-full">
+              <Label htmlFor="country" className="text-gray-700 dark:text-gray-300">País</Label>
+              <Input
+                id="country"
+                type="text"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+              {errors.country && <p className="text-red-500 text-sm">{errors.country}</p>}
+            </div>
+          </div>
+          <Button type="submit" className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+            Continuar al Pago
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

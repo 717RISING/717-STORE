@@ -1,76 +1,175 @@
-"use client"
+'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
-import { db } from "@/lib/database"
-import { formatPrice } from "@/lib/products"
-import type { Order } from "@/lib/orders"
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { getOrders } from '@/lib/database' // Assuming getOrders is in lib/database.ts
+
+interface OrderItem {
+  productId: string
+  name: string
+  quantity: number
+  price: number
+  size?: string
+  image?: string
+}
+
+interface Order {
+  id: string
+  userId: string
+  customerName: string
+  customerEmail: string
+  orderDate: string
+  totalAmount: number
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  paymentStatus: 'paid' | 'pending' | 'refunded'
+  shippingAddress: {
+    street: string
+    city: string
+    zip: string
+    country: string
+  }
+  items: OrderItem[]
+  channel: string
+}
 
 export default function OrdersTab() {
   const [orders, setOrders] = useState<Order[]>([])
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   useEffect(() => {
-    setOrders(db.orders)
+    fetchOrders()
   }, [])
 
-  const getStatusBadge = (status: string) => {
+  const fetchOrders = async () => {
+    const fetchedOrders = await getOrders()
+    setOrders(fetchedOrders)
+  }
+
+  const getStatusBadgeVariant = (status: Order['status']) => {
     switch (status) {
-      case "delivered":
-        return <Badge className="bg-green-100 text-green-800">Entregado</Badge>
-      case "shipped":
-        return <Badge className="bg-blue-100 text-blue-800">Enviado</Badge>
-      case "processing":
-        return <Badge className="bg-yellow-100 text-yellow-800">Procesando</Badge>
-      case "cancelled":
-        return <Badge variant="destructive">Cancelado</Badge>
-      case "pending":
-        return <Badge className="bg-gray-100 text-gray-800">Pendiente</Badge>
+      case 'pending':
+        return 'secondary'
+      case 'processing':
+        return 'default'
+      case 'shipped':
+        return 'outline'
+      case 'delivered':
+        return 'success' // Assuming a success variant exists or can be styled
+      case 'cancelled':
+        return 'destructive'
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return 'secondary'
     }
   }
 
+  const getPaymentStatusBadgeVariant = (status: Order['paymentStatus']) => {
+    switch (status) {
+      case 'paid':
+        return 'success'
+      case 'pending':
+        return 'secondary'
+      case 'refunded':
+        return 'destructive'
+      default:
+        return 'secondary'
+    }
+  }
+
+  const openOrderDetails = (order: Order) => {
+    setSelectedOrder(order)
+    setIsDialogOpen(true)
+  }
+
   return (
-    <div className="grid gap-6">
-      <Card className="bg-gray-800 text-white border-gray-700">
-        <CardHeader>
-          <CardTitle>Mis Pedidos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {orders.length === 0 ? (
-            <p className="text-gray-400">No tienes pedidos aún.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-gray-700">
-                    <TableHead>ID Pedido</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id} className="border-gray-800">
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
-                      <TableCell>{formatPrice(order.totalAmount)}</TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell>
-                        <button className="text-[#5D1A1D] hover:underline text-sm">Ver Detalles</button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Mis Pedidos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {orders.length === 0 ? (
+          <p className="text-gray-700 dark:text-gray-300">No tienes pedidos realizados aún.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID Pedido</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Pago</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell className="font-medium text-gray-900 dark:text-white">{order.id}</TableCell>
+                  <TableCell className="text-gray-700 dark:text-gray-300">
+                    {new Date(order.orderDate).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-gray-700 dark:text-gray-300">
+                    ${order.totalAmount.toLocaleString('es-CO')} COP
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusBadgeVariant(order.status)}>{order.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getPaymentStatusBadgeVariant(order.paymentStatus)}>{order.paymentStatus}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm" onClick={() => openOrderDetails(order)}>
+                      Ver Detalles
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">Detalles del Pedido #{selectedOrder?.id}</DialogTitle>
+            </DialogHeader>
+            {selectedOrder && (
+              <div className="grid gap-4 py-4 text-gray-700 dark:text-gray-300">
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Información del Cliente:</h3>
+                  <p>Nombre: {selectedOrder.customerName}</p>
+                  <p>Email: {selectedOrder.customerEmail}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Dirección de Envío:</h3>
+                  <p>{selectedOrder.shippingAddress.street}</p>
+                  <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.zip}</p>
+                  <p>{selectedOrder.shippingAddress.country}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Artículos:</h3>
+                  <ul className="list-disc list-inside">
+                    {selectedOrder.items.map((item, index) => (
+                      <li key={index}>
+                        {item.name} (Talla: {item.size}) x {item.quantity} - ${item.price.toLocaleString('es-CO')} COP c/u
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Total: ${selectedOrder.totalAmount.toLocaleString('es-CO')} COP</h3>
+                  <p>Estado del Pedido: <Badge variant={getStatusBadgeVariant(selectedOrder.status)}>{selectedOrder.status}</Badge></p>
+                  <p>Estado del Pago: <Badge variant={getPaymentStatusBadgeVariant(selectedOrder.paymentStatus)}>{selectedOrder.paymentStatus}</Badge></p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
   )
 }

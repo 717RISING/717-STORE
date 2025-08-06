@@ -1,30 +1,28 @@
-// This script simulates real-time order updates.
-// In a real application, this would be handled by a backend service
-// pushing updates to a database or a message queue.
+// This script would typically run on a server or a background process
+// to simulate real-time order status updates.
+// For a client-side only demo, this is illustrative.
 
-// This is a client-side simulation for demonstration purposes.
-// It's not meant for production use.
+const orders = [
+  { id: "ORD-001", status: "pending" },
+  { id: "ORD-002", status: "processing" },
+  { id: "ORD-003", status: "shipped" },
+];
 
-const ORDER_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"]
-
-function getRandomStatus() {
-  return ORDER_STATUSES[Math.floor(Math.random() * ORDER_STATUSES.length)]
+function updateOrderStatus(orderId, newStatus) {
+  const order = orders.find(o => o.id === orderId);
+  if (order) {
+    order.status = newStatus;
+    console.log(`Order ${orderId} updated to status: ${newStatus}`);
+    // In a real application, you would update a database here
+    // and potentially notify the user via webhooks or real-time channels.
+  } else {
+    console.log(`Order ${orderId} not found.`);
+  }
 }
 
-function simulateOrderUpdate(orderId) {
-  const newStatus = getRandomStatus()
-  console.log(`Simulating update for order ${orderId}: new status is ${newStatus}`)
-  // In a real app, you'd update a database here
-  // For now, we just log it.
-}
+// Simulate updates after some time
+setTimeout(() => updateOrderStatus("ORD-001", "processing"), 5000);
+setTimeout(() => updateOrderStatus("ORD-002", "shipped"), 10000);
+setTimeout(() => updateOrderStatus("ORD-003", "delivered"), 15000);
 
-// Simulate updates for a few mock orders every 10 seconds
-const mockOrderIds = ["ORD-001", "ORD-002", "ORD-003", "ORD-004"]
-
-setInterval(() => {
-  mockOrderIds.forEach((orderId) => {
-    simulateOrderUpdate(orderId)
-  })
-}, 10000)
-
-console.log("Order update simulation started...")
+console.log("Order update simulation started.");

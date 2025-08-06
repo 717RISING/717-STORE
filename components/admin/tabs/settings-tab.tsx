@@ -1,37 +1,35 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { useTheme } from 'next-themes'
 
-export default function SettingsTab() {
-  const [storeName, setStoreName] = useState("717 Store")
-  const [contactEmail, setContactEmail] = useState("info@717store.com")
-  const [shippingPolicy, setShippingPolicy] = useState("Envío gratuito en pedidos superiores a $200.000 COP. Entregas en 3-7 días hábiles.")
-  const [returnPolicy, setReturnPolicy] = useState("Devoluciones aceptadas dentro de 30 días con el artículo sin usar y etiquetas originales.")
+export function SettingsTab() {
+  const { theme, setTheme } = useTheme()
+  const [storeName, setStoreName] = useState('717 Store')
+  const [contactEmail, setContactEmail] = useState('contacto@717store.com')
+  const [shippingPolicy, setShippingPolicy] = useState('Envío gratuito en pedidos superiores a $150.000 COP. Entregas en 3-5 días hábiles.')
+  const [returnPolicy, setReturnPolicy] = useState('Devoluciones aceptadas dentro de los 30 días posteriores a la compra, con el producto en su estado original.')
   const [maintenanceMode, setMaintenanceMode] = useState(false)
-  const { toast } = useToast()
+  const [currency, setCurrency] = useState('COP')
 
-  const handleSaveSettings = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Simulate API call to save settings
-    console.log("Saving settings:", {
+  const handleSaveSettings = () => {
+    // In a real application, this would send data to a backend API
+    console.log('Guardando configuración:', {
       storeName,
       contactEmail,
       shippingPolicy,
       returnPolicy,
       maintenanceMode,
+      currency,
+      theme,
     })
-    toast({
-      title: "Configuración Guardada",
-      description: "Los ajustes de la tienda han sido actualizados.",
-      variant: "success",
-    })
+    alert('Configuración guardada (simulado)!')
   }
 
   return (
@@ -39,71 +37,78 @@ export default function SettingsTab() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Configuración de la Tienda</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSaveSettings} className="space-y-6">
-          <div>
-            <Label htmlFor="store-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Nombre de la Tienda
-            </Label>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="storeName" className="text-gray-700 dark:text-gray-300">Nombre de la Tienda</Label>
             <Input
-              id="store-name"
+              id="storeName"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             />
           </div>
-          <div>
-            <Label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Correo Electrónico de Contacto
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="contactEmail" className="text-gray-700 dark:text-gray-300">Email de Contacto</Label>
             <Input
-              id="contact-email"
+              id="contactEmail"
               type="email"
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
               className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             />
           </div>
-          <div>
-            <Label htmlFor="shipping-policy" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Política de Envíos
-            </Label>
-            <Textarea
-              id="shipping-policy"
-              value={shippingPolicy}
-              onChange={(e) => setShippingPolicy(e.target.value)}
-              rows={4}
-              className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-            />
-          </div>
-          <div>
-            <Label htmlFor="return-policy" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Política de Devoluciones
-            </Label>
-            <Textarea
-              id="return-policy"
-              value={returnPolicy}
-              onChange={(e) => setReturnPolicy(e.target.value)}
-              rows={4}
-              className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="maintenance-mode" className="text-lg text-gray-700 dark:text-gray-300">
-              Modo Mantenimiento
-            </Label>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="shippingPolicy" className="text-gray-700 dark:text-gray-300">Política de Envío</Label>
+          <Textarea
+            id="shippingPolicy"
+            value={shippingPolicy}
+            onChange={(e) => setShippingPolicy(e.target.value)}
+            rows={3}
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="returnPolicy" className="text-gray-700 dark:text-gray-300">Política de Devoluciones</Label>
+          <Textarea
+            id="returnPolicy"
+            value={returnPolicy}
+            onChange={(e) => setReturnPolicy(e.target.value)}
+            rows={3}
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="maintenanceMode" className="text-gray-700 dark:text-gray-300">Modo Mantenimiento</Label>
             <Switch
-              id="maintenance-mode"
+              id="maintenanceMode"
               checked={maintenanceMode}
               onCheckedChange={setMaintenanceMode}
-              className="data-[state=checked]:bg-[#4A1518] data-[state=unchecked]:bg-gray-300"
+              className="data-[state=checked]:bg-[#4A1518]"
             />
           </div>
-          <Button type="submit" className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-            Guardar Configuración
-          </Button>
-        </form>
+          <div className="space-y-2">
+            <Label htmlFor="currency" className="text-gray-700 dark:text-gray-300">Moneda</Label>
+            <Input
+              id="currency"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+            />
+          </div>
+        </div>
+
+        <Button onClick={handleSaveSettings} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+          Guardar Configuración
+        </Button>
       </CardContent>
     </Card>
   )
 }
+
+export default SettingsTab

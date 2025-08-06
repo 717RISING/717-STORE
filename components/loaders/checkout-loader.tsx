@@ -1,62 +1,46 @@
-"use client"
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-import { useState, useEffect } from "react"
-import { ShoppingCart, CreditCard, Truck, CheckCircle } from 'lucide-react'
-
-interface CheckoutLoaderProps {
-  message?: string
-}
-
-export function CheckoutLoader({ message = "Preparando tu pedido..." }: CheckoutLoaderProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const steps = ["Verificando carrito...", "Procesando envío...", "Confirmando pago...", "¡Pedido completado!"]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length)
-    }, 1500)
-    return () => clearInterval(interval)
-  }, [steps.length])
-
-  const getIcon = (step: number) => {
-    switch (step) {
-      case 0:
-        return <ShoppingCart className="w-12 h-12 text-white animate-pulse" />
-      case 1:
-        return <Truck className="w-12 h-12 text-white animate-pulse" />
-      case 2:
-        return <CreditCard className="w-12 h-12 text-white animate-pulse" />
-      case 3:
-        return <CheckCircle className="w-12 h-12 text-white animate-bounce" />
-      default:
-        return <ShoppingCart className="w-12 h-12 text-white animate-pulse" />
-    }
-  }
-
+export default function CheckoutLoader() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
-      <div className="relative mb-8">
-        <div className="w-32 h-32 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
-          {getIcon(currentStep)}
+    <Card className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 p-6">
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-1/3 bg-gray-200 dark:bg-gray-700" /> {/* Title */}
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
         </div>
-        <div className="absolute inset-0 border-4 border-[#4A1518] rounded-full animate-ping opacity-40" />
-      </div>
 
-      <div className="text-center max-w-md">
-        <p className="text-2xl font-semibold mb-2">{steps[currentStep]}</p>
-        <p className="text-gray-400 text-base">{message}</p>
-      </div>
+        {/* Shipping Form Loader */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-1/4 bg-gray-200 dark:bg-gray-700" /> {/* Section Title */}
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-10 col-span-2 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-10 col-span-2 bg-gray-200 dark:bg-gray-700" />
+          </div>
+          <Skeleton className="h-12 w-full bg-gray-200 dark:bg-gray-700" /> {/* Button */}
+        </div>
 
-      <div className="flex space-x-3 mt-8">
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className={`w-4 h-4 rounded-full ${
-              i === currentStep ? "bg-[#6B1E22]" : "bg-gray-700"
-            } transition-colors duration-300`}
-          />
-        ))}
+        {/* Order Summary Placeholder */}
+        <div className="mt-8 space-y-4">
+          <Skeleton className="h-6 w-1/4 bg-gray-200 dark:bg-gray-700" /> {/* Section Title */}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700" />
+          </div>
+          <Skeleton className="h-20 w-full bg-gray-200 dark:bg-gray-700" /> {/* Items table */}
+          <Skeleton className="h-6 w-1/3 ml-auto bg-gray-200 dark:bg-gray-700" /> {/* Total */}
+        </div>
       </div>
-    </div>
+    </Card>
   )
 }

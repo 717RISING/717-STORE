@@ -1,10 +1,9 @@
 import { CheckCircle } from 'lucide-react'
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { getOrderById } from "@/lib/database" // Import from lib/database
-import { formatPrice } from "@/lib/products" // Import formatPrice
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getOrderById } from '@/lib/database' // Assuming this function exists
+import { notFound } from 'next/navigation'
 
 interface ConfirmationPageProps {
   searchParams: {
@@ -16,79 +15,43 @@ export default async function ConfirmationPage({ searchParams }: ConfirmationPag
   const orderId = searchParams.orderId
 
   if (!orderId) {
-    return (
-      <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 text-center">
-        <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-red-500">Error</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-gray-700 dark:text-gray-300">No se encontró el ID del pedido.</p>
-            <Button asChild className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              <Link href="/">Volver al Inicio</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    notFound() // Or redirect to an error page
   }
 
   const order = await getOrderById(orderId)
 
   if (!order) {
-    return (
-      <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 text-center">
-        <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-red-500">Pedido No Encontrado</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-gray-700 dark:text-gray-300">El pedido con ID "{orderId}" no existe.</p>
-            <Button asChild className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              <Link href="/">Volver al Inicio</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    notFound() // Order not found
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-      <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader className="text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+    <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-64px)]">
+      <Card className="w-full max-w-md text-center bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+        <CardHeader className="flex flex-col items-center justify-center space-y-4">
+          <CheckCircle className="h-20 w-20 text-green-500" />
           <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white">¡Pedido Confirmado!</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6 text-center">
-          <p className="text-lg text-gray-700 dark:text-gray-300">
-            Gracias por tu compra. Tu pedido ha sido recibido y está siendo procesado.
+        <CardContent className="space-y-6 text-gray-700 dark:text-gray-300">
+          <p className="text-lg">
+            Gracias por tu compra. Tu pedido ha sido realizado con éxito.
           </p>
-          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md space-y-2 text-left">
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>ID del Pedido:</strong> {order.id}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Fecha:</strong> {new Date(order.orderDate).toLocaleDateString()}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Total:</strong> {formatPrice(order.totalAmount)}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Estado:</strong> {order.status}
-            </p>
-          </div>
-          <Separator className="bg-gray-200 dark:bg-gray-700" />
-          <p className="text-gray-700 dark:text-gray-300">
-            Recibirás un correo electrónico de confirmación con los detalles de tu pedido y seguimiento.
+          <p className="text-xl font-semibold">
+            Número de Pedido: <span className="text-[#4A1518] dark:text-[#FFD700]">{order.id}</span>
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-              <Link href="/productos">Seguir Comprando</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-[#4A1518] text-[#4A1518] hover:bg-[#F5E6E7] dark:border-[#6B1E22] dark:text-[#6B1E22] dark:hover:bg-gray-700">
-              <Link href="/cuenta?tab=orders">Ver Mis Pedidos</Link>
-            </Button>
+          <p>
+            Recibirás un correo electrónico de confirmación con los detalles de tu pedido en breve.
+          </p>
+          <div className="flex flex-col gap-4">
+            <Link href="/productos" passHref>
+              <Button className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white py-3 text-lg font-semibold">
+                Continuar Comprando
+              </Button>
+            </Link>
+            <Link href="/cuenta?tab=orders" passHref>
+              <Button variant="outline" className="w-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 py-3 text-lg font-semibold">
+                Ver Mis Pedidos
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

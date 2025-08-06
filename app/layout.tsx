@@ -1,25 +1,42 @@
-import type { Metadata } from "next"
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import "./globals.css"
-import ClientLayout from "@/components/client-layout"
+import './globals.css'
+import { ThemeProvider } from '@/components/theme-provider'
+import Navigation from '@/components/navigation'
+import { CartProvider } from '@/lib/cart-context'
+import ClientLayout from '@/components/client-layout' // Import the client layout
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "717 Store - Ropa Urbana y Exclusiva",
-  description: "Descubre la última moda urbana y piezas exclusivas en 717 Store. Estilo, calidad y originalidad en cada prenda.",
+  title: '717 Store',
+  description: 'Tu tienda de ropa urbana y streetwear',
     generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-        <ClientLayout>{children}</ClientLayout>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <CartProvider>
+            <ClientLayout> {/* Wrap children with ClientLayout */}
+              <Navigation />
+              <main className="flex-grow">
+                {children}
+              </main>
+            </ClientLayout>
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

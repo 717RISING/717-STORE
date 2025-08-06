@@ -8,18 +8,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUsers, updateUserRole, deleteUser } from "@/lib/database" // Assuming these functions exist in lib/database.ts
+import { getUsers, updateUserRole, deleteUser } from "@/lib/database"
 import { Edit, Trash2 } from 'lucide-react'
 
 interface User {
   id: string
   email: string
   role: "admin" | "customer"
-  name?: string // Added name for display
-  createdAt?: string // Added createdAt for display
+  name?: string
+  createdAt?: string
 }
 
-export default function CustomersTab() {
+export function CustomersTab() {
   const [users, setUsers] = useState<User[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
@@ -135,3 +135,5 @@ export default function CustomersTab() {
     </Card>
   )
 }
+
+export default CustomersTab

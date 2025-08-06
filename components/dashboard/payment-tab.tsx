@@ -7,68 +7,69 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { PlusCircle, Edit, Trash2, CreditCard } from 'lucide-react'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 interface PaymentMethod {
   id: string
-  type: "credit-card" | "paypal"
-  last4?: string
-  expiry?: string
-  email?: string
+  type: "credit-card" | "paypal" | "bank-transfer"
+  details: string // e.g., last 4 digits of card, PayPal email
   isDefault: boolean
 }
 
 const initialPaymentMethods: PaymentMethod[] = [
-  {
-    id: "card-1",
-    type: "credit-card",
-    last4: "4242",
-    expiry: "12/25",
-    isDefault: true,
-  },
-  {
-    id: "paypal-1",
-    type: "paypal",
-    email: "user@example.com",
-    isDefault: false,
-  },
+  { id: "1", type: "credit-card", details: "Visa **** 1234", isDefault: true },
+  { id: "2", type: "paypal", details: "user@example.com", isDefault: false },
 ]
 
 export function PaymentTab() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(initialPaymentMethods)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [currentMethod, setCurrentMethod] = useState<PaymentMethod | null>(null)
-  const [form, setForm] = useState({
-    type: "credit-card" as "credit-card" | "paypal",
-    last4: "",
-    expiry: "",
-    email: "",
+  const [formState, setFormState] = useState<Omit<PaymentMethod, 'id'>>({
+    type: "credit-card",
+    details: "",
     isDefault: false,
   })
+  const [errors, setErrors] = useState<any>({})
+
+  const validateForm = () => {
+    const newErrors: any = {}
+    if (!formState.details) newErrors.details = "Los detalles son requeridos."
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value, type, checked } = e.target
-    setForm((prev) => ({
+    const { name, value, type, checked } = e.target
+    setFormState((prev) => ({
       ...prev,
-      [id]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }))
   }
 
-  const handleSelectChange = (value: "credit-card" | "paypal") => {
-    setForm((prev) => ({ ...prev, type: value }))
+  const handleTypeChange = (value: "credit-card" | "paypal" | "bank-transfer") => {
+    setFormState((prev) => ({
+      ...prev,
+      type: value,
+      details: "", // Clear details when type changes
+    }))
   }
 
   const handleSaveMethod = () => {
+    if (!validateForm()) return
+
     if (currentMethod) {
-      setPaymentMethods(
-        paymentMethods.map((method) =>
-          method.id === currentMethod.id ? { ...method, ...form, isDefault: form.isDefault || method.isDefault } : method
-        )
+      // Update existing method
+      setPaymentMethods((prev) =>
+        prev.map((method) => (method.id === currentMethod.id ? { ...formState, id: method.id } : method))
       )
     } else {
-      setPaymentMethods([
-        ...paymentMethods,
-        { id: String(Date.now()), ...form, isDefault: form.isDefault || paymentMethods.length === 0 },
-      ])
+      // Add new method
+      const newMethod: PaymentMethod = {
+        ...formState,
+        id: Date.now().toString(), // Simple unique ID
+      }
+      setPaymentMethods((prev) => [...prev, newMethod])
     }
     setIsDialogOpen(false)
     resetForm()
@@ -78,67 +79,88 @@ export function PaymentTab() {
     setPaymentMethods(paymentMethods.filter((method) => method.id !== id))
   }
 
-  const openDialogForEdit = (method: PaymentMethod) => {
-    setCurrentMethod(method)
-    setForm({ ...method, last4: method.last4 || "", expiry: method.expiry || "", email: method.email || "" })
-    setIsDialogOpen(true)
+  const handleSetDefault = (id: string) => {
+    setPaymentMethods((prev) =>
+      prev.map((method) => ({
+        ...method,
+        isDefault: method.id === id,
+      }))
+    )
   }
 
-  const openDialogForAdd = () => {
+  const openAddDialog = () => {
     setCurrentMethod(null)
     resetForm()
     setIsDialogOpen(true)
   }
 
+  const openEditDialog = (method: PaymentMethod) => {
+    setCurrentMethod(method)
+    setFormState({
+      type: method.type,
+      details: method.details,
+      isDefault: method.isDefault,
+    })
+    setIsDialogOpen(true)
+  }
+
   const resetForm = () => {
-    setForm({
+    setFormState({
       type: "credit-card",
-      last4: "",
-      expiry: "",
-      email: "",
+      details: "",
       isDefault: false,
     })
+    setErrors({})
   }
 
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Métodos de Pago</CardTitle>
-        <Button onClick={openDialogForAdd} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+        <Button onClick={openAddDialog} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
           <PlusCircle className="mr-2 h-4 w-4" />
           Añadir Método
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         {paymentMethods.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400">No tienes métodos de pago guardados.</p>
+          <p className="text-gray-700 dark:text-gray-300">No tienes métodos de pago guardados.</p>
         ) : (
           <div className="grid gap-4">
             {paymentMethods.map((method) => (
-              <Card key={method.id} className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                <CardContent className="p-4 flex justify-between items-center">
-                  <div className="flex items-center space-x-3">
-                    <CreditCard className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
-                        {method.type === "credit-card" ? `Tarjeta **** ${method.last4}` : `PayPal (${method.email})`}
-                        {method.isDefault && <Badge className="ml-2 bg-[#5D1A1D] text-white">Principal</Badge>}
-                      </h3>
-                      {method.type === "credit-card" && (
-                        <p className="text-gray-700 dark:text-gray-300">Expira: {method.expiry}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => openDialogForEdit(method)}>
-                      <Edit className="h-4 w-4" />
+              <div
+                key={method.id}
+                className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700"
+              >
+                <div className="flex-grow text-gray-900 dark:text-white">
+                  <p className="font-semibold">
+                    {method.type === "credit-card" && "Tarjeta de Crédito"}
+                    {method.type === "paypal" && "PayPal"}
+                    {method.type === "bank-transfer" && "Transferencia Bancaria"}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">{method.details}</p>
+                  {method.isDefault && (
+                    <span className="text-sm font-medium text-[#4A1518] dark:text-[#FFD700]">
+                      (Predeterminado)
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2 mt-4 md:mt-0">
+                  {!method.isDefault && (
+                    <Button variant="outline" size="sm" onClick={() => handleSetDefault(method.id)} className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
+                      Establecer como Predeterminado
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteMethod(method.id)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(method)} className="text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDeleteMethod(method.id)} className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Eliminar</span>
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -151,60 +173,54 @@ export function PaymentTab() {
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="type" className="text-right text-gray-700 dark:text-gray-300">
-                  Tipo
-                </Label>
-                <Select value={form.type} onValueChange={handleSelectChange}>
-                  <SelectTrigger className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                    <SelectValue placeholder="Seleccionar tipo" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-700 text-gray-900 dark:text-white">
-                    <SelectItem value="credit-card">Tarjeta de Crédito</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <Label htmlFor="type" className="text-gray-700 dark:text-gray-300">Tipo de Pago</Label>
+                <RadioGroup value={formState.type} onValueChange={handleTypeChange} className="flex space-x-4 mt-2">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="credit-card" id="type-credit-card" />
+                    <Label htmlFor="type-credit-card" className="text-gray-700 dark:text-gray-300">Tarjeta de Crédito</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="paypal" id="type-paypal" />
+                    <Label htmlFor="type-paypal" className="text-gray-700 dark:text-gray-300">PayPal</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="bank-transfer" id="type-bank-transfer" />
+                    <Label htmlFor="type-bank-transfer" className="text-gray-700 dark:text-gray-300">Transferencia</Label>
+                  </div>
+                </RadioGroup>
               </div>
-              {form.type === "credit-card" && (
-                <>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="last4" className="text-right text-gray-700 dark:text-gray-300">
-                      Últimos 4 dígitos
-                    </Label>
-                    <Input id="last4" value={form.last4} onChange={handleInputChange} className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" maxLength={4} />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="expiry" className="text-right text-gray-700 dark:text-gray-300">
-                      Vencimiento (MM/AA)
-                    </Label>
-                    <Input id="expiry" value={form.expiry} onChange={handleInputChange} className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" placeholder="MM/AA" maxLength={5} />
-                  </div>
-                </>
-              )}
-              {form.type === "paypal" && (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right text-gray-700 dark:text-gray-300">
-                    Email de PayPal
-                  </Label>
-                  <Input id="email" value={form.email} onChange={handleInputChange} className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" type="email" />
-                </div>
-              )}
-              <div className="flex items-center space-x-2 col-span-4 justify-end">
+              <div className="space-y-2">
+                <Label htmlFor="details" className="text-gray-700 dark:text-gray-300">Detalles</Label>
+                <Input
+                  id="details"
+                  name="details"
+                  value={formState.details}
+                  onChange={handleInputChange}
+                  placeholder={
+                    formState.type === "credit-card" ? "Últimos 4 dígitos (ej: 1234)" :
+                    formState.type === "paypal" ? "Email de PayPal" :
+                    "Número de cuenta bancaria"
+                  }
+                  className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
+              </div>
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="isDefault"
-                  checked={form.isDefault}
+                  name="isDefault"
+                  checked={formState.isDefault}
                   onChange={handleInputChange}
-                  className="form-checkbox h-4 w-4 text-[#4A1518] rounded"
+                  className="h-4 w-4 text-[#4A1518] focus:ring-[#4A1518] border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700"
                 />
-                <Label htmlFor="isDefault" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Establecer como método principal
-                </Label>
+                <Label htmlFor="isDefault" className="text-gray-700 dark:text-gray-300">Establecer como predeterminado</Label>
               </div>
             </div>
             <DialogFooter>
               <Button onClick={handleSaveMethod} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-                {currentMethod ? "Guardar Cambios" : "Añadir Método"}
+                Guardar Método
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1,102 +1,164 @@
-# 717 Store - Ropa Urbana y Exclusiva
+# 717 Store Clone
 
-Bienvenido al repositorio de 717 Store, tu destino para la moda urbana y piezas exclusivas. Este proyecto está construido con Next.js y Tailwind CSS, ofreciendo una experiencia de compra moderna y responsiva.
+This is a clone of the 717 Store e-commerce website, built with Next.js and designed to showcase modern web development practices, including responsive design, user authentication, product management, and a full checkout flow.
 
-## Características
+## Features
 
--   **Catálogo de Productos:** Explora una amplia gama de camisetas, sudaderas, pantalones y accesorios.
--   **Detalles de Producto:** Páginas dedicadas con información detallada, imágenes y opciones de compra.
--   **Carrito de Compras:** Añade, actualiza y gestiona tus productos antes de finalizar la compra.
--   **Proceso de Checkout:** Un flujo de compra simplificado y seguro.
--   **Panel de Usuario:** Gestión de perfil, pedidos, direcciones y métodos de pago.
--   **Panel de Administración:** (En desarrollo) Para gestionar productos, pedidos y clientes.
--   **Diseño Responsivo:** Experiencia optimizada para dispositivos móviles, tabletas y escritorios.
--   **Modo Oscuro/Claro:** Alterna entre temas para una visualización cómoda.
--   **Chat en Vivo:** Soporte al cliente integrado.
--   **Guía de Tallas:** Ayuda a los clientes a encontrar el ajuste perfecto.
--   **Información de Envíos y Devoluciones:** Políticas claras para una experiencia de compra transparente.
+-   **Product Catalog**: Browse a variety of products with detailed descriptions and images.
+-   **Shopping Cart**: Add, remove, and update quantities of items in your cart.
+-   **User Authentication**: Secure login and registration for customers.
+-   **User Dashboard**: Users can view their orders, manage addresses, and update profile information.
+-   **Admin Dashboard**:
+    -   **Overview**: Key sales metrics, visitor data, and product performance charts.
+    -   **Product Management**: Add, edit, and delete products.
+    -   **Order Management**: View and update order statuses.
+    -   **Customer Management**: Manage user roles and customer data.
+    -   **Settings**: Configure store-wide settings.
+-   **Checkout Process**: Multi-step checkout including shipping and payment forms.
+-   **Responsive Design**: Optimized for various screen sizes (desktop, tablet, mobile).
+-   **Dark Mode**: Toggle between light and dark themes.
+-   **Page Transitions**: Smooth animations between page navigations.
+-   **Live Chat (Mock)**: A basic chat widget for immediate customer inquiries.
+-   **Supabase Integration (Mock)**: Simulated database operations for products, orders, and users.
 
-## Tecnologías Utilizadas
+## Technologies Used
 
--   **Next.js 14+ (App Router):** Framework de React para aplicaciones web full-stack.
--   **React:** Biblioteca de JavaScript para construir interfaces de usuario.
--   **Tailwind CSS:** Framework CSS utility-first para un diseño rápido y personalizable.
--   **shadcn/ui:** Componentes de UI reutilizables y accesibles.
--   **Lucide React:** Iconos de código abierto.
--   **Recharts:** Librería de gráficos para visualización de datos en el panel de administración.
--   **Zustand:** (o similar para estado global) Para la gestión del estado del carrito.
--   **TypeScript:** Para tipado estático y mejor mantenibilidad del código.
+-   **Next.js**: React framework for building full-stack web applications.
+-   **React**: Frontend library for building user interfaces.
+-   **Tailwind CSS**: Utility-first CSS framework for rapid styling.
+-   **shadcn/ui**: Reusable UI components built with Radix UI and Tailwind CSS.
+-   **Framer Motion**: Library for animations.
+-   **Lucide React**: Icon library.
+-   **Supabase**: (Mocked) Backend-as-a-Service for database and authentication.
+-   **Nodemailer**: (Mocked) For sending emails.
+-   **Recharts**: For building charts in the admin dashboard.
+-   **bcryptjs**: For password hashing (mocked in `lib/users.ts`).
 
-## Estructura del Proyecto
+## Getting Started
 
--   `app/`: Contiene las rutas de la aplicación (App Router).
-    -   `layout.tsx`: Layout principal de la aplicación.
-    -   `page.tsx`: Página de inicio.
-    -   `productos/`: Rutas para el catálogo de productos y detalles.
-    -   `checkout/`: Rutas para el proceso de compra.
-    -   `cuenta/`: Rutas para el panel de usuario.
-    -   `admin/`: Rutas para el panel de administración (protegidas).
--   `components/`: Componentes reutilizables de React.
-    -   `ui/`: Componentes de shadcn/ui.
-    -   `loaders/`: Componentes de carga adaptativos.
-    -   `admin/`: Componentes específicos del panel de administración.
-    -   `checkout/`: Componentes específicos del checkout.
-    -   `live-chat/`: Componentes del chat en vivo.
--   `lib/`: Funciones de utilidad, lógica de negocio, y simulación de base de datos.
-    -   `database.ts`: Simulación de base de datos en memoria.
-    -   `products.ts`: Definiciones y funciones relacionadas con productos.
-    -   `orders.ts`: Definiciones y funciones relacionadas con pedidos.
-    -   `users.ts`: Definiciones y funciones relacionadas con usuarios y autenticación.
-    -   `cart-context.tsx`: Contexto de React para la gestión del carrito.
-    -   `theme-context.tsx`: Contexto de React para la gestión del tema (claro/oscuro).
-    -   `utils.ts`: Funciones de utilidad generales (ej. `cn` para clases de Tailwind).
--   `hooks/`: Custom React Hooks.
--   `public/`: Activos estáticos como imágenes.
--   `scripts/`: Scripts para inicialización de datos o tareas de desarrollo.
+To run this project locally, follow these steps:
 
-## Configuración y Ejecución Local
-
-1.  **Clonar el repositorio:**
+1.  **Clone the repository:**
     \`\`\`bash
-    git clone [URL_DEL_REPOSITORIO]
+    git clone [repository-url]
     cd 717-store-clone
     \`\`\`
-
-2.  **Instalar dependencias:**
+2.  **Install dependencies:**
     \`\`\`bash
     npm install
-    # o
-    yarn install
-    # o
-    pnpm install
+    # or yarn install
+    # or pnpm install
     \`\`\`
+3.  **Set up Environment Variables:**
+    Create a `.env.local` file in the root directory and add the following (these are for Supabase, even though it's mocked, the client expects them):
+    \`\`\`
+    NEXT_PUBLIC_SUPABASE_URL="YOUR_SUPABASE_URL"
+    NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
+    SUPABASE_SERVICE_ROLE_KEY="YOUR_SUPABASE_SERVICE_ROLE_KEY"
+    SUPABASE_JWT_SECRET="YOUR_SUPABASE_JWT_SECRET"
 
-3.  **Variables de Entorno:**
-    Crea un archivo `.env.local` en la raíz del proyecto y añade las variables de entorno necesarias. Por ejemplo, para el usuario administrador (en un entorno de producción, las contraseñas deben ser hasheadas y gestionadas de forma segura):
+    # For email simulation (optional, if you want to integrate a real email service)
+    # SMTP_HOST="your_smtp_host"
+    # SMTP_PORT="587"
+    # SMTP_SECURE="true"
+    # SMTP_USER="your_email_user"
+    # SMTP_PASS="your_email_password"
+    # EMAIL_FROM="no-reply@yourdomain.com"
     \`\`\`
-    ADMIN_EMAIL=admin@717store.com
-    ADMIN_PASSWORD=adminpassword
-    \`\`\`
-    *(Nota: Para este proyecto mock, las credenciales están hardcodeadas en `lib/users.ts` y `lib/database.ts` para simplificar, pero en una aplicación real, usarías variables de entorno y un sistema de autenticación robusto.)*
+    *Note: For this demo, Supabase functions are mocked in `lib/database.ts` and `lib/users.ts`, so you don't strictly need real Supabase credentials to run the app locally, but the environment variables are expected by the `createClient` call.*
 
-4.  **Ejecutar el servidor de desarrollo:**
+4.  **Run the development server:**
     \`\`\`bash
     npm run dev
-    # o
-    yarn dev
-    # o
-    pnpm dev
+    # or yarn dev
+    # or pnpm dev
     \`\`\`
-    La aplicación estará disponible en `http://localhost:3000`.
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Despliegue
+## Admin Dashboard Access
 
-Este proyecto está optimizado para ser desplegado en Vercel. Simplemente conecta tu repositorio de GitHub a Vercel, y Vercel detectará automáticamente la configuración de Next.js y desplegará tu aplicación.
+To access the admin dashboard:
 
-## Contribuciones
+1.  Navigate to `/admin`.
+2.  Use the following credentials:
+    -   **Email**: `admin@717store.com`
+    -   **Password**: `password`
 
-Las contribuciones son bienvenidas. Por favor, abre un "issue" o un "pull request" si tienes sugerencias o mejoras.
+## Project Structure
 
----
-
-¡Gracias por usar 717 Store! Si tienes alguna pregunta, no dudes en contactarnos.
+\`\`\`
+.
+├── app/
+│   ├── admin/
+│   │   ├── page.tsx         # Admin dashboard entry point
+│   │   └── ...
+│   ├── checkout/
+│   │   ├── page.tsx         # Checkout process
+│   │   └── confirmacion/
+│   │       └── page.tsx     # Order confirmation
+│   ├── cuenta/
+│   │   └── page.tsx         # User dashboard
+│   ├── productos/
+│   │   ├── [id]/
+│   │   │   └── page.tsx     # Product detail page
+│   │   └── page.tsx         # Product listing page
+│   │   └── loading.tsx      # Loading state for products
+│   ├── actions.ts           # Server Actions for forms and data mutations
+│   ├── globals.css          # Global styles
+│   ├── layout.tsx           # Root layout
+│   └── page.tsx             # Home page
+├── components/
+│   ├── admin/
+│   │   ├── admin-dashboard.tsx # Main admin dashboard component
+│   │   ├── admin-login.tsx     # Admin login form
+│   │   └── charts/             # Chart components for admin dashboard
+│   │   └── tabs/               # Tab components for admin dashboard
+│   ├── checkout/               # Checkout related components
+│   ├── dashboard/              # User dashboard tabs
+│   ├── loaders/                # Loading skeleton components
+│   │   └── mobile/             # Mobile specific loaders
+│   ├── live-chat/              # Live chat components
+│   ├── ui/                     # shadcn/ui components (not included in repo, but assumed)
+│   ├── animated-card.tsx
+│   ├── cart-sidebar.tsx
+│   ├── client-layout.tsx       # Client-side layout wrapper
+│   ├── device-testing-suite.tsx
+│   ├── enhanced-button.tsx
+│   ├── hero-slider.tsx
+│   ├── image-with-fallback.tsx
+│   ├── interactive-product-card.tsx
+│   ├── loading-spinner.tsx
+│   ├── mobile-debug-panel.tsx
+│   ├── mobile-menu.tsx
+│   ├── navigation.tsx
+│   ├── page-loader.tsx
+│   ├── page-transition.tsx
+│   ├── product-detail.tsx
+│   ├── product-grid.tsx
+│   ├── product-search.tsx
+│   ├── progress-bar.tsx
+│   ├── responsive-test.tsx
+│   ├── size-calculator.tsx
+│   └── theme-toggle.tsx
+├── hooks/
+│   ├── use-chat.ts
+│   ├── use-mobile-detection.ts
+│   ├── use-theme-safe.ts
+│   └── use-toast.ts (assumed)
+├── lib/
+│   ├── cart-context.tsx        # Shopping cart context
+│   ├── chat-service.ts
+│   ├── database.ts             # Mock database functions (Supabase integration)
+│   ├── email.ts                # Email sending utilities (mocked)
+│   ├── orders.ts
+│   ├── page-transition-context.tsx
+│   ├── products.ts             # Product data types and mock data
+│   ├── size-calculator.ts
+│   ├── theme-context.tsx
+│   └── users.ts                # User management functions (mocked)
+├── public/                     # Static assets (images, etc.)
+├── scripts/                    # Utility scripts (e.g., database setup)
+├── package.json
+├── tailwind.config.ts
+├── tsconfig.json
+└── ...

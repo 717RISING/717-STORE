@@ -1,15 +1,14 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getOrders, updateOrderStatus } from "@/lib/database" // Assuming these functions exist in lib/database.ts
-import { formatPrice } from "@/lib/products" // Import formatPrice
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getOrders, updateOrderStatus } from '@/lib/database'
+import { Eye, CheckCircle, XCircle, Truck, Package } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 interface OrderItem {
   productId: string
@@ -27,8 +26,8 @@ interface Order {
   customerEmail: string
   orderDate: string
   totalAmount: number
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
-  paymentStatus: "paid" | "pending" | "refunded"
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  paymentStatus: 'paid' | 'pending' | 'refunded'
   shippingAddress: {
     street: string
     city: string
@@ -36,14 +35,14 @@ interface Order {
     country: string
   }
   items: OrderItem[]
-  channel?: string
+  channel: string
 }
 
-export default function OrdersTab() {
+export function OrdersTab() {
   const [orders, setOrders] = useState<Order[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
-  const [newStatus, setNewStatus] = useState<Order["status"]>("pending")
+  const [newStatus, setNewStatus] = useState<Order['status']>('pending')
 
   useEffect(() => {
     fetchOrders()
@@ -54,7 +53,24 @@ export default function OrdersTab() {
     setOrders(fetchedOrders)
   }
 
-  const openDialogForEdit = (order: Order) => {
+  const getStatusBadgeVariant = (status: Order['status']) => {
+    switch (status) {
+      case 'pending':
+        return 'secondary'
+      case 'processing':
+        return 'default'
+      case 'shipped':
+        return 'outline'
+      case 'delivered':
+        return 'success'
+      case 'cancelled':
+        return 'destructive'
+      default:
+        return 'secondary'
+    }
+  }
+
+  const openDialogForView = (order: Order) => {
     setCurrentOrder(order)
     setNewStatus(order.status)
     setIsDialogOpen(true)
@@ -63,25 +79,8 @@ export default function OrdersTab() {
   const handleStatusChange = async () => {
     if (currentOrder) {
       await updateOrderStatus(currentOrder.id, newStatus)
-      fetchOrders()
+      fetchOrders() // Re-fetch orders to update the list
       setIsDialogOpen(false)
-    }
-  }
-
-  const getStatusVariant = (status: Order["status"]) => {
-    switch (status) {
-      case "pending":
-        return "outline"
-      case "processing":
-        return "secondary"
-      case "shipped":
-        return "default"
-      case "delivered":
-        return "success" // Assuming a success variant exists or can be styled
-      case "cancelled":
-        return "destructive"
-      default:
-        return "outline"
     }
   }
 
@@ -96,9 +95,9 @@ export default function OrdersTab() {
             <TableRow>
               <TableHead>ID Pedido</TableHead>
               <TableHead>Cliente</TableHead>
+              <TableHead>Fecha</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -107,16 +106,18 @@ export default function OrdersTab() {
               <TableRow key={order.id}>
                 <TableCell className="font-medium text-gray-900 dark:text-white">{order.id}</TableCell>
                 <TableCell className="text-gray-700 dark:text-gray-300">{order.customerName}</TableCell>
-                <TableCell className="text-gray-900 dark:text-white">{formatPrice(order.totalAmount)}</TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
-                </TableCell>
                 <TableCell className="text-gray-700 dark:text-gray-300">
                   {new Date(order.orderDate).toLocaleDateString()}
                 </TableCell>
+                <TableCell className="text-gray-700 dark:text-gray-300">
+                  ${order.totalAmount.toLocaleString('es-CO')} COP
+                </TableCell>
+                <TableCell>
+                  <Badge variant={getStatusBadgeVariant(order.status)}>{order.status}</Badge>
+                </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => openDialogForEdit(order)}>
-                    Ver/Editar
+                  <Button variant="ghost" size="icon" onClick={() => openDialogForView(order)}>
+                    <Eye className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -125,32 +126,42 @@ export default function OrdersTab() {
         </Table>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 border-gray-700">
+          <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800 border-gray-700">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white">Detalles del Pedido #{currentOrder?.id}</DialogTitle>
             </DialogHeader>
             {currentOrder && (
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right text-gray-700 dark:text-gray-300">Cliente:</Label>
-                  <span className="col-span-3 text-gray-900 dark:text-white">{currentOrder.customerName} ({currentOrder.customerEmail})</span>
+              <div className="grid gap-4 py-4 text-gray-700 dark:text-gray-300">
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Información del Cliente:</h3>
+                  <p>Nombre: {currentOrder.customerName}</p>
+                  <p>Email: {currentOrder.customerEmail}</p>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right text-gray-700 dark:text-gray-300">Total:</Label>
-                  <span className="col-span-3 text-gray-900 dark:text-white">{formatPrice(currentOrder.totalAmount)}</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Dirección de Envío:</h3>
+                  <p>{currentOrder.shippingAddress.street}</p>
+                  <p>{currentOrder.shippingAddress.city}, {currentOrder.shippingAddress.zip}</p>
+                  <p>{currentOrder.shippingAddress.country}</p>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right text-gray-700 dark:text-gray-300">Dirección:</Label>
-                  <span className="col-span-3 text-gray-900 dark:text-white">
-                    {currentOrder.shippingAddress.street}, {currentOrder.shippingAddress.city},{" "}
-                    {currentOrder.shippingAddress.zip}, {currentOrder.shippingAddress.country}
-                  </span>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Artículos:</h3>
+                  <ul className="list-disc list-inside">
+                    {currentOrder.items.map((item, index) => (
+                      <li key={index}>
+                        {item.name} (Talla: {item.size}) x {item.quantity} - ${item.price.toLocaleString('es-CO')} COP c/u
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Total: ${currentOrder.totalAmount.toLocaleString('es-CO')} COP</h3>
+                  <p>Estado del Pago: <Badge variant={currentOrder.paymentStatus === 'paid' ? 'success' : 'secondary'}>{currentOrder.paymentStatus}</Badge></p>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="status" className="text-right text-gray-700 dark:text-gray-300">
-                    Estado:
+                    Actualizar Estado:
                   </Label>
-                  <Select value={newStatus} onValueChange={(value: Order["status"]) => setNewStatus(value)}>
+                  <Select value={newStatus} onValueChange={(value: Order['status']) => setNewStatus(value)}>
                     <SelectTrigger className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                       <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
@@ -163,16 +174,6 @@ export default function OrdersTab() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="col-span-4">
-                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Artículos:</h4>
-                  <ul className="space-y-1">
-                    {currentOrder.items.map((item, index) => (
-                      <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
-                        {item.name} (x{item.quantity}) - {formatPrice(item.price)}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
             )}
             <DialogFooter>
@@ -181,7 +182,7 @@ export default function OrdersTab() {
                 onClick={handleStatusChange}
                 className="bg-[#4A1518] hover:bg-[#6B1E22] text-white"
               >
-                Actualizar Estado
+                Guardar Cambios
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -190,3 +191,5 @@ export default function OrdersTab() {
     </Card>
   )
 }
+
+export default OrdersTab

@@ -1,14 +1,19 @@
-"use client"
+'use client'
 
-import { motion, useScroll, useSpring } from "framer-motion"
+import { motion, useScroll, useSpring } from 'framer-motion'
 
 export default function ProgressBar() {
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001,
+    restDelta: 0.001
   })
 
-  return <motion.div className="fixed top-0 left-0 right-0 h-1 bg-[#5D1A1D] origin-[0%] z-50" style={{ scaleX }} />
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-1 bg-[#4A1518] dark:bg-[#FFD700] origin-[0%] z-50"
+      style={{ scaleX }}
+    />
+  )
 }

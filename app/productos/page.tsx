@@ -7,7 +7,7 @@ import { User, Grid, List, Filter } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { getProducts, formatPrice } from "@/lib/products"
+import { getAllProducts, formatPrice } from "@/lib/database"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
@@ -22,7 +22,7 @@ import { useMobileDetection } from '@/hooks/use-mobile-detection'
 
 export default async function ProductsPage() {
   const { isMobile } = useMobileDetection()
-  const products = await getProducts()
+  const products = await getAllProducts()
   const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -184,7 +184,7 @@ export default async function ProductsPage() {
       {/* Products Section */}
       <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8 animate-slide-up">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-8">
             Nuestros Productos
           </h1>
           <p className="text-gray-600 dark:text-gray-400">

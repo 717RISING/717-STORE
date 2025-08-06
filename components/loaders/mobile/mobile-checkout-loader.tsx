@@ -1,62 +1,43 @@
-"use client"
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-import { useState, useEffect } from "react"
-import { ShoppingCart, CreditCard, Truck, CheckCircle } from 'lucide-react'
-
-interface MobileCheckoutLoaderProps {
-  message?: string
-}
-
-export default function MobileCheckoutLoader({ message = "Preparando tu pedido..." }: MobileCheckoutLoaderProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const steps = ["Verificando carrito...", "Procesando envío...", "Confirmando pago...", "¡Pedido completado!"]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length)
-    }, 1500)
-    return () => clearInterval(interval)
-  }, [steps.length])
-
-  const getIcon = (step: number) => {
-    switch (step) {
-      case 0:
-        return <ShoppingCart className="w-8 h-8 text-white animate-pulse" />
-      case 1:
-        return <Truck className="w-8 h-8 text-white animate-pulse" />
-      case 2:
-        return <CreditCard className="w-8 h-8 text-white animate-pulse" />
-      case 3:
-        return <CheckCircle className="w-8 h-8 text-white animate-bounce" />
-      default:
-        return <ShoppingCart className="w-8 h-8 text-white animate-pulse" />
-    }
-  }
-
+export default function MobileCheckoutLoader() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
-      <div className="relative mb-8">
-        <div className="w-24 h-24 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
-          {getIcon(currentStep)}
+    <Card className="w-full mx-auto bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 p-4">
+      <div className="space-y-5">
+        <Skeleton className="h-7 w-2/3 bg-gray-200 dark:bg-gray-700" /> {/* Title */}
+        <div className="grid grid-cols-3 gap-1 mb-4">
+          <Skeleton className="h-9 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 bg-gray-200 dark:bg-gray-700" />
         </div>
-        <div className="absolute inset-0 border-4 border-[#4A1518] rounded-full animate-ping opacity-40" />
-      </div>
 
-      <div className="text-center max-w-xs">
-        <p className="text-xl font-semibold mb-2">{steps[currentStep]}</p>
-        <p className="text-gray-400 text-sm">{message}</p>
-      </div>
+        {/* Shipping Form Loader */}
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-1/2 bg-gray-200 dark:bg-gray-700" /> {/* Section Title */}
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-10 w-full bg-gray-200 dark:bg-gray-700" /> {/* Button */}
+        </div>
 
-      <div className="flex space-x-2 mt-6">
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 rounded-full ${
-              i === currentStep ? "bg-[#6B1E22]" : "bg-gray-700"
-            } transition-colors duration-300`}
-          />
-        ))}
+        {/* Order Summary Placeholder */}
+        <div className="mt-6 space-y-3">
+          <Skeleton className="h-5 w-1/2 bg-gray-200 dark:bg-gray-700" /> {/* Section Title */}
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-full bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+          </div>
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-full bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+          </div>
+          <Skeleton className="h-16 w-full bg-gray-200 dark:bg-gray-700" /> {/* Items list */}
+          <Skeleton className="h-5 w-1/3 ml-auto bg-gray-200 dark:bg-gray-700" /> {/* Total */}
+        </div>
       </div>
-    </div>
+    </Card>
   )
 }

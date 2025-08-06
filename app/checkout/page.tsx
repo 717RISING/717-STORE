@@ -1,205 +1,111 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
-import { useCart } from "@/lib/cart-context"
-import ShippingForm from "@/components/checkout/shipping-form"
-import PaymentForm from "@/components/checkout/payment-form"
-import OrderSummary from "@/components/checkout/order-summary"
-import EnhancedButton from "@/components/enhanced-button"
-import { createOrderAction } from "@/app/actions" // Importar la Server Action
-import type { ShippingInfo, PaymentInfo } from "@/lib/database"
-import { toast } from "sonner"
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import ShippingForm from '@/components/checkout/shipping-form'
+import PaymentForm from '@/components/checkout/payment-form'
+import OrderSummary from '@/components/checkout/order-summary'
+import { useCart } from '@/lib/cart-context'
+import { submitOrder } from '@/app/actions'
+import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
-import { useTheme } from "@/lib/theme-context"
-import CheckoutLoader from "@/components/loaders/checkout-loader"
-import MobileCheckoutLoader from "@/components/loaders/mobile/mobile-checkout-loader"
-import { useMobileDetection } from "@/hooks/use-mobile-detection"
-import { Suspense } from "react"
-import { Separator } from "@/components/ui/separator"
 
 export default function CheckoutPage() {
-  const { state: cartState, dispatch } = useCart()
+  const [activeTab, setActiveTab] = useState('shipping')
+  const [shippingData, setShippingData] = useState<any>(null)
+  const [paymentData, setPaymentData] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { cartItems, cartTotal, clearCart } = useCart()
   const router = useRouter()
-  const { theme } = useTheme()
-  const { isMobile } = useMobileDetection()
 
-  const [shippingData, setShippingData] = useState<ShippingInfo>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "Colombia",
-    cost: 0, // Costo de envío inicial
-  })
-
-  const [paymentData, setPaymentData] = useState<PaymentInfo>({
-    method: "card",
-    cardDetails: {
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-      cardName: "",
-    },
-  })
-
-  const [activeTab, setActiveTab] = useState("shipping")
-  const [loadingPage, setLoadingPage] = useState(true)
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false)
-
-  // Calcular totales
-  const subtotal = useMemo(() => {
-    return cartState.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  }, [cartState.items])
-
-  const shippingCost = useMemo(() => {
-    return subtotal >= 300000 ? 0 : 10000 // Envío gratis para pedidos de 300.000 COP o más
-  }, [subtotal])
-
-  const taxRate = 0.19 // 19% IVA
-  const tax = useMemo(() => subtotal * taxRate, [subtotal, taxRate])
-  const total = useMemo(() => subtotal + shippingCost + tax, [subtotal, shippingCost, tax])
-
-  useEffect(() => {
-    // Redirigir si el carrito está vacío al cargar la página
-    if (cartState.items.length === 0 && !isPlacingOrder) {
-      router.push("/productos")
-      toast.info("Tu carrito está vacío. Añade productos para continuar.")
-      return
-    }
-    // Actualizar el costo de envío en el estado de shippingData
-    setShippingData((prev) => ({ ...prev, cost: shippingCost }))
-    setLoadingPage(false)
-  }, [cartState.items, router, isPlacingOrder, shippingCost])
-
-  const handlePlaceOrder = async () => {
-    setIsPlacingOrder(true)
-
-    // Validar datos de envío
-    const requiredShippingFields: Array<keyof ShippingInfo> = [
-      "firstName",
-      "lastName",
-      "email",
-      "phone",
-      "address",
-      "city",
-      "state",
-      "zipCode",
-    ]
-    const missingShippingFields = requiredShippingFields.filter((field) => !shippingData[field])
-
-    if (missingShippingFields.length > 0) {
-      toast.error(`Por favor, completa todos los campos de envío: ${missingShippingFields.join(", ")}.`)
-      setIsPlacingOrder(false)
-      return
-    }
-
-    // Validar datos de pago según el método
-    if (paymentData.method === "card") {
-      const requiredCardFields = ["cardName", "cardNumber", "expiryDate", "cvv"]
-      const missingCardFields = requiredCardFields.filter(
-        (field) => !paymentData.cardDetails || !paymentData.cardDetails[field as keyof typeof paymentData.cardDetails],
-      )
-      if (missingCardFields.length > 0) {
-        toast.error(`Por favor, completa todos los campos de la tarjeta: ${missingCardFields.join(", ")}.`)
-        setIsPlacingOrder(false)
-        return
-      }
-      // Aquí podrías añadir validaciones más robustas para tarjeta (regex, Luhn algorithm, etc.)
-    }
-
-    try {
-      // Llamar a la Server Action para crear el pedido
-      const newOrder = await createOrderAction(
-        cartState.items.map((item) => ({
-          productId: item.productId,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          imageUrl: item.imageUrl,
-          size: item.size,
-          color: item.color,
-        })),
-        shippingData,
-        total,
-        shippingData.email, // Usar el email del formulario de envío como customerEmail
-      )
-
-      if (newOrder) {
-        dispatch({ type: "CLEAR_CART" }) // Limpiar el carrito después de la compra exitosa
-        toast.success("¡Pedido realizado con éxito! Redirigiendo a la confirmación...")
-        router.push(`/checkout/confirmacion?orderId=${newOrder.id}&status=success`)
-      } else {
-        toast.error("Hubo un error al procesar tu pedido. Por favor, inténtalo de nuevo.")
-        router.push(`/checkout/confirmacion?status=failed`)
-      }
-    } catch (error) {
-      console.error("Error durante el proceso de compra:", error)
-      toast.error("Ocurrió un error inesperado. Por favor, inténtalo de nuevo.")
-      router.push(`/checkout/confirmacion?status=failed`)
-    } finally {
-      setIsPlacingOrder(false)
-    }
+  const handleShippingSubmit = (data: any) => {
+    setShippingData(data)
+    setActiveTab('payment')
   }
 
-  if (loadingPage || (cartState.items.length === 0 && !isPlacingOrder)) {
-    return isMobile ? <MobileCheckoutLoader /> : <CheckoutLoader />
+  const handlePaymentSubmit = (data: any) => {
+    setPaymentData(data)
+    setActiveTab('summary')
+  }
+
+  const handleSubmitOrder = async () => {
+    if (!shippingData || !paymentData || cartItems.length === 0) {
+      alert('Por favor, completa todos los pasos del checkout y asegúrate de tener artículos en el carrito.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const formData = new FormData()
+    formData.append('name', shippingData.name)
+    formData.append('email', shippingData.email)
+    formData.append('address', shippingData.address)
+    formData.append('city', shippingData.city)
+    formData.append('zip', shippingData.zip)
+    formData.append('country', shippingData.country)
+    formData.append('paymentMethod', paymentData.paymentMethod)
+    formData.append('cartItems', JSON.stringify(cartItems))
+
+    const result = await submitOrder(formData)
+
+    setIsSubmitting(false)
+
+    if (result.success) {
+      clearCart()
+      router.push(`/checkout/confirmacion?orderId=${result.orderId}`)
+    } else {
+      alert(`Error al procesar el pedido: ${result.message}`)
+    }
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Finalizar Compra</h1>
+    <div className="container mx-auto px-4 py-8">
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white">Checkout</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 gap-2 mb-6 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+              <TabsTrigger value="shipping" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white">
+                1. Envío
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white" disabled={!shippingData}>
+                2. Pago
+              </TabsTrigger>
+              <TabsTrigger value="summary" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white" disabled={!paymentData}>
+                3. Resumen
+              </TabsTrigger>
+            </TabsList>
 
-      <Suspense fallback={<CheckoutLoader />}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Información de Envío
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ShippingForm data={shippingData} onChange={setShippingData} />
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Información de Pago
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PaymentForm data={paymentData} onChange={setPaymentData} isLoading={isPlacingOrder} />
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="lg:col-span-1">
-            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 sticky top-24">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Resumen del Pedido</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <OrderSummary subtotal={subtotal} shipping={shippingCost} tax={tax} total={total} cartItems={cartState.items} />
-                <Separator className="my-4 bg-gray-200 dark:bg-gray-700" />
-                <div className="flex justify-between items-center text-xl font-bold text-gray-900 dark:text-white">
-                  <span>Total:</span>
-                  <span>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(total)}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </Suspense>
+            <TabsContent value="shipping">
+              <ShippingForm onSubmit={handleShippingSubmit} initialData={shippingData} />
+            </TabsContent>
+            <TabsContent value="payment">
+              <PaymentForm onSubmit={handlePaymentSubmit} initialData={paymentData} />
+            </TabsContent>
+            <TabsContent value="summary">
+              <OrderSummary shippingData={shippingData} paymentData={paymentData} cartItems={cartItems} cartTotal={cartTotal} />
+              <Button
+                onClick={handleSubmitOrder}
+                className="w-full mt-6 bg-[#4A1518] hover:bg-[#6B1E22] text-white py-3 text-lg font-semibold"
+                disabled={isSubmitting || cartItems.length === 0}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando Pedido...
+                  </>
+                ) : (
+                  'Confirmar Pedido'
+                )}
+              </Button>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }

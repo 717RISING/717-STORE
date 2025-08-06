@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation"
-import ProductDetail from "@/components/product-detail"
-import { getProductById } from "@/lib/products"
+import ProductDetail from '@/components/product-detail'
+import { getProducts } from '@/lib/database'
+import { notFound } from 'next/navigation'
 
 interface ProductPageProps {
   params: {
@@ -8,31 +8,24 @@ interface ProductPageProps {
   }
 }
 
-export async function generateMetadata({ params }: ProductPageProps) {
-  const product = await getProductById(params.id)
-
-  if (!product) {
-    return {
-      title: "Producto no encontrado",
-    }
-  }
-
-  return {
-    title: product.name,
-    description: product.description,
-  }
+export async function generateStaticParams() {
+  const products = await getProducts()
+  return products.map((product) => ({
+    id: product.id,
+  }))
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProductById(params.id)
+  const products = await getProducts()
+  const product = products.find((p) => p.id === params.id)
 
   if (!product) {
     notFound()
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 py-8">
       <ProductDetail product={product} />
-    </main>
+    </div>
   )
 }

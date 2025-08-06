@@ -1,37 +1,32 @@
-"use client"
-
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export function MobileProfileLoader() {
   return (
-    <div className="px-4 py-6 space-y-4">
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center space-x-3">
-            <Skeleton className="h-16 w-16 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Tabs */}
+      <div className="grid grid-cols-2 gap-2">
+        <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="h-10 bg-gray-200 dark:bg-gray-700" />
+      </div>
+
+      {/* Main Content */}
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 h-[400px]">
+        <CardHeader>
+          <Skeleton className="h-7 w-1/2 bg-gray-200 dark:bg-gray-700" />
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-          <div className="space-y-3">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-          <div className="space-y-3">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-          <Skeleton className="h-9 w-28" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-10 w-full bg-gray-200 dark:bg-gray-700" />
         </CardContent>
       </Card>
     </div>
   )
 }
+
+export default MobileProfileLoader

@@ -4,6 +4,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
+export const db = supabase
 
 // Mock data for development
 const mockProducts = [
@@ -24,6 +25,24 @@ const mockProducts = [
     image: "/products/camisetas/oversized-tee.jpg",
     category: "camisetas",
     stock: 8
+  },
+  {
+    id: "3",
+    name: "Graphic Tee Blood",
+    description: "Camiseta con diseño gráfico exclusivo",
+    price: 92000,
+    image: "/products/camisetas/graphic-tee-blood.jpg",
+    category: "camisetas",
+    stock: 12
+  },
+  {
+    id: "4",
+    name: "Graphic Tee Pain",
+    description: "Camiseta con diseño gráfico único",
+    price: 92000,
+    image: "/products/camisetas/graphic-tee-pain.jpg",
+    category: "camisetas",
+    stock: 10
   }
 ]
 
@@ -51,7 +70,8 @@ const mockOrders = [
         price: 89000,
         size: "M"
       }
-    ]
+    ],
+    channel: "Web"
   }
 ]
 
@@ -74,6 +94,14 @@ const mockUsers = [
 
 export async function getProducts() {
   return mockProducts
+}
+
+export async function getAllProducts() {
+  return mockProducts
+}
+
+export async function getFeaturedProducts() {
+  return mockProducts.slice(0, 4)
 }
 
 export async function addProduct(product: any) {
@@ -99,6 +127,15 @@ export async function deleteProduct(id: string) {
 
 export async function getOrders() {
   return mockOrders
+}
+
+export async function getOrderById(id: string) {
+  return mockOrders.find(order => order.id === id) || null
+}
+
+export async function addOrder(order: any) {
+  mockOrders.push(order)
+  return order
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {

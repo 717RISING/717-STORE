@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast"
 import AdaptiveLoader from "@/components/loaders/adaptive-loader"
 import { Suspense } from "react"
 import ProductLoader from "@/components/loaders/product-loader"
+import MobileProductLoader from "@/components/loaders/mobile/mobile-product-loader"
+import { useMobileDetection } from '@/hooks/use-mobile-detection' // Client component hook
 
 export default async function HomePage() {
   const allProducts = await getAllProducts()
@@ -24,6 +26,7 @@ export default async function HomePage() {
   const [email, setEmail] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const isMobile = useMobileDetection() // Use the hook to detect mobile
 
   useEffect(() => {
     // Verificar si el usuario está autenticado
@@ -195,7 +198,7 @@ export default async function HomePage() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">
             Productos Destacados
           </h2>
-          <Suspense fallback={<ProductLoader />}>
+          <Suspense fallback={isMobile ? <MobileProductLoader /> : <ProductLoader />}>
             <ProductGrid products={featuredProducts} />
           </Suspense>
         </div>
