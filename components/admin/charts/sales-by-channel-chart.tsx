@@ -1,60 +1,34 @@
 "use client"
 
-import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
-interface SalesByChannelChartProps {
-  data: { name: string; value: number; color: string }[]
-}
+const data = [
+  { name: 'Tienda Online', value: 65, color: '#8884d8' },
+  { name: 'Redes Sociales', value: 25, color: '#82ca9d' },
+  { name: 'Marketplace', value: 10, color: '#ffc658' }
+]
 
-export default function SalesByChannelChart({ data }: SalesByChannelChartProps) {
+export default function SalesByChannelChart() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Ventas por Canal</CardTitle>
-        <CardDescription>Distribución de ventas por diferentes canales</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={{
-            desktop: {
-              label: "Escritorio",
-              color: "hsl(var(--chart-1))",
-            },
-            mobile: {
-              label: "Móvil",
-              color: "hsl(var(--chart-2))",
-            },
-            inStore: {
-              label: "En Tienda",
-              color: "hsl(var(--chart-3))",
-            },
-          }}
-          className="h-[300px]"
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          labelLine={false}
+          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          outerRadius={80}
+          fill="#8884d8"
+          dataKey="value"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip content={<ChartTooltipContent nameKey="name" />} />
-              <Legend />
-              <Pie
-                data={data}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+        <Tooltip />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
   )
 }

@@ -13,12 +13,15 @@ import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
 import InteractiveProductCard from "@/components/interactive-product-card"
 import ProductLoader from "@/components/loaders/product-loader"
+import MobileProductLoader from "@/components/loaders/mobile/mobile-product-loader"
 import { useThemeSafe } from "@/hooks/use-theme-safe"
 import ThemeToggle from "@/components/theme-toggle"
 import { ProductGrid } from "@/components/product-grid"
 import { Suspense } from "react"
+import { useMobileDetection } from '@/hooks/use-mobile-detection'
 
 export default async function ProductsPage() {
+  const { isMobile } = useMobileDetection()
   const products = await getProducts()
   const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -82,7 +85,7 @@ export default async function ProductsPage() {
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
-        <ProductLoader size="lg" message="Cargando productos exclusivos..." />
+        {isMobile ? <MobileProductLoader size="lg" message="Cargando productos exclusivos..." /> : <ProductLoader size="lg" message="Cargando productos exclusivos..." />}
       </div>
     )
   }
@@ -179,7 +182,8 @@ export default async function ProductsPage() {
       </header>
 
       {/* Products Section */}
-      <div className="container mx-auto px-4 py-8 animate-slide-up">
+      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8 animate-slide-up">
+        <h1 className="mb-8 text-3xl font-bold">Nuestros Productos</h1>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters */}
           <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
@@ -308,7 +312,7 @@ export default async function ProductsPage() {
                 </p>
               </div>
             ) : viewMode === "grid" ? (
-              <Suspense fallback={<ProductLoader />}>
+              <Suspense fallback={isMobile ? <MobileProductLoader /> : <ProductLoader />}>
                 <ProductGrid products={filteredProducts} />
               </Suspense>
             ) : (

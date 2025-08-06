@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback } from "react"
-import { fetchChatResponse } from "@/lib/chat-service"
+import { useState, useCallback } from 'react'
+import { sendMessage as sendChatMessage } from '@/lib/chat-service'
 
-interface Message {
-  role: "user" | "assistant"
+export type Message = {
+  role: 'user' | 'assistant'
   content: string
 }
 
@@ -12,29 +12,24 @@ export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const sendMessage = useCallback(async (text: string) => {
-    const userMessage: Message = { role: "user", content: text }
-    setMessages((prevMessages) => [...prevMessages, userMessage])
+  const sendMessage = useCallback(async (content: string) => {
+    const newUserMessage: Message = { role: 'user', content }
+    setMessages((prevMessages) => [...prevMessages, newUserMessage])
     setIsLoading(true)
 
     try {
-      const assistantResponse = await fetchChatResponse(text)
-      const assistantMessage: Message = { role: "assistant", content: assistantResponse }
-      setMessages((prevMessages) => [...prevMessages, assistantMessage])
+      const assistantResponse = await sendChatMessage(content)
+      const newAssistantMessage: Message = { role: 'assistant', content: assistantResponse }
+      setMessages((prevMessages) => [...prevMessages, newAssistantMessage])
     } catch (error) {
-      console.error("Error sending message:", error)
+      console.error('Error sending message:', error)
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: "assistant", content: "Lo siento, hubo un error al procesar tu solicitud." },
+        { role: 'assistant', content: 'Lo siento, hubo un error al procesar tu solicitud.' },
       ])
     } finally {
       setIsLoading(false)
     }
-  }, [])
-
-  // Initial welcome message
-  useEffect(() => {
-    setMessages([{ role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte hoy?" }])
   }, [])
 
   return { messages, sendMessage, isLoading }

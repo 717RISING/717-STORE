@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Star, Sparkles, Gem, Crown } from 'lucide-react'
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface MobileBrandLoaderProps {
   message?: string
@@ -34,7 +35,7 @@ export default function MobileBrandLoader({ message = "Cargando experiencia de m
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
+    <div className="flex flex-col items-center space-y-4 p-4">
       <div className="relative mb-8">
         <div className="w-24 h-24 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
           {getIcon(currentStep)}
@@ -56,6 +57,16 @@ export default function MobileBrandLoader({ message = "Cargando experiencia de m
             } transition-colors duration-300`}
           />
         ))}
+      </div>
+
+      <Skeleton className="h-20 w-20 rounded-full" />
+      <Skeleton className="h-6 w-48" />
+      <Skeleton className="h-4 w-full" />
+      <div className="grid w-full grid-cols-2 gap-4">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
       </div>
     </div>
   )

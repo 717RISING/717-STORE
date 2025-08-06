@@ -1,87 +1,140 @@
 "use client"
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ShoppingCart, Eye } from 'lucide-react'
-import { Button } from "@/components/ui/button"
+import { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
-import { Product } from "@/lib/types"
-import { formatPrice } from "@/lib/products"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Heart, ShoppingCart, Eye } from 'lucide-react'
+import { motion } from "framer-motion"
+import Image from "next/image"
+
+interface Product {
+  id: string
+  name: string
+  price: number
+  originalPrice?: number
+  image: string
+  category: string
+  isNew?: boolean
+  isSale?: boolean
+}
 
 interface InteractiveProductCardProps {
   product: Product
+  onAddToCart?: (product: Product) => void
+  onAddToWishlist?: (product: Product) => void
+  onQuickView?: (product: Product) => void
 }
 
-export function InteractiveProductCard({ product }: InteractiveProductCardProps) {
+export function InteractiveProductCard({ 
+  product, 
+  onAddToCart, 
+  onAddToWishlist, 
+  onQuickView 
+}: InteractiveProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [isInWishlist, setIsInWishlist] = useState(false)
+
+  const handleAddToWishlist = () => {
+    setIsInWishlist(!isInWishlist)
+    onAddToWishlist?.(product)
+  }
+
+  const discount = product.originalPrice 
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0
 
   return (
-    <Card
-      className="relative overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.2 }}
     >
-      <Link href={`/productos/${product.id}`} className="block">
-        <div className="relative w-full h-60 bg-gray-100 dark:bg-gray-700 overflow-hidden">
+      <Card 
+        className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="relative aspect-square overflow-hidden">
           <Image
-            src={product.images[0] || "/placeholder.svg"}
+            src={product.image || "/placeholder.svg"}
             alt={product.name}
             fill
-            style={{ objectFit: "cover" }}
-            className="transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={true}
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
           />
-          {product.discountPercentage > 0 && (
-            <div className="absolute top-2 left-2 bg-[#5D1A1D] text-white text-xs font-bold px-2 py-1 rounded-full">
-              -{product.discountPercentage}%
+          
+          {/* Badges */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {product.isNew && (
+              <Badge variant="secondary" className="bg-green-500 text-white">
+                Nuevo
+              </Badge>
+            )}
+            {product.isSale && discount > 0 && (
+              <Badge variant="destructive">
+                -{discount}%
+              </Badge>
+            )}
+          </div>
+
+          {/* Wishlist Button */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className={`absolute top-2 right-2 transition-all duration-200 ${
+              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+            onClick={handleAddToWishlist}
+          >
+            <Heart 
+              className={`h-4 w-4 ${
+                isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'
+              }`} 
+            />
+          </Button>
+
+          {/* Quick Actions */}
+          <div className={`absolute bottom-2 left-2 right-2 flex gap-2 transition-all duration-200 ${
+            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => onAddToCart?.(product)}
+            >
+              <ShoppingCart className="h-4 w-4 mr-1" />
+              Agregar
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => onQuickView?.(product)}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <CardContent className="p-4">
+          <div className="space-y-2">
+            <Badge variant="outline" className="text-xs">
+              {product.category}
+            </Badge>
+            <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+              {product.name}
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg">
+                ${product.price.toLocaleString()}
+              </span>
+              {product.originalPrice && (
+                <span className="text-sm text-muted-foreground line-through">
+                  ${product.originalPrice.toLocaleString()}
+                </span>
+              )}
             </div>
-          )}
-        </div>
-      </Link>
-      <CardContent className="p-4 text-center">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 truncate">
-          {product.name}
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          {product.category}
-        </p>
-        <div className="flex items-center justify-center gap-2 mb-4">
-          {product.discountPercentage > 0 ? (
-            <>
-              <span className="text-xl font-bold text-[#5D1A1D]">
-                {formatPrice(product.price * (1 - product.discountPercentage / 100))}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
-                {formatPrice(product.price)}
-              </span>
-            </>
-          ) : (
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatPrice(product.price)}
-            </span>
-          )}
-        </div>
-        <div
-          className={`absolute inset-x-0 bottom-0 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 p-4 flex justify-center gap-2 transition-transform duration-300 ${
-            isHovered ? "translate-y-0" : "translate-y-full"
-          }`}
-        >
-          <Button variant="outline" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-            <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            <span className="sr-only">Añadir a la lista de deseos</span>
-          </Button>
-          <Button size="sm" className="flex-1 bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            Añadir al carrito
-          </Button>
-          <Button variant="outline" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-            <Eye className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            <span className="sr-only">Ver detalles</span>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }

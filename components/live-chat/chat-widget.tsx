@@ -1,32 +1,71 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { MessageSquare } from 'lucide-react'
-import ChatInterface from "./chat-interface"
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { MessageSquare, X } from 'lucide-react'
+import { ChatInterface } from './chat-interface'
+import { useChat } from '@/hooks/use-chat'
+import { cn } from '@/lib/utils'
 
-export default function ChatWidget() {
+export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
+  const { messages, sendMessage, isLoading } = useChat()
+
+  const toggleChat = () => {
+    setIsOpen(!isOpen)
+  }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
+    <div className="fixed bottom-4 right-4 z-50">
+      {!isOpen && (
         <Button
-          variant="default"
-          size="icon"
-          className="fixed bottom-4 right-4 z-50 rounded-full bg-[#4A1518] hover:bg-[#6B1E22] text-white shadow-lg"
+          onClick={toggleChat}
+          className="rounded-full p-4 shadow-lg"
           aria-label="Open chat widget"
         >
           <MessageSquare className="h-6 w-6" />
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col bg-gray-900 text-white">
-        <SheetHeader className="p-4 border-b border-gray-700">
-          <SheetTitle className="text-white">Soporte en Vivo</SheetTitle>
-        </SheetHeader>
-        <ChatInterface />
-      </SheetContent>
-    </Sheet>
+      )}
+
+      <Card
+        className={cn(
+          "w-80 md:w-96 max-h-[80vh] flex flex-col",
+          isOpen ? "block" : "hidden"
+        )}
+      >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 border-b">
+          <CardTitle className="text-lg">Soporte en Vivo</CardTitle>
+          <Button variant="ghost" size="icon" onClick={toggleChat} aria-label="Close chat widget">
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent className="flex-1 p-4 overflow-y-auto">
+          <ChatInterface messages={messages} isLoading={isLoading} />
+        </CardContent>
+        <CardFooter className="p-4 border-t">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              const form = e.currentTarget
+              const input = form.elements.namedItem('message') as HTMLInputElement
+              if (input.value.trim()) {
+                sendMessage(input.value)
+                input.value = ''
+              }
+            }}
+            className="flex w-full space-x-2"
+          >
+            <input
+              name="message"
+              placeholder="Escribe tu mensaje..."
+              className="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              disabled={isLoading}
+            />
+            <Button type="submit" disabled={isLoading}>Enviar</Button>
+          </form>
+        </CardFooter>
+      </Card>
+    </div>
   )
 }

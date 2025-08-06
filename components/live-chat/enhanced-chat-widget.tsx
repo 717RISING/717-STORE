@@ -1,52 +1,72 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { MessageSquare, X, Minimize2, Maximize2 } from 'lucide-react'
-import ChatInterface from "./chat-interface"
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { MessageSquare, X } from 'lucide-react'
+import { ChatInterface } from './chat-interface'
+import { useChat } from '@/hooks/use-chat'
+import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
 
-export default function EnhancedChatWidget() {
+export function EnhancedChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
+  const { messages, sendMessage, isLoading } = useChat()
 
-  const toggleMinimize = () => {
-    setIsMinimized(!isMinimized)
+  const toggleChat = () => {
+    setIsOpen(!isOpen)
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
+    <div className="fixed bottom-4 right-4 z-50">
+      {!isOpen && (
         <Button
-          variant="default"
-          size="icon"
-          className="fixed bottom-4 right-4 z-50 rounded-full bg-[#4A1518] hover:bg-[#6B1E22] text-white shadow-lg"
+          onClick={toggleChat}
+          className="rounded-full p-4 shadow-lg"
           aria-label="Open chat widget"
         >
           <MessageSquare className="h-6 w-6" />
         </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="right"
-        className={`p-0 flex flex-col bg-gray-900 text-white transition-all duration-300 ease-in-out ${
-          isMinimized ? "w-20 h-20 rounded-full overflow-hidden" : "w-full sm:w-[400px] h-full"
-        }`}
-      >
-        {!isMinimized && (
-          <SheetHeader className="p-4 border-b border-gray-700 flex flex-row items-center justify-between">
-            <SheetTitle className="text-white">Soporte en Vivo</SheetTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={toggleMinimize} aria-label="Minimize chat">
-                {isMinimized ? <Maximize2 className="h-5 w-5 text-white" /> : <Minimize2 className="h-5 w-5 text-white" />}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close chat">
-                <X className="h-5 w-5 text-white" />
-              </Button>
-            </div>
-          </SheetHeader>
+      )}
+
+      <Card
+        className={cn(
+          "w-80 md:w-96 max-h-[80vh] flex flex-col",
+          isOpen ? "block" : "hidden"
         )}
-        {!isMinimized && <ChatInterface />}
-      </SheetContent>
-    </Sheet>
+      >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 border-b">
+          <CardTitle className="text-lg">Soporte en Vivo</CardTitle>
+          <Button variant="ghost" size="icon" onClick={toggleChat} aria-label="Close chat widget">
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent className="flex-1 p-4 overflow-y-auto">
+          <ChatInterface messages={messages} isLoading={isLoading} />
+        </CardContent>
+        <CardFooter className="p-4 border-t">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              const form = e.currentTarget
+              const input = form.elements.namedItem('message') as HTMLInputElement
+              if (input.value.trim()) {
+                sendMessage(input.value)
+                input.value = ''
+              }
+            }}
+            className="flex w-full space-x-2"
+          >
+            <Input
+              name="message"
+              placeholder="Escribe tu mensaje..."
+              className="flex-1"
+              disabled={isLoading}
+            />
+            <Button type="submit" disabled={isLoading}>Enviar</Button>
+          </form>
+        </CardFooter>
+      </Card>
+    </div>
   )
 }

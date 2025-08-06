@@ -1,149 +1,190 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useMobileDetection } from "@/hooks/use-mobile-detection"
-import { cn } from "@/lib/utils"
+import { Smartphone, Tablet, Monitor, Wifi, WifiOff } from 'lucide-react'
 
-interface ResponsiveTestProps {
-  children: React.ReactNode
-}
-
-export function ResponsiveTest({ children }: ResponsiveTestProps) {
-  const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024)
-  const [height, setHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 768)
-  const [showControls, setShowControls] = useState(true)
-  const [devicePreset, setDevicePreset] = useState("custom")
-  const { isMobile: detectedMobile, touchSupport } = useMobileDetection()
-
-  const devicePresets = {
-    "custom": { width: width, height: height },
-    "iphone-se": { width: 375, height: 667 },
-    "iphone-12": { width: 390, height: 844 },
-    "ipad-mini": { width: 768, height: 1024 },
-    "ipad-pro": { width: 1024, height: 1366 },
-    "desktop-sm": { width: 1280, height: 800 },
-    "desktop-md": { width: 1440, height: 900 },
-    "desktop-lg": { width: 1920, height: 1080 },
-  } as const
+export function ResponsiveTest() {
+  const [screenSize, setScreenSize] = useState('')
+  const [isOnline, setIsOnline] = useState(true)
+  const [deviceInfo, setDeviceInfo] = useState({
+    width: 0,
+    height: 0,
+    userAgent: '',
+    pixelRatio: 1
+  })
 
   useEffect(() => {
-    const handleResize = () => {
-      if (devicePreset === "custom") {
-        setWidth(window.innerWidth)
-        setHeight(window.innerHeight)
+    const updateScreenSize = () => {
+      const width = window.innerWidth
+      setDeviceInfo({
+        width,
+        height: window.innerHeight,
+        userAgent: navigator.userAgent,
+        pixelRatio: window.devicePixelRatio || 1
+      })
+
+      if (width < 640) {
+        setScreenSize('Mobile')
+      } else if (width < 1024) {
+        setScreenSize('Tablet')
+      } else {
+        setScreenSize('Desktop')
       }
     }
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [devicePreset])
 
-  const applyPreset = (presetKey: keyof typeof devicePresets) => {
-    const preset = devicePresets[presetKey]
-    setWidth(preset.width)
-    setHeight(preset.height)
-    setDevicePreset(presetKey)
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
+    updateScreenSize()
+    window.addEventListener('resize', updateScreenSize)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('resize', updateScreenSize)
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
+  const getDeviceIcon = () => {
+    switch (screenSize) {
+      case 'Mobile':
+        return <Smartphone className="h-5 w-5" />
+      case 'Tablet':
+        return <Tablet className="h-5 w-5" />
+      default:
+        return <Monitor className="h-5 w-5" />
+    }
+  }
+
+  const getBreakpointColor = () => {
+    switch (screenSize) {
+      case 'Mobile':
+        return 'bg-red-500'
+      case 'Tablet':
+        return 'bg-yellow-500'
+      default:
+        return 'bg-green-500'
+    }
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-950">
-      {showControls && (
-        <Card className="p-4 shadow-md rounded-none border-b dark:border-gray-800 bg-white dark:bg-gray-900 z-10">
-          <CardHeader className="p-0 pb-2">
-            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-              Responsive Test Suite
+    <div className="min-h-screen p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {getDeviceIcon()}
+              Responsive Design Test
+              <Badge className={getBreakpointColor()}>
+                {screenSize}
+              </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="width-slider" className="text-gray-700 dark:text-gray-300">
-                Width: {width}px
-              </Label>
-              <Slider
-                id="width-slider"
-                min={200}
-                max={2000}
-                step={1}
-                value={[width]}
-                onValueChange={([val]) => {
-                  setWidth(val)
-                  setDevicePreset("custom")
-                }}
-                className="[&>span:first-child]:h-2 [&>span:first-child]:bg-gray-300 dark:[&>span:first-child]:bg-gray-700 [&>span:first-child>span]:bg-[#5D1A1D] dark:[&>span:first-child>span]:bg-[#6B1E22]"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="height-slider" className="text-gray-700 dark:text-gray-300">
-                Height: {height}px
-              </Label>
-              <Slider
-                id="height-slider"
-                min={200}
-                max={1500}
-                step={1}
-                value={[height]}
-                onValueChange={([val]) => {
-                  setHeight(val)
-                  setDevicePreset("custom")
-                }}
-                className="[&>span:first-child]:h-2 [&>span:first-child]:bg-gray-300 dark:[&>span:first-child]:bg-gray-700 [&>span:first-child>span]:bg-[#5D1A1D] dark:[&>span:first-child>span]:bg-[#6B1E22]"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="device-preset" className="text-gray-700 dark:text-gray-300">
-                Device Presets
-              </Label>
-              <Select value={devicePreset} onValueChange={applyPreset}>
-                <SelectTrigger id="device-preset" className="w-full bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
-                  <SelectValue placeholder="Select a preset" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
-                  <SelectItem value="custom">Custom</SelectItem>
-                  <SelectItem value="iphone-se">iPhone SE (375x667)</SelectItem>
-                  <SelectItem value="iphone-12">iPhone 12 (390x844)</SelectItem>
-                  <SelectItem value="ipad-mini">iPad Mini (768x1024)</SelectItem>
-                  <SelectItem value="ipad-pro">iPad Pro (1024x1366)</SelectItem>
-                  <SelectItem value="desktop-sm">Desktop Small (1280x800)</SelectItem>
-                  <SelectItem value="desktop-md">Desktop Medium (1440x900)</SelectItem>
-                  <SelectItem value="desktop-lg">Desktop Large (1920x1080)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2 col-span-full md:col-span-1">
-              <Switch
-                id="show-controls"
-                checked={showControls}
-                onCheckedChange={setShowControls}
-                className="data-[state=checked]:bg-[#5D1A1D] data-[state=unchecked]:bg-gray-300 dark:data-[state=unchecked]:bg-gray-700"
-              />
-              <Label htmlFor="show-controls" className="text-gray-700 dark:text-gray-300">
-                Show Controls
-              </Label>
-            </div>
-            <div className="col-span-full md:col-span-2 text-gray-700 dark:text-gray-300">
-              <p>Detected Mobile: {detectedMobile ? "Yes" : "No"}</p>
-              <p>Touch Support: {touchSupport ? "Yes" : "No"}</p>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Screen Size</h3>
+                <p className="text-sm text-muted-foreground">
+                  {deviceInfo.width} x {deviceInfo.height}px
+                </p>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">Device Pixel Ratio</h3>
+                <p className="text-sm text-muted-foreground">
+                  {deviceInfo.pixelRatio}x
+                </p>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold flex items-center gap-2">
+                  Connection
+                  {isOnline ? (
+                    <Wifi className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <WifiOff className="h-4 w-4 text-red-500" />
+                  )}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isOnline ? 'Online' : 'Offline'}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
-      <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
-        <div
-          style={{ width: `${width}px`, height: `${height}px` }}
-          className={cn(
-            "relative border-8 border-gray-800 dark:border-gray-200 rounded-xl shadow-2xl overflow-hidden bg-white dark:bg-gray-900 transition-all duration-300",
-            !showControls && "border-none rounded-none"
-          )}
-        >
-          <div className="absolute inset-0 overflow-auto">
-            {children}
-          </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="bg-red-50 border-red-200">
+            <CardHeader>
+              <CardTitle className="text-red-700">Mobile (< 640px)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-red-600">
+                Single column layout, touch-friendly buttons
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-yellow-50 border-yellow-200">
+            <CardHeader>
+              <CardTitle className="text-yellow-700">Tablet (640px - 1024px)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-yellow-600">
+                Two column layout, medium spacing
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-green-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="text-green-700">Desktop (> 1024px)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-green-600">
+                Multi-column layout, hover effects
+              </p>
+            </CardContent>
+          </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Components</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm">Small Button</Button>
+              <Button>Default Button</Button>
+              <Button size="lg">Large Button</Button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-square bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white font-bold"
+                >
+                  {i + 1}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>User Agent</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground break-all">
+              {deviceInfo.userAgent}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

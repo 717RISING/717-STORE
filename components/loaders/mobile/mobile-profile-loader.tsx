@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { User, Loader2, Settings, Lock } from 'lucide-react'
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface MobileProfileLoaderProps {
   message?: string
@@ -34,7 +35,7 @@ export default function MobileProfileLoader({ message = "Cargando perfil de usua
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
+    <div className="flex flex-col items-center space-y-4 p-4">
       <div className="relative mb-8">
         <div className="w-24 h-24 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
           {getIcon(currentStep)}
@@ -47,7 +48,7 @@ export default function MobileProfileLoader({ message = "Cargando perfil de usua
         <p className="text-gray-400 text-sm">{message}</p>
       </div>
 
-      <div className="flex space-x-2 mt-6">
+      <div className="grid w-full grid-cols-1 gap-3">
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
@@ -57,6 +58,8 @@ export default function MobileProfileLoader({ message = "Cargando perfil de usua
           />
         ))}
       </div>
+
+      <Skeleton className="h-3 w-20" />
     </div>
   )
 }

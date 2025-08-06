@@ -1,47 +1,40 @@
 "use client"
 
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-interface SalesChartProps {
-  data: { name: string; sales: number; revenue: number }[]
-}
+const data = [
+  { name: 'Ene', sales: 4000, orders: 240 },
+  { name: 'Feb', sales: 3000, orders: 139 },
+  { name: 'Mar', sales: 2000, orders: 980 },
+  { name: 'Abr', sales: 2780, orders: 390 },
+  { name: 'May', sales: 1890, orders: 480 },
+  { name: 'Jun', sales: 2390, orders: 380 },
+  { name: 'Jul', sales: 3490, orders: 430 },
+]
 
-export function SalesChart({ data }: SalesChartProps) {
+export function SalesChart() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Tendencia de Ventas y Ingresos</CardTitle>
-        <CardDescription>Ventas y ingresos por mes</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer
-          config={{
-            sales: {
-              label: "Ventas",
-              color: "hsl(var(--chart-1))",
-            },
-            revenue: {
-              label: "Ingresos",
-              color: "hsl(var(--chart-2))",
-            },
-          }}
-          className="h-[300px]"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Legend />
-              <Line type="monotone" dataKey="sales" stroke="var(--color-sales)" name="Ventas" />
-              <Line type="monotone" dataKey="revenue" stroke="var(--color-revenue)" name="Ingresos" />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Line 
+          type="monotone" 
+          dataKey="sales" 
+          stroke="#8884d8" 
+          strokeWidth={2}
+          dot={{ fill: '#8884d8' }}
+        />
+        <Line 
+          type="monotone" 
+          dataKey="orders" 
+          stroke="#82ca9d" 
+          strokeWidth={2}
+          dot={{ fill: '#82ca9d' }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
   )
 }

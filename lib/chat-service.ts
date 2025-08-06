@@ -1,28 +1,25 @@
 // lib/chat-service.ts
 // This file simulates an AI chat service. In a real application, you would integrate with an actual AI API.
 
-export async function fetchChatResponse(message: string): Promise<string> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
+'use server'
 
-  const lowerCaseMessage = message.toLowerCase()
+export async function sendMessage(message: string): Promise<string> {
+  // Simulate a delay for AI processing
+  await new Promise(resolve => setTimeout(resolve, 1000))
 
-  if (lowerCaseMessage.includes("hola") || lowerCaseMessage.includes("saludo")) {
-    return "¡Hola! ¿En qué puedo ayudarte hoy? Puedes preguntar sobre productos, envíos o devoluciones."
-  } else if (lowerCaseMessage.includes("envío") || lowerCaseMessage.includes("envios")) {
-    return "Los envíos nacionales tardan de 3 a 7 días hábiles. Los envíos internacionales pueden tardar de 7 a 20 días hábiles. ¿Necesitas más detalles?"
-  } else if (lowerCaseMessage.includes("devolución") || lowerCaseMessage.includes("devoluciones")) {
-    return "Puedes solicitar una devolución dentro de los 30 días posteriores a la compra, siempre que el artículo esté sin usar y con sus etiquetas. Visita nuestra sección de 'Envíos y Devoluciones' para más información."
-  } else if (lowerCaseMessage.includes("producto") || lowerCaseMessage.includes("productos")) {
-    return "Tenemos una amplia variedad de camisetas, sudaderas, pantalones y accesorios. ¿Estás buscando algo en particular?"
-  } else if (lowerCaseMessage.includes("gracias")) {
-    return "De nada. ¡Estoy aquí para ayudarte!"
-  } else if (lowerCaseMessage.includes("horario") || lowerCaseMessage.includes("abren")) {
-    return "Nuestra tienda online está abierta 24/7. Para soporte, estamos disponibles de lunes a viernes, de 9 AM a 6 PM (hora de Colombia)."
-  } else if (lowerCaseMessage.includes("contacto")) {
-    return "Puedes contactarnos por correo electrónico en info@717store.com o llamarnos al +57 310 123 4567."
+  // Simple rule-based response for demonstration
+  if (message.toLowerCase().includes('envío')) {
+    return 'El envío estándar tarda de 3 a 5 días hábiles. Para más detalles, visita nuestra sección de Envíos y Devoluciones.'
+  } else if (message.toLowerCase().includes('devolución')) {
+    return 'Nuestra política de devoluciones permite devolver productos sin usar en 30 días. Puedes iniciar una devolución desde tu cuenta.'
+  } else if (message.toLowerCase().includes('producto')) {
+    return '¿Qué tipo de producto te interesa? Tenemos camisetas, sudaderas y accesorios.'
+  } else if (message.toLowerCase().includes('hola')) {
+    return '¡Hola! ¿En qué puedo ayudarte hoy?'
+  } else if (message.toLowerCase().includes('gracias')) {
+    return 'De nada. Estoy aquí para ayudarte.'
   } else {
-    return "Lo siento, no entendí tu pregunta. ¿Podrías reformularla o preguntar algo diferente?"
+    return 'Gracias por tu mensaje. Un agente de soporte se pondrá en contacto contigo pronto.'
   }
 }
 
