@@ -1,58 +1,25 @@
-interface Measurements {
-  chest: number;
-  waist: number;
-  hips: number;
-  inseam: number;
-}
+export function calculateSize(chest: number, waist: number, hip: number, unit: "cm" | "in"): string {
+  let c = chest
+  let w = waist
+  let h = hip
 
-// This is a simplified mock for demonstration.
-// Real size calculation would involve more complex logic and data.
-export function calculateSize(
-  gender: 'male' | 'female',
-  itemType: 'tshirt' | 'pants' | 'jacket',
-  measurements: Measurements
-): string {
-  const { chest, waist, hips, inseam } = measurements;
-
-  if (isNaN(chest) || isNaN(waist) || isNaN(hips) || isNaN(inseam)) {
-    return "Medidas inválidas";
+  if (unit === "in") {
+    c = chest * 2.54
+    w = waist * 2.54
+    h = hip * 2.54
   }
 
-  if (gender === 'male') {
-    if (itemType === 'tshirt') {
-      if (chest < 90) return 'S';
-      if (chest >= 90 && chest < 100) return 'M';
-      if (chest >= 100 && chest < 110) return 'L';
-      return 'XL';
-    } else if (itemType === 'pants') {
-      if (waist < 75) return 'S';
-      if (waist >= 75 && waist < 85) return 'M';
-      if (waist >= 85 && waist < 95) return 'L';
-      return 'XL';
-    } else if (itemType === 'jacket') {
-      if (chest < 95) return 'S';
-      if (chest >= 95 && chest < 105) return 'M';
-      if (chest >= 105 && chest < 115) return 'L';
-      return 'XL';
-    }
-  } else if (gender === 'female') {
-    if (itemType === 'tshirt') {
-      if (chest < 85) return 'S';
-      if (chest >= 85 && chest < 95) return 'M';
-      if (chest >= 95 && chest < 105) return 'L';
-      return 'XL';
-    } else if (itemType === 'pants') {
-      if (waist < 65) return 'S';
-      if (waist >= 65 && waist < 75) return 'M';
-      if (waist >= 75 && waist < 85) return 'L';
-      return 'XL';
-    } else if (itemType === 'jacket') {
-      if (chest < 90) return 'S';
-      if (chest >= 90 && chest < 100) return 'M';
-      if (chest >= 100 && chest < 110) return 'L';
-      return 'XL';
-    }
+  if (c >= 80 && c <= 85 && w >= 65 && w <= 70 && h >= 85 && h <= 90) {
+    return "XS"
+  } else if (c >= 86 && c <= 91 && w >= 71 && w <= 76 && h >= 91 && h <= 96) {
+    return "S"
+  } else if (c >= 92 && c <= 97 && w >= 77 && w <= 82 && h >= 97 && h <= 102) {
+    return "M"
+  } else if (c >= 98 && c <= 103 && w >= 83 && w <= 88 && h >= 103 && h <= 108) {
+    return "L"
+  } else if (c >= 104 && c <= 109 && w >= 89 && w <= 94 && h >= 109 && h <= 114) {
+    return "XL"
+  } else {
+    return "No se encontró una talla exacta. Por favor, revisa tus medidas o consulta la tabla de tallas."
   }
-
-  return 'N/A'; // No recommendation found
 }

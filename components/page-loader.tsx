@@ -1,26 +1,24 @@
-"use client"
+'use client'
 
+import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
-import { usePageTransition } from '@/lib/page-transition-context' // Assuming this context exists
+import { LoadingSpinner } from './loading-spinner'
 
-export function PageLoader() {
-  const { isTransitioning } = usePageTransition()
-  const [showLoader, setShowLoader] = useState(false)
+interface PageLoaderProps {
+  isLoading: boolean;
+}
+
+export function PageLoader({ isLoading }: PageLoaderProps) {
+  const [showLoader, setShowLoader] = useState(isLoading)
 
   useEffect(() => {
-    if (isTransitioning) {
-      // Show loader immediately when transition starts
+    if (isLoading) {
       setShowLoader(true)
     } else {
-      // Hide loader after a small delay to ensure smooth transition out
-      const timer = setTimeout(() => {
-        setShowLoader(false)
-      }, 300) // Adjust delay as needed
+      const timer = setTimeout(() => setShowLoader(false), 300) // Delay hiding to allow animation
       return () => clearTimeout(timer)
     }
-  }, [isTransitioning])
+  }, [isLoading])
 
   return (
     <AnimatePresence>
@@ -32,8 +30,7 @@ export function PageLoader() {
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm"
         >
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <span className="sr-only">Cargando página...</span>
+          <LoadingSpinner size="lg" />
         </motion.div>
       )}
     </AnimatePresence>

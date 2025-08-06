@@ -1,49 +1,53 @@
-// This script simulates real-time order updates.
-// In a real application, this would be handled by a backend service
-// pushing updates to a WebSocket or similar.
+// This script simulates real-time order updates for demonstration purposes.
+// In a real application, these updates would come from a backend system
+// triggered by events like payment confirmation, shipping updates, etc.
 
 const orders = [
-  { id: 'ORD001', status: 'Pendiente' },
-  { id: 'ORD002', status: 'Completado' },
-  { id: 'ORD003', status: 'Pendiente' },
+  { id: "ORD789012", status: "Pendiente", total: 120.00, userId: "user1" },
+  { id: "ORD345678", status: "Procesando", total: 85.50, userId: "user2" },
+  { id: "ORD901234", status: "Enviado", total: 200.00, userId: "user1" },
+  { id: "ORD567890", status: "Entregado", total: 45.00, userId: "user3" },
 ];
 
 function updateOrderStatus(orderId, newStatus) {
-  const order = orders.find(o => o.id === orderId);
-  if (order) {
-    order.status = newStatus;
-    console.log(`Order ${orderId} updated to: ${newStatus}`);
-    return true;
+  const orderIndex = orders.findIndex(order => order.id === orderId);
+  if (orderIndex !== -1) {
+    orders[orderIndex].status = newStatus;
+    console.log(`Order ${orderId} updated to status: ${newStatus}`);
+    return orders[orderIndex];
   }
   console.log(`Order ${orderId} not found.`);
-  return false;
+  return null;
 }
 
 function simulateUpdates() {
-  console.log('Starting order update simulation...');
+  console.log("Starting order update simulation...");
 
-  // Simulate a few updates over time
+  // Simulate a pending order moving to processing
   setTimeout(() => {
-    updateOrderStatus('ORD001', 'Enviado');
-  }, 3000); // After 3 seconds
+    updateOrderStatus("ORD789012", "Procesando");
+  }, 3000);
 
+  // Simulate a processing order being shipped
   setTimeout(() => {
-    updateOrderStatus('ORD003', 'Completado');
-  }, 7000); // After 7 seconds
+    updateOrderStatus("ORD345678", "Enviado");
+  }, 7000);
 
+  // Simulate a shipped order being delivered
   setTimeout(() => {
-    updateOrderStatus('ORD002', 'Entregado'); // New status
-  }, 10000); // After 10 seconds
+    updateOrderStatus("ORD901234", "Entregado");
+  }, 12000);
 
-  console.log('Simulation scheduled.');
+  console.log("Simulation scheduled.");
 }
 
-// To run this script:
-// 1. Make sure you have Node.js installed.
-// 2. Save this file as simulate-order-updates.js
-// 3. Run in your terminal: node simulate-order-updates.js
+// To run this simulation, you would typically call `simulateUpdates()`
+// from a Node.js environment or integrate it into a testing framework.
+// For a live application, this logic would reside on the server.
 
-// You can also integrate this into a larger Node.js backend
-// or a serverless function that triggers these updates.
+// Example of how to run it:
+// simulateUpdates();
+// console.log("Current orders:", orders); // This will show initial state, updates happen asynchronously.
 
-simulateUpdates();
+// Export functions for potential external use or testing
+export { orders, updateOrderStatus, simulateUpdates };

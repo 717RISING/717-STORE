@@ -1,22 +1,15 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 
-export function MobileChatLoader() {
+interface MobileChatLoaderProps {
+  className?: string
+}
+
+export function MobileChatLoader({ className }: MobileChatLoaderProps) {
   return (
-    <div className="flex flex-col h-full p-4 space-y-4">
-      <div className="flex justify-start">
-        <Skeleton className="h-10 w-3/4 rounded-lg" />
-      </div>
-      <div className="flex justify-end">
-        <Skeleton className="h-10 w-2/3 rounded-lg" />
-      </div>
-      <div className="flex justify-start">
-        <Skeleton className="h-10 w-1/2 rounded-lg" />
-      </div>
-      <div className="flex justify-end">
-        <Skeleton className="h-10 w-3/4 rounded-lg" />
-      </div>
-      <div className="flex-1" /> {/* Spacer */}
-      <Skeleton className="h-12 w-full rounded-md" />
+    <div className={cn("flex flex-col items-center justify-center h-full w-full", className)}>
+      <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+      <p className="mt-4 text-base text-gray-600 dark:text-gray-300">Cargando chat móvil...</p>
     </div>
   )
 }

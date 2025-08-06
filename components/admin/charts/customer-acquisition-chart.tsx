@@ -1,44 +1,46 @@
-"use client"
+'use client'
 
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
 
-const customerAcquisitionData = [
-  { month: "Ene", newCustomers: 100 },
-  { month: "Feb", newCustomers: 120 },
-  { month: "Mar", newCustomers: 90 },
-  { month: "Abr", newCustomers: 150 },
-  { month: "May", newCustomers: 130 },
-  { month: "Jun", newCustomers: 180 },
-  { month: "Jul", newCustomers: 160 },
-  { month: "Ago", newCustomers: 200 },
-  { month: "Sep", newCustomers: 190 },
-  { month: "Oct", newCustomers: 220 },
-  { month: "Nov", newCustomers: 250 },
-  { month: "Dic", newCustomers: 280 },
+const data = [
+  { name: "Ene", newCustomers: 50 },
+  { name: "Feb", newCustomers: 60 },
+  { name: "Mar", newCustomers: 75 },
+  { name: "Abr", newCustomers: 80 },
+  { name: "May", newCustomers: 90 },
+  { name: "Jun", newCustomers: 100 },
 ]
 
 export function CustomerAcquisitionChart() {
   return (
-    <ChartContainer
-      config={{
-        newCustomers: {
-          label: "Nuevos Clientes",
-          color: "hsl(var(--primary))",
-        },
-      }}
-      className="h-[300px] w-full"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={customerAcquisitionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <Legend />
-          <Line type="monotone" dataKey="newCustomers" stroke="var(--color-newCustomers)" name="Nuevos Clientes" />
-        </LineChart>
-      </ResponsiveContainer>
-    </ChartContainer>
+    <Card>
+      <CardHeader>
+        <CardTitle>Adquisición de Clientes</CardTitle>
+        <CardDescription>Nuevos clientes por mes.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={data}>
+            <XAxis
+              dataKey="name"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="newCustomers" stroke="currentColor" className="stroke-purple-500" />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   )
 }

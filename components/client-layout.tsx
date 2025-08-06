@@ -1,41 +1,33 @@
-"use client"
+'use client'
 
-import { usePathname } from 'next/navigation'
-import { MobileMenu } from './mobile-menu'
-import { CartSidebar } from './cart-sidebar'
-import { PageTransition } from './page-transition'
-import { MobileDebugPanel } from './mobile-debug-panel'
-import { useMobileDetection } from '@/hooks/use-mobile-detection'
-import { useAuth } from '@/lib/auth-context' // Import useAuth
+import { ThemeProvider } from 'next-themes'
+import { CartProvider } from '@/lib/cart-context'
+import { AuthProvider } from '@/lib/auth-context'
+import { Toaster } from '@/components/ui/sonner'
+import Navigation from '@/components/navigation' // Changed to default import
+import Footer from '@/components/footer' // Changed to default import
+import { ChatWidget } from '@/components/live-chat/chat-widget'
 
 interface ClientLayoutProps {
   children: React.ReactNode
 }
 
-export default function ClientLayout({ children }: ClientLayoutProps) {
-  const pathname = usePathname()
-  const isMobile = useMobileDetection()
-  const { isAuthenticated } = useAuth() // Use auth context
-
-  // Determine if the current path is an admin route
-  const isAdminRoute = pathname.startsWith('/admin')
-
-  // Determine if the current path is a login route
-  const isLoginRoute = pathname === '/login' || pathname === '/admin/login'
-
-  // Render only children for admin login page
-  if (isLoginRoute) {
-    return <>{children}</>
-  }
-
+export function ClientLayout({ children }: ClientLayoutProps) {
   return (
-    <>
-      <PageTransition>
-        {children}
-      </PageTransition>
-      {isMobile && !isAdminRoute && <MobileMenu />}
-      {!isAdminRoute && <CartSidebar />}
-      {process.env.NODE_ENV === 'development' && <MobileDebugPanel />}
-    </>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AuthProvider>
+        <CartProvider>
+          <div className="flex flex-col min-h-screen">
+            <Navigation />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <ChatWidget />
+            <Toaster richColors position="bottom-right" />
+          </div>
+        </CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

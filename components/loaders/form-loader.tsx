@@ -7,9 +7,9 @@ interface FormLoaderProps {
 
 export function FormLoader({ className }: FormLoaderProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center h-full w-full p-4", className)}>
-      <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      <p className="mt-4 text-lg text-muted-foreground">Cargando formulario...</p>
+    <div className={cn("flex items-center justify-center w-full py-4", className)}>
+      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+      <span className="ml-2 text-gray-600 dark:text-gray-300">Procesando...</span>
     </div>
   )
 }

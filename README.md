@@ -1,153 +1,91 @@
-# 717 Store - Streetwear E-commerce
+# 717 Store - Streetwear y Moda Urbana
 
-Welcome to the 717 Store, an authentic streetwear e-commerce platform built with Next.js, React, and Tailwind CSS. This project aims to provide a modern and responsive online shopping experience for streetwear enthusiasts.
+Bienvenido al repositorio de 717 Store, tu destino para el streetwear más auténtico y las últimas tendencias. Este proyecto es una aplicación de comercio electrónico construida con Next.js, React y Tailwind CSS, diseñada para ofrecer una experiencia de compra moderna y responsiva.
 
-## Features
+## Características
 
--   **Product Catalog:** Browse a wide range of streetwear products with detailed descriptions and images.
--   **Shopping Cart:** Add, update, and remove items from your cart.
--   **User Authentication:** Secure user login and registration.
--   **User Dashboard:** Manage profile, addresses, orders, and wishlist.
--   **Admin Dashboard:** (Under development) Manage products, orders, customers, and view sales analytics.
--   **Responsive Design:** Optimized for various devices (mobile, tablet, desktop).
--   **Theme Toggle:** Switch between light and dark modes.
--   **Live Chat Support:** AI-powered chat assistant for customer queries.
--   **Page Transitions & Loaders:** Smooth navigation and loading indicators.
--   **Size Calculator:** Tool to help customers find their recommended size.
--   **Checkout Process:** Multi-step checkout with shipping and payment forms.
+-   **Catálogo de Productos:** Explora una amplia gama de camisetas, sudaderas, pantalones, chaquetas y accesorios.
+-   **Filtros y Búsqueda:** Encuentra fácilmente lo que buscas con opciones de filtrado por categoría y una barra de búsqueda.
+-   **Carrito de Compras:** Añade productos al carrito y gestiona tus selecciones antes de finalizar la compra.
+-   **Proceso de Checkout:** Un flujo de pago intuitivo con formularios de envío y pago.
+-   **Autenticación de Usuario:** Inicia sesión o regístrate para gestionar tu perfil y ver el historial de pedidos.
+-   **Panel de Administración:** Un panel básico para la gestión de productos, pedidos y usuarios (con credenciales de administrador simuladas).
+-   **Diseño Responsivo:** Experiencia de usuario optimizada para dispositivos móviles, tablets y escritorio.
+-   **Modo Oscuro/Claro:** Alterna entre temas para una visualización cómoda.
+-   **Chat de Soporte:** Un widget de chat en vivo simulado para asistencia al cliente.
+-   **Guía de Tallas y Calculadora:** Herramientas para ayudar a los clientes a encontrar la talla perfecta.
+-   **Páginas Informativas:** Secciones para Envíos y Devoluciones, Términos y Condiciones, y Política de Privacidad.
 
-## Technologies Used
+## Tecnologías Utilizadas
 
--   **Next.js 14:** React framework for production.
--   **React 18:** JavaScript library for building user interfaces.
--   **Tailwind CSS:** A utility-first CSS framework for rapid UI development.
--   **shadcn/ui:** Reusable UI components built with Radix UI and Tailwind CSS.
--   **Framer Motion:** For animations and page transitions.
--   **Zustand:** (Or similar state management) for global state (e.g., cart).
--   **NProgress:** For progress bar on page loads.
--   **Recharts:** For data visualization in admin dashboard.
--   **AI SDK (`ai`, `@ai-sdk/openai`):** For integrating AI capabilities (e.g., live chat).
--   **bcryptjs:** For password hashing.
--   **date-fns:** For date formatting.
+-   **Next.js 14+ (App Router):** Framework de React para aplicaciones web de alto rendimiento.
+-   **React 18:** Biblioteca de JavaScript para construir interfaces de usuario.
+-   **Tailwind CSS:** Framework CSS para un diseño rápido y personalizable.
+-   **Shadcn/ui:** Componentes UI reutilizables y accesibles construidos con Radix UI y Tailwind CSS.
+-   **Lucide React:** Colección de iconos personalizables.
+-   **Zod:** Para validación de esquemas.
+-   **Sonner:** Para notificaciones de tipo "toast".
+-   **Framer Motion:** Para animaciones fluidas.
+-   **Recharts:** Para gráficos en el panel de administración.
+-   **date-fns:** Para manipulación de fechas.
+-   **bcryptjs:** Para simulación de hashing de contraseñas (en un entorno real, se usaría en el backend).
 
-## Getting Started
+## Configuración del Proyecto
 
-### Prerequisites
+Para ejecutar este proyecto localmente, sigue estos pasos:
 
--   Node.js (v18.x or higher)
--   pnpm (recommended, but npm/yarn also work)
-
-### Installation
-
-1.  **Clone the repository:**
+1.  **Clona el repositorio:**
     \`\`\`bash
-    git clone https://github.com/717RISING/717-STORE.git
-    cd 717-STORE
+    git clone [URL_DEL_REPOSITORIO]
+    cd 717-store-clone
     \`\`\`
 
-2.  **Install dependencies:**
+2.  **Instala las dependencias:**
     \`\`\`bash
-    pnpm install
-    # or
     npm install
-    # or
+    # o
     yarn install
+    # o
+    pnpm install
     \`\`\`
 
-3.  **Set up Environment Variables:**
-    Create a `.env.local` file in the root directory and add your environment variables.
-    Example:
-    \`\`\`env
-    # For AI SDK (if using OpenAI)
-    OPENAI_API_KEY=your_openai_api_key
-
-    # For email service (if using Nodemailer, replace with your SMTP details)
-    # SMTP_HOST=smtp.example.com
-    # SMTP_PORT=587
-    # SMTP_SECURE=false
-    # SMTP_USER=your_email@example.com
-    # SMTP_PASS=your_email_password
-    # EMAIL_FROM="717 Store <no-reply@717store.com>"
-
-    # Base URL for emails/links (adjust for production)
-    NEXT_PUBLIC_BASE_URL=http://localhost:3000
-    \`\`\`
-    *Note: This project uses mock data for database interactions and email sending for simplicity. For a production environment, you would integrate with a real database (e.g., PostgreSQL, MongoDB) and a transactional email service.*
-
-4.  **Run the development server:**
+3.  **Ejecuta el servidor de desarrollo:**
     \`\`\`bash
-    pnpm dev
-    # or
     npm run dev
-    # or
+    # o
     yarn dev
+    # o
+    pnpm dev
     \`\`\`
 
-    Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+    La aplicación estará disponible en `http://localhost:3000`.
 
-## Project Structure
+## Datos Simulados
 
-\`\`\`
-.
-├── app/
-│   ├── admin/             # Admin dashboard pages
-│   ├── checkout/          # Checkout process pages
-│   ├── cuenta/            # User dashboard pages
-│   ├── productos/         # Product listing and detail pages
-│   ├── contacto/          # Contact page
-│   ├── envios-devoluciones/ # Shipping & Returns policy page
-│   ├── privacidad/        # Privacy Policy page
-│   ├── tallas/            # Size Guide page
-│   ├── terminos/          # Terms & Conditions page
-│   ├── layout.tsx         # Root layout for the application
-│   ├── page.tsx           # Home page
-│   └── globals.css        # Global styles
-├── components/
-│   ├── admin/             # Admin specific components (dashboard, charts, tabs)
-│   ├── checkout/          # Checkout specific components (forms, summary)
-│   ├── dashboard/         # User dashboard tabs
-│   ├── loaders/           # Loading components
-│   ├── live-chat/         # Live chat widget components
-│   ├── ui/                # shadcn/ui components (generated by CLI)
-│   ├── *.tsx              # General reusable components (e.g., Navigation, ProductCard)
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utility functions, contexts, data mocks
-├── public/                # Static assets (images, fonts)
-├── scripts/               # Backend scripts (e.g., database setup, order updates)
-└── ...
-\`\`\`
+Este proyecto utiliza datos simulados (dummy data) para productos, usuarios y pedidos. No se conecta a una base de datos real por defecto.
 
-## Usage
+-   **Usuarios de Prueba:**
+    -   **Usuario Normal:**
+        -   Email: `juan@example.com`
+        -   Contraseña: `password123`
+    -   **Usuario Administrador:**
+        -   Email: `admin@717store.com`
+        -   Contraseña: `admin123`
 
-### Home Page (`/`)
-Features a hero slider, product highlights, and a newsletter signup.
+## Estructura del Proyecto
 
-### Products Page (`/productos`)
-Displays all available products with filtering and sorting options.
-
-### Product Detail Page (`/productos/[id]`)
-Shows detailed information for a single product, including size and color selection, and add-to-cart functionality.
-
-### Shopping Cart
-Accessible via a floating button and a sidebar.
-
-### Checkout (`/checkout`)
-A multi-step process for shipping and payment.
-
-### User Account (`/cuenta`)
-A dashboard for authenticated users to manage their profile, orders, addresses, and wishlist.
-
-### Admin Dashboard (`/admin`)
-(Requires `admin@717store.com` with password `adminpassword` for mock login)
-Provides an overview of sales, product performance, customer data, and order management.
-
-### Responsive Testing (`/test-responsive`, `/device-test`)
-Pages to help visualize and test the responsiveness of the application on different screen sizes and device types.
-
-## Contributing
-
-Contributions are welcome! Please feel free to fork the repository, make your changes, and submit a pull request.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+-   `app/`: Contiene las rutas de la aplicación (App Router).
+    -   `actions.ts`: Server Actions para lógica de negocio (autenticación, contacto).
+    -   `api/`: Rutas de API (si se usan).
+    -   `layout.tsx`: Layout principal de la aplicación.
+    -   `page.tsx`: Página de inicio.
+    -   `productos/`: Rutas para el catálogo de productos y detalles de producto.
+    -   `login/`: Página de inicio de sesión/registro.
+    -   `cuenta/`: Panel de usuario con pestañas (perfil, pedidos, etc.).
+    -   `admin/`: Panel de administración.
+    -   `contacto/`: Página de contacto.
+    -   `envios-devoluciones/`: Página de políticas de envío y devolución.
+    -   `privacidad/`: Página de política de privacidad.
+    -   `terminos/`: Página de términos y condiciones.
+    -   `tallas/`: Página de guía de tallas y calculadora.
+    -   `checkout/`:

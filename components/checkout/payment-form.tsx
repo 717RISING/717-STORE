@@ -1,128 +1,83 @@
-"use client"
+'use client'
 
-import { useState } from 'react'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2 } from 'lucide-react'
+import { useState } from "react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Card, CardContent } from "@/components/ui/card"
+import { CreditCard, Banknote } from 'lucide-react'
 
 interface PaymentFormProps {
-  onSubmit: (data: any) => void // Replace 'any' with your PaymentDetails type
+  onSubmit: (data: any) => void;
+  initialData?: any;
 }
 
-export function PaymentForm({ onSubmit }: PaymentFormProps) {
-  const [cardNumber, setCardNumber] = useState('')
-  const [cardName, setCardName] = useState('')
-  const [expiryMonth, setExpiryMonth] = useState('')
-  const [expiryYear, setExpiryYear] = useState('')
-  const [cvc, setCvc] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function PaymentForm({ onSubmit, initialData }: PaymentFormProps) {
+  const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || "credit-card")
+  const [cardNumber, setCardNumber] = useState(initialData?.cardNumber || "")
+  const [cardName, setCardName] = useState(initialData?.cardName || "")
+  const [expiryDate, setExpiryDate] = useState(initialData?.expiryDate || "")
+  const [cvv, setCvv] = useState(initialData?.cvv || "")
 
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 10 }, (_, i) => (currentYear + i).toString())
-  const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-
-    // Basic validation
-    if (!cardNumber || !cardName || !expiryMonth || !expiryYear || !cvc) {
-      alert('Por favor, completa todos los campos de pago.')
-      setIsSubmitting(false)
-      return
-    }
-
-    // Simulate payment tokenization/API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    onSubmit({
-      cardNumber: cardNumber.replace(/\s/g, ''), // Remove spaces
-      cardName,
-      expiryMonth,
-      expiryYear,
-      cvc,
-    })
-    setIsSubmitting(false)
+    onSubmit({ paymentMethod, cardNumber, cardName, expiryDate, cvv })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-        <Input
-          id="cardNumber"
-          type="text"
-          placeholder="XXXX XXXX XXXX XXXX"
-          value={cardNumber}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, '').substring(0, 16)
-            setCardNumber(value.replace(/(\d{4})(?=\d)/g, '$1 '))
-          }}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
-        <Input
-          id="cardName"
-          type="text"
-          placeholder="Nombre Completo"
-          value={cardName}
-          onChange={(e) => setCardName(e.target.value)}
-          required
-        />
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="expiryMonth">Mes</Label>
-          <Select value={expiryMonth} onValueChange={setExpiryMonth} required>
-            <SelectTrigger id="expiryMonth">
-              <SelectValue placeholder="MM" />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map(month => (
-                <SelectItem key={month} value={month}>{month}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Label
+          htmlFor="credit-card"
+          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
+        >
+          <RadioGroupItem id="credit-card" value="credit-card" className="sr-only" />
+          <CreditCard className="mb-3 h-6 w-6" />
+          Tarjeta de Crédito/Débito
+        </Label>
+        <Label
+          htmlFor="paypal"
+          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
+        >
+          <RadioGroupItem id="paypal" value="paypal" className="sr-only" />
+          <Banknote className="mb-3 h-6 w-6" />
+          PayPal
+        </Label>
+      </RadioGroup>
+
+      {paymentMethod === "credit-card" && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="cardNumber">Número de Tarjeta</Label>
+              <Input id="cardNumber" type="text" placeholder="XXXX XXXX XXXX XXXX" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
+              <Input id="cardName" type="text" placeholder="Nombre Apellido" value={cardName} onChange={(e) => setCardName(e.target.value)} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="expiryDate">Fecha de Vencimiento</Label>
+                <Input id="expiryDate" type="text" placeholder="MM/AA" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cvv">CVV</Label>
+                <Input id="cvv" type="text" placeholder="XXX" value={cvv} onChange={(e) => setCvv(e.target.value)} required />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {paymentMethod === "paypal" && (
+        <div className="text-center text-gray-600 dark:text-gray-400">
+          Serás redirigido a PayPal para completar tu compra.
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="expiryYear">Año</Label>
-          <Select value={expiryYear} onValueChange={setExpiryYear} required>
-            <SelectTrigger id="expiryYear">
-              <SelectValue placeholder="AAAA" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map(year => (
-                <SelectItem key={year} value={year}>{year}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="cvc">CVC</Label>
-          <Input
-            id="cvc"
-            type="text"
-            placeholder="XXX"
-            value={cvc}
-            onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').substring(0, 4))}
-            required
-          />
-        </div>
-      </div>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Procesando Pago...
-          </>
-        ) : (
-          'Pagar Ahora'
-        )}
-      </Button>
+      )}
+
+      <Button type="submit" className="w-full">Continuar con el Pago</Button>
     </form>
   )
 }

@@ -1,37 +1,48 @@
-"use client"
+'use client'
 
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
 
-const salesByRegionData = [
-  { region: "Norte", sales: 15000 },
-  { region: "Centro", sales: 22000 },
-  { region: "Sur", sales: 18000 },
-  { region: "Este", sales: 10000 },
-  { region: "Oeste", sales: 13000 },
+const data = [
+  { name: "Bogotá", sales: 4000 },
+  { name: "Medellín", sales: 3000 },
+  { name: "Cali", sales: 2000 },
+  { name: "Barranquilla", sales: 2780 },
+  { name: "Cartagena", sales: 1890 },
 ]
 
 export function SalesByRegionChart() {
   return (
-    <ChartContainer
-      config={{
-        sales: {
-          label: "Ventas",
-          color: "hsl(var(--primary))",
-        },
-      }}
-      className="h-[300px] w-full"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={salesByRegionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="region" />
-          <YAxis />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <Legend />
-          <Bar dataKey="sales" fill="var(--color-sales)" name="Ventas por Región" />
-        </BarChart>
-      </ResponsiveContainer>
-    </ChartContainer>
+    <Card>
+      <CardHeader>
+        <CardTitle>Ventas por Región</CardTitle>
+        <CardDescription>Distribución de ventas por ciudades principales.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={data} layout="vertical" margin={{ left: 50, right: 20 }}>
+            <YAxis
+              dataKey="name"
+              type="category"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <XAxis
+              type="number"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `$${value}`}
+            />
+            <Tooltip formatter={(value: number) => `$${value}`} />
+            <Legend />
+            <Bar dataKey="sales" fill="currentColor" className="fill-blue-500" />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   )
 }

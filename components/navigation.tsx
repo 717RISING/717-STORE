@@ -1,95 +1,108 @@
-"use client"
+'use client'
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { ShoppingCart, User, Search, Menu } from 'lucide-react'
-import { useCart } from "@/lib/cart-context"
-import { CartSidebar } from "./cart-sidebar"
-import { useState } from "react"
-import { ProductSearch } from "./product-search"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MobileMenu } from "./mobile-menu"
+import { CartSidebar } from "./cart-sidebar"
+import { ProductSearch } from "./product-search"
 import { ThemeToggle } from "./theme-toggle"
-import { useTheme } from "next-themes"
+import { useAuth } from "@/lib/auth-context"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { logout } from "@/app/actions"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 export function Navigation() {
-  const { cartItems } = useCart()
-  const [isCartOpen, setIsCartOpen] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { theme } = useTheme()
+  const { isAuthenticated, user } = useAuth()
+  const pathname = usePathname()
+  const [isSticky, setIsSticky] = useState(false)
 
-  const cartItemCount = cartItems.reduce((count, item) => count + item.quantity, 0)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsSticky(true)
+      } else {
+        setIsSticky(false)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
     <header className={cn(
-      "sticky top-0 z-40 w-full border-b py-3 px-4 md:px-6 flex items-center justify-between",
-      theme === "dark" ? "bg-gray-950 border-gray-800" : "bg-white border-gray-200"
+      "w-full bg-background/95 backdrop-blur-sm z-40 transition-all duration-300",
+      isSticky ? "sticky top-0 shadow-md" : ""
     )}>
-      {/* Mobile Menu Trigger */}
-      <div className="md:hidden">
-        <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} className="text-gray-900 dark:text-white">
-          <Menu className="h-6 w-6" />
-          <span className="sr-only">Abrir menú</span>
-        </Button>
-      </div>
-
-      {/* Logo */}
-      <Link href="/" className="flex items-center justify-center md:justify-start flex-1 md:flex-none">
-        <span className="text-2xl font-bold text-[#4A1518] dark:text-[#FFD700] brand-font">717 STORE</span>
-      </Link>
-
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center space-x-6 mx-auto">
-        <Link href="/" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-          Inicio
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
+          <Image src="/logo.png" alt="717 Store Logo" width={40} height={40} />
+          <span className="sr-only">717 Store</span>
         </Link>
-        <Link href="/productos" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-          Productos
-        </Link>
-        <Link href="/tallas" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-          Guía de Tallas
-        </Link>
-        <Link href="/contacto" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-          Contacto
-        </Link>
-        <Link href="/envios-devoluciones" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-          Envíos y Devoluciones
-        </Link>
-      </nav>
-
-      {/* Right-aligned Icons */}
-      <div className="flex items-center space-x-2 md:space-x-4 ml-auto">
-        {/* Search Icon (Desktop) */}
-        <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex text-gray-900 dark:text-white">
-          <Search className="h-5 w-5" />
-          <span className="sr-only">Buscar</span>
-        </Button>
-        <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-
-        {/* User Account */}
-        <Link href="/cuenta" passHref>
-          <Button variant="ghost" size="icon" className="text-gray-900 dark:text-white">
-            <User className="h-5 w-5" />
-            <span className="sr-only">Mi Cuenta</span>
-          </Button>
-        </Link>
-
-        {/* Cart Icon */}
-        <Button variant="ghost" size="icon" onClick={() => setIsCartOpen(true)} className="relative text-gray-900 dark:text-white">
-          <ShoppingCart className="h-5 w-5" />
-          {cartItemCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#4A1518] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              {cartItemCount}
-            </span>
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <Link href="/" className={cn("hover:text-primary transition-colors", pathname === "/" && "text-primary")} prefetch={false}>
+            Inicio
+          </Link>
+          <Link href="/productos" className={cn("hover:text-primary transition-colors", pathname.startsWith("/productos") && "text-primary")} prefetch={false}>
+            Productos
+          </Link>
+          <Link href="/contacto" className={cn("hover:text-primary transition-colors", pathname === "/contacto" && "text-primary")} prefetch={false}>
+            Contacto
+          </Link>
+          <Link href="/envios-devoluciones" className={cn("hover:text-primary transition-colors", pathname === "/envios-devoluciones" && "text-primary")} prefetch={false}>
+            Envíos y Devoluciones
+          </Link>
+        </nav>
+        <div className="flex items-center gap-4">
+          <ProductSearch />
+          <ThemeToggle />
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Menú de usuario</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/cuenta">Dashboard</Link>
+                </DropdownMenuItem>
+                {user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">Admin Panel</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => logout()}>Cerrar Sesión</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/login">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Iniciar Sesión</span>
+              </Link>
+            </Button>
           )}
-          <span className="sr-only">Carrito de compras</span>
-        </Button>
-        <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-
-        {/* Theme Toggle */}
-        <ThemeToggle />
+          <CartSidebar />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full max-w-xs p-0">
+              <MobileMenu />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   )

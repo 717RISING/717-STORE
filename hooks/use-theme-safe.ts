@@ -1,18 +1,11 @@
-import { useTheme } from 'next-themes'
-import { useState, useEffect } from 'react'
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 export function useThemeSafe() {
-  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
 
-  // useEffect only runs on the client, so now we can safely show the UI
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => setMounted(true), [])
 
-  if (!mounted) {
-    return { theme: undefined, setTheme, resolvedTheme: undefined, mounted: false }
-  }
-
-  return { theme, setTheme, resolvedTheme, mounted: true }
+  return { mounted, theme, setTheme, resolvedTheme }
 }

@@ -1,80 +1,179 @@
-// This script simulates setting up a database schema and seeding initial data.
-// In a real application, you would use a database client (e.g., pg for PostgreSQL, mongoose for MongoDB)
-// and define your schema and data insertion logic.
+// This script is for setting up a mock database or seeding initial data.
+// In a real application, this would interact with a database like Supabase, Neon, etc.
 
-// For demonstration, we'll use a simple in-memory mock.
-const { initializeDatabase, insertIntoCollection } = require('../lib/database'); // Adjust path as needed
+const mockProducts = [
+  {
+    id: "prod1",
+    name: "Big Dreams T-Shirt",
+    description: "Una camiseta oversized con un diseño inspirador.",
+    price: 35.00,
+    imageUrl: "/products/camisetas/big-dreams-tshirt.png",
+    category: "Camisetas",
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Negro", "Blanco"],
+    stock: 100,
+  },
+  {
+    id: "prod2",
+    name: "Oversized Tee",
+    description: "La camiseta básica oversized perfecta para tu estilo diario.",
+    price: 30.00,
+    imageUrl: "/products/camisetas/oversized-tee.png",
+    category: "Camisetas",
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Gris", "Blanco"],
+    stock: 80,
+  },
+  {
+    id: "prod3",
+    name: "Graphic Tee Blood",
+    description: "Camiseta con gráfico audaz y mensaje impactante.",
+    price: 40.00,
+    imageUrl: "/products/camisetas/graphic-tee-blood.png",
+    category: "Camisetas",
+    sizes: ["M", "L"],
+    colors: ["Rojo"],
+    stock: 50,
+  },
+  {
+    id: "prod4",
+    name: "Graphic Tee Pain",
+    description: "Diseño único que expresa la lucha y la superación.",
+    price: 40.00,
+    imageUrl: "/products/camisetas/graphic-tee-pain.png",
+    category: "Camisetas",
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Negro"],
+    stock: 70,
+  },
+];
 
-async function setupDatabase() {
-  console.log('Starting database setup...');
+const mockUsers = [
+  {
+    id: "user1",
+    name: "Alice Smith",
+    email: "alice@example.com",
+    passwordHash: "hashedpassword1", // In a real app, never store plain passwords
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    orderCount: 3,
+    totalSpent: 250.75,
+    isActive: true,
+  },
+  {
+    id: "user2",
+    name: "Bob Johnson",
+    email: "bob@example.com",
+    passwordHash: "hashedpassword2",
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    orderCount: 1,
+    totalSpent: 85.50,
+    isActive: true,
+  },
+  {
+    id: "user3",
+    name: "Charlie Brown",
+    email: "charlie@example.com",
+    passwordHash: "hashedpassword3",
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    orderCount: 0,
+    totalSpent: 0,
+    isActive: false,
+  },
+];
 
-  try {
-    await initializeDatabase();
+const mockOrders = [
+  {
+    id: "ORD789012",
+    userId: "user1",
+    items: [
+      { productId: "prod1", quantity: 1, price: 35.00, name: "Big Dreams T-Shirt" },
+      { productId: "prod2", quantity: 2, price: 30.00, name: "Oversized Tee" },
+    ],
+    total: 95.00,
+    status: "Pendiente",
+    shippingAddress: {
+      name: "Alice Smith",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zip: "90210",
+      country: "USA",
+    },
+    paymentMethod: "Credit Card",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "ORD345678",
+    userId: "user2",
+    items: [
+      { productId: "prod3", quantity: 1, price: 40.00, name: "Graphic Tee Blood" },
+      { productId: "prod4", quantity: 1, price: 40.00, name: "Graphic Tee Pain" },
+    ],
+    total: 80.00,
+    status: "Procesando",
+    shippingAddress: {
+      name: "Bob Johnson",
+      address1: "456 Oak Ave",
+      city: "Otherville",
+      state: "NY",
+      zip: "10001",
+      country: "USA",
+    },
+    paymentMethod: "PayPal",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
-    // Seed initial users
-    console.log('Seeding users...');
-    await insertIntoCollection('users', { id: 'user1', name: 'Alice Smith', email: 'alice@example.com', role: 'customer', createdAt: new Date() });
-    await insertIntoCollection('users', { id: 'user2', name: 'Bob Johnson', email: 'bob@example.com', role: 'customer', createdAt: new Date() });
-    await insertIntoCollection('users', { id: 'admin1', name: 'Admin User', email: 'admin@717store.com', role: 'admin', createdAt: new Date() });
-    console.log('Users seeded.');
+const mockShippingAddresses = [
+  {
+    id: "addr1",
+    userId: "user1",
+    name: "Alice Smith",
+    address1: "123 Main St",
+    address2: "Apt 4B",
+    city: "Anytown",
+    state: "CA",
+    zip: "90210",
+    country: "USA",
+    isDefault: true,
+  },
+  {
+    id: "addr2",
+    userId: "user1",
+    name: "Alice's Work",
+    address1: "789 Business Rd",
+    city: "Workville",
+    state: "CA",
+    zip: "90211",
+    country: "USA",
+    isDefault: false,
+  },
+];
 
-    // Seed initial products
-    console.log('Seeding products...');
-    await insertIntoCollection('products', {
-      id: 'prod1',
-      name: 'Camiseta Oversized "Big Dreams"',
-      description: 'Camiseta oversized de algodón premium con estampado "Big Dreams".',
-      price: 35.00,
-      category: 'Camisetas',
-      image: '/products/camisetas/big-dreams-tshirt.png',
-      sizes: ['S', 'M', 'L', 'XL'],
-      rating: 4.5,
-      reviews: 120,
-      details: ['100% Algodón', 'Corte Oversized']
-    });
-    await insertIntoCollection('products', {
-      id: 'prod2',
-      name: 'Pantalón Cargo Urbano',
-      description: 'Pantalón cargo de estilo urbano con múltiples bolsillos.',
-      price: 65.00,
-      category: 'Pantalones',
-      image: '/placeholder.svg?height=400&width=400',
-      sizes: ['28', '30', '32', '34', '36'],
-      rating: 4.2,
-      reviews: 85,
-      details: ['60% Algodón, 40% Poliéster', 'Cintura elástica']
-    });
-    console.log('Products seeded.');
+function seedDatabase() {
+  console.log("Seeding mock database...");
+  // In a real scenario, you would use your database client (e.g., Supabase, Prisma)
+  // to insert these mock data into your tables.
+  // Example with Supabase (conceptual):
+  // await supabase.from('products').insert(mockProducts);
+  // await supabase.from('users').insert(mockUsers);
+  // await supabase.from('orders').insert(mockOrders);
+  // await supabase.from('shipping_addresses').insert(mockShippingAddresses);
 
-    // Seed initial orders
-    console.log('Seeding orders...');
-    await insertIntoCollection('orders', {
-      id: 'ORD001',
-      userId: 'user1',
-      customerName: 'Alice Smith',
-      date: new Date('2024-07-20T14:30:00Z'),
-      total: 70.00,
-      status: 'Completado',
-      paymentMethod: 'Tarjeta de Crédito',
-      items: [{ productId: 'prod1', name: 'Camiseta Oversized', quantity: 2, price: 35.00 }]
-    });
-    await insertIntoCollection('orders', {
-      id: 'ORD002',
-      userId: 'user2',
-      customerName: 'Bob Johnson',
-      date: new Date('2024-07-22T10:00:00Z'),
-      total: 65.00,
-      status: 'Pendiente',
-      paymentMethod: 'PayPal',
-      items: [{ productId: 'prod2', name: 'Pantalón Cargo Urbano', quantity: 1, price: 65.00 }]
-    });
-    console.log('Orders seeded.');
-
-    console.log('Database setup complete!');
-  } catch (error) {
-    console.error('Error during database setup:', error);
-  }
+  console.log("Mock products:", mockProducts.length);
+  console.log("Mock users:", mockUsers.length);
+  console.log("Mock orders:", mockOrders.length);
+  console.log("Mock shipping addresses:", mockShippingAddresses.length);
+  console.log("Database seeding complete (mock data).");
 }
 
-// Execute the setup function
-setupDatabase();
+// To run this script, you would typically execute it via Node.js:
+// node scripts/setup-database.js
+// seedDatabase();
+
+export { mockProducts, mockUsers, mockOrders, mockShippingAddresses, seedDatabase };

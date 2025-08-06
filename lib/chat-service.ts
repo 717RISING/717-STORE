@@ -5,6 +5,7 @@
 
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { ChatMessage } from './types'; // Ensure ChatMessage type is imported
 
 interface ChatMessage {
   id: string
@@ -72,189 +73,28 @@ export class ChatService {
   }
 }
 
-export function getChatResponse(message: string): string {
-  const lowerMessage = message.toLowerCase()
+// Dummy function to simulate AI response
+export async function generateChatResponse(userMessage: string): Promise<string> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
 
-  // Productos
-  if (lowerMessage.includes("producto") || lowerMessage.includes("camiseta") || lowerMessage.includes("ropa")) {
-    return `🛍️ **Nuestros Productos Destacados:**
+  const lowerCaseMessage = userMessage.toLowerCase();
 
-📱 **Camisetas:**
-• Big Dreams T-Shirt - $45.000
-• Oversized Tee - $42.000
-• Graphic Tee Blood - $48.000
-• Graphic Tee Pain - $48.000
-
-👕 **Características:**
-• 100% algodón premium
-• Diseños exclusivos
-• Tallas S, M, L, XL, XXL
-• Colores variados disponibles
-
-💫 **Ofertas actuales:**
-• 2x1 en camisetas seleccionadas
-• Envío gratis en compras +$80.000`
+  if (lowerCaseMessage.includes('hola') || lowerCaseMessage.includes('saludo')) {
+    return "¡Hola! ¿En qué puedo ayudarte hoy?";
+  } else if (lowerCaseMessage.includes('envío') || lowerCaseMessage.includes('entrega')) {
+    return "El tiempo de envío nacional es de 3-7 días hábiles. Para envíos internacionales, puede tardar entre 7-20 días hábiles. Recibirás un número de seguimiento una vez que tu pedido sea enviado.";
+  } else if (lowerCaseMessage.includes('devolución') || lowerCaseMessage.includes('cambio')) {
+    return "Puedes solicitar una devolución o cambio dentro de los 30 días posteriores a la entrega, siempre que el artículo esté sin usar y con sus etiquetas originales. Visita nuestra sección de 'Envíos y Devoluciones' para más detalles.";
+  } else if (lowerCaseMessage.includes('producto') || lowerCaseMessage.includes('stock')) {
+    return "Puedes explorar todos nuestros productos en la sección 'Productos'. Si buscas algo específico, usa la barra de búsqueda. La disponibilidad de stock se muestra en la página de cada producto.";
+  } else if (lowerCaseMessage.includes('contacto') || lowerCaseMessage.includes('hablar con alguien')) {
+    return "Puedes contactarnos directamente a través de nuestro formulario en la página de 'Contacto', o enviarnos un correo a info@717store.com. También puedes llamarnos al +57 1 234 5678.";
+  } else if (lowerCaseMessage.includes('gracias')) {
+    return "¡De nada! Estoy aquí para ayudarte.";
+  } else {
+    return "Lo siento, no estoy seguro de cómo responder a eso. ¿Podrías reformular tu pregunta o intentar con algo más específico?";
   }
-
-  // Envíos
-  if (lowerMessage.includes("envío") || lowerMessage.includes("entrega") || lowerMessage.includes("domicilio")) {
-    return `🚚 **Información de Envíos:**
-
-📍 **Cobertura Nacional:**
-• Bogotá: $8.000 (1-2 días)
-• Medellín: $12.000 (2-3 días)
-• Cali: $12.000 (2-3 días)
-• Barranquilla: $15.000 (3-4 días)
-• Otras ciudades: $18.000 (4-6 días)
-
-⚡ **Envío Express:**
-• Bogotá: $15.000 (mismo día)
-• Principales ciudades: $25.000 (24h)
-
-🎁 **Envío GRATIS:**
-• Compras superiores a $80.000
-• Aplica para todo el país`
-  }
-
-  // Tallas
-  if (lowerMessage.includes("talla") || lowerMessage.includes("medida") || lowerMessage.includes("tamaño")) {
-    return `📏 **Guía de Tallas (Camisetas):**
-
-👕 **Medidas en cm:**
-• **S:** Pecho 92, Largo 68
-• **M:** Pecho 97, Largo 70
-• **L:** Pecho 102, Largo 72
-• **XL:** Pecho 107, Largo 74
-• **XXL:** Pecho 112, Largo 76
-
-📐 **Cómo medir:**
-1. Pecho: Contorno bajo las axilas
-2. Largo: Desde hombro hasta borde inferior
-
-💡 **Recomendación:**
-Si estás entre dos tallas, elige la mayor para mayor comodidad.`
-  }
-
-  // Pagos
-  if (lowerMessage.includes("pago") || lowerMessage.includes("pagar") || lowerMessage.includes("tarjeta")) {
-    return `💳 **Métodos de Pago Disponibles:**
-
-🏦 **Tarjetas:**
-• Visa, Mastercard, American Express
-• Débito y crédito
-• Hasta 12 cuotas sin interés
-
-📱 **Digitales:**
-• PSE (Débito online)
-• Nequi, Daviplata
-• Bancolombia a la Mano
-
-💰 **Otros:**
-• Efecty, Baloto
-• Contra entrega (+$5.000)
-
-🔒 **100% Seguro** - Transacciones encriptadas`
-  }
-
-  // Cambios y devoluciones
-  if (lowerMessage.includes("cambio") || lowerMessage.includes("devolución") || lowerMessage.includes("garantía")) {
-    return `🔄 **Política de Cambios y Devoluciones:**
-
-✅ **Condiciones:**
-• 30 días calendario desde la compra
-• Producto en perfecto estado
-• Con etiquetas originales
-• Factura de compra
-
-📦 **Proceso:**
-1. Contacta nuestro soporte
-2. Envía fotos del producto
-3. Te enviamos guía de devolución
-4. Procesamos en 3-5 días hábiles
-
-💸 **Reembolsos:**
-• Mismo método de pago original
-• Procesamiento: 5-10 días hábiles
-
-🚚 **Costo de envío de devolución:** $12.000`
-  }
-
-  // Ofertas
-  if (lowerMessage.includes("oferta") || lowerMessage.includes("descuento") || lowerMessage.includes("promoción")) {
-    return `🎉 **Ofertas Especiales Activas:**
-
-🔥 **MEGA DESCUENTOS:**
-• 2x1 en camisetas seleccionadas
-• 30% OFF en segunda unidad
-• Combo 3 camisetas por $120.000
-
-⚡ **FLASH SALES:**
-• Descuentos hasta 40% por tiempo limitado
-• Productos desde $25.000
-
-🎁 **BENEFICIOS EXTRA:**
-• Envío gratis en compras +$80.000
-• Puntos de fidelidad por cada compra
-• Descuento del 10% en tu cumpleaños
-
-📱 **Código:** CHAT10 (10% descuento adicional)`
-  }
-
-  // Estado de pedido
-  if (lowerMessage.includes("pedido") || lowerMessage.includes("orden") || lowerMessage.includes("estado")) {
-    return `📋 **Consulta tu Pedido:**
-
-🔍 **Para verificar el estado:**
-1. Ingresa a tu cuenta en 717store.com
-2. Ve a "Mis Pedidos"
-3. O envíanos tu número de orden
-
-📱 **Estados posibles:**
-• ✅ Confirmado
-• 📦 En preparación
-• 🚚 En camino
-• 🏠 Entregado
-
-📞 **¿Necesitas ayuda?**
-Envíanos tu número de orden y te ayudamos inmediatamente.`
-  }
-
-  // Contacto
-  if (lowerMessage.includes("contacto") || lowerMessage.includes("soporte") || lowerMessage.includes("ayuda")) {
-    return `📞 **Contacta con Nosotros:**
-
-🕐 **Horarios de Atención:**
-• Lunes a Viernes: 8:00 AM - 6:00 PM
-• Sábados: 9:00 AM - 4:00 PM
-• Domingos: 10:00 AM - 2:00 PM
-
-📱 **Canales de Contacto:**
-• WhatsApp: +57 300 123 4567
-• Email: soporte@717store.com
-• Teléfono: +57 1 234 5678
-
-🏢 **Tienda Física:**
-• Dirección: Calle 123 #45-67, Bogotá
-• Centro Comercial Plaza Central, Local 234
-
-💬 **Chat en vivo:** Disponible 24/7`
-  }
-
-  // Respuesta por defecto
-  return `👋 ¡Hola! Soy tu asistente virtual de 717 Store.
-
-🛍️ **Puedo ayudarte con:**
-• Información de productos y precios
-• Guía de tallas y medidas
-• Métodos de pago disponibles
-• Información de envíos
-• Política de cambios
-• Estado de pedidos
-• Ofertas especiales
-
-💬 **¿En qué específicamente te puedo ayudar hoy?**
-
-Escribe tu pregunta o selecciona una de las opciones rápidas. 😊`
 }
 
 export function getQuickReplies(message: string): string[] {
@@ -345,4 +185,18 @@ export function getQuickReplies(message: string): string[] {
     "Ofertas especiales",
     "Estado de pedido",
   ]
+}
+
+export async function getChatResponse(prompt: string): Promise<string> {
+  try {
+    const { text } = await generateText({
+      model: openai('gpt-4o'),
+      prompt: prompt,
+      system: 'Eres un asistente de soporte al cliente para 717 Store, una tienda de streetwear. Responde de manera amigable y útil, enfocándote en la información de la tienda. Si te preguntan algo fuera de tu conocimiento, redirige al usuario a contactar directamente a info@717store.com.',
+    })
+    return text
+  } catch (error) {
+    console.error('Error getting chat response from AI:', error)
+    return 'Lo siento, no pude procesar tu solicitud en este momento. Por favor, intenta de nuevo más tarde o contáctanos directamente en info@717store.com.'
+  }
 }

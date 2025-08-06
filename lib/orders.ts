@@ -1,114 +1,153 @@
-import { CartItem } from "./cart-context";
-
-export interface OrderItem {
-  productId: string;
-  name: string;
-  quantity: number;
-  price: number;
-  size: string | null;
-  color: string | null;
-}
-
-export interface Order {
-  id: string;
-  userId: string;
-  date: string; // ISO string
-  status: "Pendiente" | "Procesando" | "Enviado" | "Completado" | "Cancelado";
-  total: number;
-  items: OrderItem[];
-  shippingAddress: string;
-  paymentMethod: string;
-}
+import { Order } from './types'; // Ensure Order type is imported
+import { mockOrders } from '@/scripts/setup-database' // Assuming mockOrders is exported from setup-database.js
 
 // Dummy data for orders
 let dummyOrders: Order[] = [
   {
-    id: "ORD001",
+    id: "ORD78901",
     userId: "user-123",
-    date: new Date("2023-10-26T10:00:00Z").toISOString(),
-    total: 75.00,
-    status: "Completado",
     items: [
-      { productId: "prod-001", name: "Camiseta 'Big Dreams'", quantity: 1, price: 25.00, size: "M", color: "Negro" },
-      { productId: "prod-002", name: "Sudadera 'Code Life'", quantity: 1, price: 50.00, size: "L", color: "Gris" },
+      { productId: "prod-1", name: "Camiseta 'Big Dreams'", quantity: 1, price: 29.99, size: "M", color: "Negro" },
+      { productId: "prod-8", name: "Gorra '717 Original'", quantity: 1, price: 19.99, size: "Única", color: "Negro" },
     ],
-    shippingAddress: "Calle Falsa 123, Bogotá, Cundinamarca, 110111, Colombia",
-    paymentMethod: "credit-card",
+    shippingAddress: {
+      fullName: "Juan Pérez",
+      address: "Calle Falsa 123",
+      city: "Springfield",
+      state: "IL",
+      zipCode: "62701",
+      country: "USA",
+      email: "juan@example.com",
+      phone: "555-123-4567",
+    },
+    paymentDetails: {
+      cardNumber: "************4242",
+      cardName: "Juan Pérez",
+      expiryDate: "12/25",
+      cvv: "***",
+    },
+    total: 49.98,
+    status: "delivered",
+    createdAt: "2023-10-20T10:00:00Z",
+    updatedAt: "2023-10-25T15:00:00Z",
   },
   {
-    id: "ORD002",
-    userId: "user-456",
-    date: new Date("2023-11-15T14:30:00Z").toISOString(),
-    total: 30.00,
-    status: "Pendiente",
+    id: "ORD78902",
+    userId: "user-123",
     items: [
-      { productId: "prod-003", name: "Gorra 'Street Vibe'", quantity: 1, price: 30.00, size: "Única", color: "Blanco" },
+      { productId: "prod-2", name: "Oversized Tee 'Urban Flow'", quantity: 2, price: 34.99, size: "L", color: "Verde Oliva" },
     ],
-    shippingAddress: "Carrera 7 #10-20, Medellín, Antioquia, 050010, Colombia",
-    paymentMethod: "paypal",
+    shippingAddress: {
+      fullName: "Juan Pérez",
+      address: "Calle Falsa 123",
+      city: "Springfield",
+      state: "IL",
+      zipCode: "62701",
+      country: "USA",
+      email: "juan@example.com",
+      phone: "555-123-4567",
+    },
+    paymentDetails: {
+      cardNumber: "************1234",
+      cardName: "Juan Pérez",
+      expiryDate: "08/24",
+      cvv: "***",
+    },
+    total: 69.98,
+    status: "shipped",
+    createdAt: "2023-10-22T11:30:00Z",
+    updatedAt: "2023-10-24T09:00:00Z",
   },
   {
-    id: "ORD003",
-    userId: "user-123",
-    date: new Date("2024-01-05T09:15:00Z").toISOString(),
-    total: 120.00,
-    status: "Enviado",
+    id: "ORD78903",
+    userId: "guest-user-123",
     items: [
-      { productId: "prod-004", name: "Chaqueta 'Urban Explorer'", quantity: 1, price: 120.00, size: "M", color: "Negro" },
+      { productId: "prod-5", name: "Sudadera con Capucha 'Night City'", quantity: 1, price: 59.99, size: "M", color: "Negro" },
     ],
-    shippingAddress: "Calle Falsa 123, Bogotá, Cundinamarca, 110111, Colombia",
-    paymentMethod: "credit-card",
+    shippingAddress: {
+      fullName: "Invitado Cliente",
+      address: "Avenida Siempre Viva 742",
+      city: "Springfield",
+      state: "IL",
+      zipCode: "62701",
+      country: "USA",
+      email: "guest@example.com",
+      phone: "555-987-6543",
+    },
+    paymentDetails: {
+      cardNumber: "************5678",
+      cardName: "Invitado Cliente",
+      expiryDate: "06/26",
+      cvv: "***",
+    },
+    total: 59.99,
+    status: "pending",
+    createdAt: "2023-10-26T14:00:00Z",
+    updatedAt: "2023-10-26T14:00:00Z",
   },
 ];
 
-// Simulate fetching all orders
 export async function getOrders(): Promise<Order[]> {
-  // In a real application, this would be an API call to your backend/database
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  return dummyOrders;
+  // In a real application, you would fetch this from a database (e.g., Supabase)
+  // For now, we'll use mock data.
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(mockOrders as Order[])
+    }, 500) // Simulate network delay
+  })
 }
 
-// Simulate fetching orders by user ID
+export async function getOrderById(id: string): Promise<Order | null> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const order = mockOrders.find(o => o.id === id)
+      resolve(order ? (order as Order) : null)
+    }, 300) // Simulate network delay
+  })
+}
+
 export async function getOrdersByUserId(userId: string): Promise<Order[]> {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500));
   return dummyOrders.filter(order => order.userId === userId);
 }
 
-// Simulate creating a new order
-export async function createOrder(orderData: Omit<Order, 'id' | 'date'>): Promise<{ success: boolean; orderId?: string; message?: string }> {
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-
-  const newOrderId = `ORD${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+export async function createOrder(order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; message?: string; orderId?: string }> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 1000));
   const newOrder: Order = {
-    ...orderData,
-    id: newOrderId,
-    date: new Date().toISOString(),
+    id: `ORD${Date.now()}`,
+    ...order,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
-
   dummyOrders.push(newOrder);
   console.log("New order created:", newOrder);
-  return { success: true, orderId: newOrderId, message: "Pedido creado exitosamente." };
+  return { success: true, message: "Pedido creado exitosamente.", orderId: newOrder.id };
 }
 
-// Simulate updating an order
-export async function updateOrder(orderId: string, updatedData: Partial<Order>): Promise<{ success: boolean; message?: string }> {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  const index = dummyOrders.findIndex(order => order.id === orderId);
-  if (index > -1) {
-    dummyOrders[index] = { ...dummyOrders[index], ...updatedData };
-    console.log(`Order ${orderId} updated:`, dummyOrders[index]);
+export async function updateOrder(id: string, updates: Partial<Order>): Promise<{ success: boolean; message?: string }> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500));
+  const index = dummyOrders.findIndex(order => order.id === id);
+  if (index !== -1) {
+    dummyOrders[index] = {
+      ...dummyOrders[index],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
     return { success: true, message: "Pedido actualizado exitosamente." };
   }
   return { success: false, message: "Pedido no encontrado." };
 }
 
-// Simulate deleting an order
-export async function deleteOrder(orderId: string): Promise<{ success: boolean; message?: string }> {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+export async function deleteOrder(id: string): Promise<{ success: boolean; message?: string }> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500));
   const initialLength = dummyOrders.length;
-  dummyOrders = dummyOrders.filter(order => order.id !== orderId);
+  dummyOrders = dummyOrders.filter(order => order.id !== id);
   if (dummyOrders.length < initialLength) {
-    console.log(`Order ${orderId} deleted.`);
+    console.log(`Order ${id} deleted.`);
     return { success: true, message: "Pedido eliminado exitosamente." };
   }
   return { success: false, message: "Pedido no encontrado." };

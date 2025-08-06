@@ -22,33 +22,23 @@ import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RefreshCw, ShieldCheck } from 'lucide-react'
 import { Product } from '@/lib/types'
+import { BrandLoader } from '@/components/loaders/brand-loader' // Changed to named import
+import { AnimatedCard } from "@/components/animated-card"
 
-export default function HomePage() {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+export const metadata = {
+  title: '717 Store - Streetwear y Moda Urbana',
+  description: 'Descubre la última colección de streetwear, camisetas, sudaderas, pantalones y accesorios en 717 Store. Estilo auténtico y calidad premium.',
+}
+
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts()
+  const products = await getProducts()
+  const { isMobile } = useMobileDetection()
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const isMobile = useMobileDetection()
-  const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [email, setEmail] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
+  const [userName, setUserName] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const products = await getFeaturedProducts()
-        setFeaturedProducts(products)
-      } catch (err) {
-        setError('Failed to load featured products.')
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     const userAuth = localStorage.getItem("userAuth")
     const userInfo = localStorage.getItem("userInfo")
 
@@ -58,35 +48,8 @@ export default function HomePage() {
       setUserName(user.name)
     }
 
-    fetchFeaturedProducts()
+    setLoading(false)
   }, [])
-
-  const features = [
-    {
-      icon: Truck,
-      title: "Envío Gratis",
-      description: "En pedidos superiores a $50",
-      delay: 0,
-    },
-    {
-      icon: Shield,
-      title: "Compra Segura",
-      description: "Protección total en tus pagos",
-      delay: 200,
-    },
-    {
-      icon: Headphones,
-      title: "Soporte 24/7",
-      description: "Atención al cliente siempre disponible",
-      delay: 400,
-    },
-    {
-      icon: Star,
-      title: "Calidad Premium",
-      description: "Productos de la más alta calidad",
-      delay: 600,
-    },
-  ]
 
   const heroImages = [
     { src: "/slider-1.png", alt: "Colección de verano 717 Store" },
@@ -151,7 +114,9 @@ export default function HomePage() {
 
       {/* Hero Section con Slider */}
       <section className="relative h-[70vh] overflow-hidden">
-        <HeroSlider images={heroImages} />
+        <Suspense fallback={<BrandLoader className="h-[400px]" />}>
+          <HeroSlider images={heroImages} />
+        </Suspense>
 
         {/* Overlay con contenido */}
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
@@ -204,8 +169,6 @@ export default function HomePage() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Productos Destacados</h2>
           {loading ? (
             isMobile ? <MobileProductLoader /> : <ProductLoader />
-          ) : error ? (
-            <div className="text-center text-red-500 text-lg">{error}</div>
           ) : (
             <ProductGrid products={featuredProducts} />
           )}
@@ -247,14 +210,14 @@ export default function HomePage() {
               <Input
                 type="email"
                 placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value=""
+                onChange={() => {}}
                 required
                 className="input-modern rounded-modern-lg flex-1"
-                disabled={isSubmitting}
+                disabled={false}
               />
               <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 rounded-modern-lg hover-lift-modern px-6">
-                {isSubmitting ? "Suscribiendo..." : "Suscribirse"}
+                Suscribirse
               </Button>
             </form>
           </div>
@@ -268,28 +231,69 @@ export default function HomePage() {
       <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
         <div className="container px-4 md:px-6">
           <div className="grid gap-8 md:grid-cols-3 text-center">
-            <Card className="flex flex-col items-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <Truck className="h-12 w-12 text-[#4A1518] mb-4" />
-              <CardTitle className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Envíos Rápidos</CardTitle>
-              <CardContent className="text-gray-600 dark:text-gray-400">
-                Entregamos tus pedidos en tiempo récord, directamente a tu puerta.
+            <AnimatedCard delay={0.1} from="bottom">
+              <CardHeader className="flex flex-row items-center space-x-4">
+                <Truck className="h-8 w-8 text-primary" />
+                <CardTitle>Envío Rápido</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Recibe tus pedidos en tiempo récord con nuestras opciones de envío express.
+                </p>
               </CardContent>
-            </Card>
-            <Card className="flex flex-col items-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <RefreshCw className="h-12 w-12 text-[#4A1518] mb-4" />
-              <CardTitle className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Devoluciones Fáciles</CardTitle>
-              <CardContent className="text-gray-600 dark:text-gray-400">
-                Proceso de devolución sencillo y sin complicaciones para tu tranquilidad.
+            </AnimatedCard>
+            <AnimatedCard delay={0.2} from="bottom">
+              <CardHeader className="flex flex-row items-center space-x-4">
+                <RefreshCw className="h-8 w-8 text-primary" />
+                <CardTitle>Devoluciones Fáciles</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Proceso de devolución sin complicaciones en 30 días.
+                </p>
               </CardContent>
-            </Card>
-            <Card className="flex flex-col items-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <ShieldCheck className="h-12 w-12 text-[#4A1518] mb-4" />
-              <CardTitle className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Compra Segura</CardTitle>
-              <CardContent className="text-gray-600 dark:text-gray-400">
-                Tus datos y pagos están protegidos con la más alta tecnología de seguridad.
+            </AnimatedCard>
+            <AnimatedCard delay={0.3} from="bottom">
+              <CardHeader className="flex flex-row items-center space-x-4">
+                <ShieldCheck className="h-8 w-8 text-primary" />
+                <CardTitle>Pago Seguro</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Tus transacciones están protegidas con la última tecnología de encriptación.
+                </p>
               </CardContent>
-            </Card>
+            </AnimatedCard>
           </div>
+        </div>
+      </section>
+
+      {/* Featured Products from Updates */}
+      <section className="py-12 md:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">
+            Nuestros Productos Destacados
+          </h2>
+          {loading ? (
+            isMobile ? <MobileProductLoader /> : <ProductLoader />
+          ) : (
+            <ProductGrid products={products.slice(0, 8)} /> {/* Display a subset of products */}
+          )}
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section className="py-12 md:py-16 lg:py-20 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
+            Sobre 717 Store
+          </h2>
+          <p className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
+            En 717 Store, nos apasiona la moda urbana y el streetwear. Ofrecemos una selección curada de prendas exclusivas y de alta calidad que reflejan tu estilo único. Creemos en la autoexpresión a través de la ropa y nos esforzamos por traerte las últimas tendencias con un toque distintivo.
+          </p>
+          <p className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto mt-4">
+            Nuestra misión es empoderarte para que te vistas con confianza y autenticidad. ¡Únete a la comunidad 717!
+          </p>
         </div>
       </section>
 

@@ -1,34 +1,38 @@
-"use client";
+'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { type ThemeProviderProps } from 'next-themes';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { useTheme } from 'next-themes'
 
 interface ThemeContextType {
-  theme: string | undefined;
-  setTheme: (theme: string) => void;
-  resolvedTheme: string | undefined;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
 }
 
-interface CustomThemeContextType {
-  // Add any custom theme state or functions here if necessary
-  // For now, we'll just re-export useNextTheme
-}
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-const CustomThemeContext = createContext<CustomThemeContextType | undefined>(undefined);
+export function CustomThemeProvider({ children }: { children: ReactNode }) {
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
-}
+  useEffect(() => setMounted(true), [])
 
-// If you had custom context values, you'd create a custom hook like this:
-/*
-export function useCustomTheme() {
-  const context = useContext(CustomThemeContext);
-  if (context === undefined) {
-    throw new Error('useCustomTheme must be used within a ThemeProvider');
+  const isDarkMode = mounted ? resolvedTheme === 'dark' : false
+
+  const toggleTheme = () => {
+    setTheme(isDarkMode ? 'light' : 'dark')
   }
-  return context;
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  )
 }
-*/
+
+export function useCustomTheme() {
+  const context = useContext(ThemeContext)
+  if (context === undefined) {
+    throw new Error("useCustomTheme must be used within a CustomThemeProvider")
+  }
+  return context
+}

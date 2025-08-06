@@ -7,9 +7,9 @@ interface SearchLoaderProps {
 
 export function SearchLoader({ className }: SearchLoaderProps) {
   return (
-    <div className={cn("flex items-center justify-center h-24 w-full", className)}>
-      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      <span className="ml-2 text-muted-foreground">Buscando...</span>
+    <div className={cn("flex items-center justify-center h-full w-full", className)}>
+      <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      <span className="ml-2 text-gray-600 dark:text-gray-300">Buscando productos...</span>
     </div>
   )
 }

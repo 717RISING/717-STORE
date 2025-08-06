@@ -1,18 +1,15 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 
-export function MobileSearchLoader() {
+interface MobileSearchLoaderProps {
+  className?: string
+}
+
+export function MobileSearchLoader({ className }: MobileSearchLoaderProps) {
   return (
-    <div className="flex flex-col items-center p-4">
-      <Skeleton className="h-10 w-full rounded-md mb-4" />
-      <div className="grid grid-cols-2 gap-4 w-full">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex flex-col space-y-2">
-            <Skeleton className="h-[150px] w-full rounded-md" />
-            <Skeleton className="h-4 w-[80%]" />
-            <Skeleton className="h-4 w-[60%]" />
-          </div>
-        ))}
-      </div>
+    <div className={cn("flex flex-col items-center justify-center h-full w-full", className)}>
+      <Loader2 className="h-10 w-10 animate-spin text-gray-500" />
+      <p className="mt-4 text-base text-gray-600 dark:text-gray-300">Buscando en móvil...</p>
     </div>
   )
 }

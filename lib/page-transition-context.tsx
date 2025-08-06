@@ -1,71 +1,68 @@
-"use client"
+'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css' // Import NProgress CSS
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ProgressBar } from '@/components/progress-bar'
 
 interface PageTransitionContextType {
+  startTransition: (href: string) => void;
   isTransitioning: boolean;
-  startTransition: () => void;
-  endTransition: () => void;
 }
 
 const PageTransitionContext = createContext<PageTransitionContextType | undefined>(undefined)
 
-export function PageTransitionProvider({ children }: { children: React.ReactNode }) {
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const pathname = usePathname()
+export function PageTransitionProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [progress, setProgress] = useState(0)
 
-  const startTransition = useCallback(() => {
+  const startTransition = useCallback((href: string) => {
     setIsTransitioning(true)
-    NProgress.start()
-  }, [])
+    setProgress(0) // Reset progress
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(interval)
+          return prev
+        }
+        return prev + 10
+      })
+    }, 100)
 
-  const endTransition = useCallback(() => {
-    setIsTransitioning(false)
-    NProgress.done()
-  }, [])
+    router.push(href)
 
-  useEffect(() => {
-    // This effect handles route changes initiated by Next.js Link or router.push/replace
-    const handleRouteChangeStart = (url: string) => {
-      if (url !== pathname) {
-        startTransition()
-      }
-    }
-
-    const handleRouteChangeComplete = () => {
-      endTransition()
-    }
-
-    const handleRouteChangeError = () => {
-      endTransition()
-    }
-
-    // NProgress configuration (optional, can be moved to a separate file)
-    NProgress.configure({ showSpinner: false, trickleSpeed: 200, minimum: 0.1 });
-
-    // Attach event listeners for Next.js router events
-    // Note: In App Router, these events are not directly exposed as in Pages Router.
-    // We simulate it by tracking pathname changes and using a global loading indicator.
-    // For a more robust solution, consider a custom router wrapper or a library.
-
-    // For now, we'll rely on the pathname change to trigger the transition state.
-    // The actual NProgress start/done will be managed by the ProgressBar component
-    // which listens to router events (if available) or simply by the PageLoader.
-
-    // This context primarily manages the `isTransitioning` state for child components.
-    // The ProgressBar component will handle the visual progress bar.
+    // Simulate completion after a short delay, or integrate with actual route change events
+    const timeout = setTimeout(() => {
+      clearInterval(interval)
+      setProgress(100)
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setProgress(0)
+      }, 300) // Small delay to show 100%
+    }, 1000) // Adjust based on typical page load time
 
     return () => {
-      // Clean up if necessary, though for App Router, direct router events are less common.
+      clearInterval(interval)
+      clearTimeout(timeout)
     }
-  }, [pathname, startTransition, endTransition])
+  }, [router])
 
   return (
-    <PageTransitionContext.Provider value={{ isTransitioning, startTransition, endTransition }}>
+    <PageTransitionContext.Provider value={{ startTransition, isTransitioning }}>
+      <AnimatePresence mode="wait">
+        {isTransitioning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[9999] bg-background flex items-center justify-center"
+          >
+            <ProgressBar progress={progress} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {children}
     </PageTransitionContext.Provider>
   )
@@ -74,7 +71,7 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
 export function usePageTransition() {
   const context = useContext(PageTransitionContext)
   if (context === undefined) {
-    throw new Error('usePageTransition must be used within a PageTransitionProvider')
+    throw new Error("usePageTransition must be used within a PageTransitionProvider")
   }
   return context
 }

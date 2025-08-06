@@ -1,43 +1,32 @@
-// This is a mock email service for demonstration purposes.
-// In a real application, you would integrate with an actual email sending service like Resend, SendGrid, Mailgun, etc.
+import { Resend } from 'resend'
 
-interface EmailOptions {
-  from: string;
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+interface SendEmailOptions {
   to: string;
   subject: string;
-  text?: string;
-  html?: string;
-  react?: React.ReactElement; // For React email templates
+  html: string;
+  from?: string;
 }
 
-export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
-  console.log("Simulating email send:");
-  console.log("From:", options.from);
-  console.log("To:", options.to);
-  console.log("Subject:", options.subject);
-  if (options.text) {
-    console.log("Text Content:", options.text);
-  }
-  if (options.html) {
-    console.log("HTML Content (truncated):", options.html.substring(0, 200) + "...");
-  }
-  if (options.react) {
-    console.log("React Component provided for email content.");
-    // In a real scenario, you'd render the React component to HTML here
-    // For example, using @react-email/render
-  }
+export async function sendEmail({ to, subject, html, from = 'onboarding@resend.dev' }: SendEmailOptions) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: from,
+      to: to,
+      subject: subject,
+      html: html,
+    })
 
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+    if (error) {
+      console.error('Error sending email:', error)
+      return { success: false, error: error.message }
+    }
 
-  // Simulate success or failure
-  const success = Math.random() > 0.1; // 90% success rate
-
-  if (success) {
-    console.log("Email sent successfully (mock)!");
-    return { success: true };
-  } else {
-    console.error("Failed to send email (mock)!");
-    return { success: false, error: "Mock email sending failed." };
+    console.log('Email sent successfully:', data)
+    return { success: true, data }
+  } catch (error) {
+    console.error('An unexpected error occurred while sending email:', error)
+    return { success: false, error: 'An unexpected error occurred.' }
   }
 }

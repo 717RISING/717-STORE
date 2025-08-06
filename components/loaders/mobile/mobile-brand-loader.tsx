@@ -1,22 +1,30 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 
-export function MobileBrandLoader() {
+interface MobileBrandLoaderProps {
+  className?: string
+  size?: "sm" | "md" | "lg"
+}
+
+export function MobileBrandLoader({ className, size = "md" }: MobileBrandLoaderProps) {
+  const loaderSizeClass = {
+    sm: "h-10 w-10",
+    md: "h-14 w-14",
+    lg: "h-18 w-18",
+  }[size]
+
+  const textSizeClass = {
+    sm: "text-xl",
+    md: "text-3xl",
+    lg: "text-4xl",
+  }[size]
+
   return (
-    <div className="flex flex-col items-center p-4 space-y-6">
-      <Skeleton className="h-24 w-24 rounded-full" />
-      <Skeleton className="h-8 w-2/3" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-[90%]" />
-      <Skeleton className="h-4 w-[80%]" />
-      <div className="grid grid-cols-2 gap-4 w-full">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex flex-col space-y-2">
-            <Skeleton className="h-[150px] w-full rounded-md" />
-            <Skeleton className="h-4 w-[80%]" />
-            <Skeleton className="h-4 w-[60%]" />
-          </div>
-        ))}
-      </div>
+    <div className={cn("flex flex-col items-center justify-center", className)}>
+      <Loader2 className={cn("animate-spin text-[#4A1518] dark:text-[#FFD700]", loaderSizeClass)} />
+      <p className={cn("mt-4 font-bold text-[#4A1518] dark:text-[#FFD700] brand-font", textSizeClass)}>
+        717 STORE
+      </p>
     </div>
   )
 }

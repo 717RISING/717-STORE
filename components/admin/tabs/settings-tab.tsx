@@ -6,60 +6,71 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
+import { AdaptiveLoader } from '@/components/loaders/adaptive-loader' // Changed to named import
 
-export function SettingsTab() {
+export function AdminSettingsTab() {
   const [storeName, setStoreName] = useState('717 Store')
   const [contactEmail, setContactEmail] = useState('info@717store.com')
-  const [currency, setCurrency] = useState('USD')
-  const [enablePromotions, setEnablePromotions] = useState(true)
+  const [storeAddress, setStoreAddress] = useState("Calle Ficticia 123, Ciudad Ejemplo")
+  const [currency, setCurrency] = useState("USD")
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [shippingPolicy, setShippingPolicy] = useState("Política de envío estándar: 3-5 días hábiles.")
+  const [returnPolicy, setReturnPolicy] = useState("Política de devolución: 30 días para cambios o reembolsos.")
   const [isSaving, setIsSaving] = useState(false)
-  const { toast } = useToast()
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
-    // Simulate API call to update settings
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    // Simulate API call to save settings
+    await new Promise(resolve => setTimeout(resolve, 1000))
     setIsSaving(false)
-    toast({
-      title: "Configuración Guardada",
-      description: "La configuración de la tienda ha sido actualizada exitosamente.",
-      variant: "default",
-    })
+    toast.success("Configuración guardada exitosamente.")
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>Información General de la Tienda</CardTitle>
-          <CardDescription>Actualiza el nombre de tu tienda, email de contacto y moneda.</CardDescription>
+          <CardTitle>Configuración General de la Tienda</CardTitle>
+          <CardDescription>Gestiona la información básica y operativa de tu tienda.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSaveSettings}>
-            <div className="space-y-2">
-              <Label htmlFor="store-name">Nombre de la Tienda</Label>
-              <Input id="store-name" value={storeName} onChange={(e) => setStoreName(e.target.value)} />
+          <form onSubmit={handleSaveSettings} className="space-y-6">
+            <div className="grid gap-2">
+              <Label htmlFor="storeName">Nombre de la Tienda</Label>
+              <Input
+                id="storeName"
+                type="text"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                placeholder="Nombre de tu tienda"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="contact-email">Email de Contacto</Label>
-              <Input id="contact-email" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+            <div className="grid gap-2">
+              <Label htmlFor="contactEmail">Correo Electrónico de Contacto</Label>
+              <Input
+                id="contactEmail"
+                type="email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                placeholder="contacto@tutienda.com"
+                required
+              />
             </div>
-            <div className="space-y-2">
+            <div className="grid gap-2">
+              <Label htmlFor="store-address">Dirección de la Tienda</Label>
+              <Input id="store-address" value={storeAddress} onChange={(e) => setStoreAddress(e.target.value)} />
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="currency">Moneda</Label>
               <Input id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} />
             </div>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                'Guardar Cambios'
-              )}
+              <AdaptiveLoader isVisible={isSaving} size="sm" className="mr-2" />
+              {isSaving ? 'Guardando...' : 'Guardar Configuración'}
             </Button>
           </form>
         </CardContent>
@@ -67,30 +78,55 @@ export function SettingsTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Preferencias de Marketing</CardTitle>
-          <CardDescription>Controla las opciones de marketing y promociones.</CardDescription>
+          <CardTitle>Modo Mantenimiento</CardTitle>
+          <CardDescription>Habilita o deshabilita el modo mantenimiento para tu tienda.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="maintenance-mode">Habilitar Modo Mantenimiento</Label>
+            <Switch
+              id="maintenance-mode"
+              checked={maintenanceMode}
+              onCheckedChange={setMaintenanceMode}
+            />
+          </div>
+          <Button onClick={handleSaveSettings} disabled={isSaving}>
+            <AdaptiveLoader isVisible={isSaving} size="sm" className="mr-2" />
+            {isSaving ? 'Guardando...' : 'Guardar Modo Mantenimiento'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Políticas de la Tienda</CardTitle>
+          <CardDescription>Edita las políticas de envío y devolución de tu tienda.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="enable-promotions">Habilitar Promociones</Label>
-              <Switch
-                id="enable-promotions"
-                checked={enablePromotions}
-                onCheckedChange={setEnablePromotions}
+          <form onSubmit={handleSaveSettings} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="shipping-policy">Política de Envío</Label>
+              <Textarea
+                id="shipping-policy"
+                value={shippingPolicy}
+                onChange={(e) => setShippingPolicy(e.target.value)}
+                rows={5}
               />
             </div>
-            <Button onClick={handleSaveSettings} disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                'Guardar Preferencias'
-              )}
+            <div className="grid gap-2">
+              <Label htmlFor="return-policy">Política de Devolución</Label>
+              <Textarea
+                id="return-policy"
+                value={returnPolicy}
+                onChange={(e) => setReturnPolicy(e.target.value)}
+                rows={5}
+              />
+            </div>
+            <Button type="submit" disabled={isSaving}>
+              <AdaptiveLoader isVisible={isSaving} size="sm" className="mr-2" />
+              {isSaving ? 'Guardando...' : 'Guardar Políticas'}
             </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>

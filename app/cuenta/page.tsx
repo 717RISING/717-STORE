@@ -1,6 +1,3 @@
-"use client"
-
-import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileTab } from '@/components/dashboard/profile-tab'
 import { OrdersTab } from '@/components/dashboard/orders-tab'
@@ -8,34 +5,32 @@ import { AddressesTab } from '@/components/dashboard/addresses-tab'
 import { PaymentTab } from '@/components/dashboard/payment-tab'
 import { WishlistTab } from '@/components/dashboard/wishlist-tab'
 import { SettingsTab } from '@/components/dashboard/settings-tab'
-import { useAuth } from '@/lib/auth-context' // Import useAuth
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { ProfileLoader } from '@/components/loaders/profile-loader'
-import { MobileProfileLoader } from '@/components/loaders/mobile/mobile-profile-loader'
+import { Suspense } from 'react'
+import { ProfileLoader } from '@/components/loaders/profile-loader' // Changed to named import
+import { MobileProfileLoader } from '@/components/loaders/mobile/mobile-profile-loader' // Changed to named import
 import { useMobileDetection } from '@/hooks/use-mobile-detection'
+import { redirect } from 'next/navigation'
+import { validateUserSession } from '@/app/actions' // Assuming this action exists for server-side session validation
 
-export default function AccountPage() {
-  const { isAuthenticated, isLoading } = useAuth()
-  const router = useRouter()
-  const isMobile = useMobileDetection()
+export const metadata = {
+  title: 'Mi Cuenta - 717 Store',
+  description: 'Gestiona tu perfil, pedidos, direcciones, métodos de pago y lista de deseos en 717 Store.',
+}
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login')
-    }
-  }, [isAuthenticated, isLoading, router])
+export default async function AccountPage() {
+  const { isMobile } = useMobileDetection()
+  const { success, user } = await validateUserSession()
 
-  if (isLoading || !isAuthenticated) {
-    return isMobile ? <MobileProfileLoader /> : <ProfileLoader />
+  if (!success || !user) {
+    redirect('/login') // Redirect to login if not authenticated
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
-      <h1 className="text-4xl font-bold text-center mb-8">Mi Cuenta</h1>
+    <main className="container mx-auto px-4 py-8 md:px-6 lg:py-12">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Mi Cuenta</h1>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:grid-cols-6">
           <TabsTrigger value="profile">Perfil</TabsTrigger>
           <TabsTrigger value="orders">Pedidos</TabsTrigger>
           <TabsTrigger value="addresses">Direcciones</TabsTrigger>
@@ -44,24 +39,36 @@ export default function AccountPage() {
           <TabsTrigger value="settings">Configuración</TabsTrigger>
         </TabsList>
         <TabsContent value="profile" className="mt-6">
-          <ProfileTab />
+          <Suspense fallback={isMobile ? <MobileProfileLoader /> : <ProfileLoader />}>
+            <ProfileTab />
+          </Suspense>
         </TabsContent>
         <TabsContent value="orders" className="mt-6">
-          <OrdersTab />
+          <Suspense fallback={isMobile ? <MobileProfileLoader /> : <ProfileLoader />}>
+            <OrdersTab />
+          </Suspense>
         </TabsContent>
         <TabsContent value="addresses" className="mt-6">
-          <AddressesTab />
+          <Suspense fallback={isMobile ? <MobileProfileLoader /> : <ProfileLoader />}>
+            <AddressesTab />
+          </Suspense>
         </TabsContent>
         <TabsContent value="payment" className="mt-6">
-          <PaymentTab />
+          <Suspense fallback={isMobile ? <MobileProfileLoader /> : <ProfileLoader />}>
+            <PaymentTab />
+          </Suspense>
         </TabsContent>
         <TabsContent value="wishlist" className="mt-6">
-          <WishlistTab />
+          <Suspense fallback={isMobile ? <MobileProfileLoader /> : <ProfileLoader />}>
+            <WishlistTab />
+          </Suspense>
         </TabsContent>
         <TabsContent value="settings" className="mt-6">
-          <SettingsTab />
+          <Suspense fallback={isMobile ? <MobileProfileLoader /> : <ProfileLoader />}>
+            <SettingsTab />
+          </Suspense>
         </TabsContent>
       </Tabs>
-    </div>
+    </main>
   )
 }

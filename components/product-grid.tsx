@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Search, Filter } from 'lucide-react'
 import { getAllProducts } from "@/lib/database"
-import { Product } from '@/lib/types' // Assuming you have a types file for Product
+import { Product } from '@/lib/products'
+import { useDebounce } from "@/hooks/use-debounce"
 
 interface ProductGridProps {
   products: Product[]
@@ -19,10 +20,11 @@ export default function ProductGrid({ products }: ProductGridProps) {
   const [sortBy, setSortBy] = useState("name")
   const [filterCategory, setFilterCategory] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
+  const debouncedSearchTerm = useDebounce(searchTerm, 300) // Debounce search input
 
   useEffect(() => {
     filterAndSortProducts()
-  }, [products, searchTerm, sortBy, filterCategory])
+  }, [products, debouncedSearchTerm, sortBy, filterCategory])
 
   const loadProducts = async () => {
     setIsLoading(true)
@@ -40,10 +42,10 @@ export default function ProductGrid({ products }: ProductGridProps) {
     let filtered = [...products]
 
     // Filter by search term
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        product.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       )
     }
 

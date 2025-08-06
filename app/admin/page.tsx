@@ -1,12 +1,12 @@
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { AdminLogin } from "@/components/admin/admin-login"
-import { validateAdminSession } from "@/lib/users" // Assuming this function exists
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-context" // Assuming authOptions are defined here
 
 export default async function AdminPage() {
-  // In a real application, this would check a secure session or token
-  const isAdminLoggedIn = await validateAdminSession() // Simulate session validation
+  const session = await getServerSession(authOptions)
 
-  if (!isAdminLoggedIn) {
+  if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
     return <AdminLogin />
   }
 

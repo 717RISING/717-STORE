@@ -1,41 +1,29 @@
-import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Message } from "ai"
+import { cn } from "@/lib/utils"
 
 interface ChatMessageProps {
-  message: {
-    role: 'user' | 'assistant'
-    content: string
-  }
+  message: Message;
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  const isUser = message.role === 'user'
-
+  const isUser = message.role === "user"
   return (
-    <div className={cn(
-      "flex items-start gap-3",
-      isUser ? "justify-end" : "justify-start"
-    )}>
-      {!isUser && (
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/placeholder-avatar.jpg" alt="Bot" />
-          <AvatarFallback>AI</AvatarFallback>
-        </Avatar>
+    <div
+      className={cn(
+        "flex items-start gap-3",
+        isUser ? "justify-end" : "justify-start"
       )}
-      <div className={cn(
-        "max-w-[70%] p-3 rounded-lg",
-        isUser
-          ? "bg-primary text-primary-foreground rounded-br-none"
-          : "bg-muted text-muted-foreground rounded-bl-none"
-      )}>
+    >
+      <div
+        className={cn(
+          "rounded-lg p-3 max-w-[70%]",
+          isUser
+            ? "bg-primary text-primary-foreground"
+            : "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-50"
+        )}
+      >
         <p className="text-sm">{message.content}</p>
       </div>
-      {isUser && (
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-          <AvatarFallback>Tú</AvatarFallback>
-        </Avatar>
-      )}
     </div>
   )
 }

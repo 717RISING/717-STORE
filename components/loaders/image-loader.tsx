@@ -7,9 +7,8 @@ interface ImageLoaderProps {
 
 export function ImageLoader({ className }: ImageLoaderProps) {
   return (
-    <div className={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md", className)}>
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      <span className="sr-only">Cargando imagen...</span>
+    <div className={cn("flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-md", className)}>
+      <Loader2 className="h-8 w-8 animate-spin text-gray-500 dark:text-gray-400" />
     </div>
   )
 }

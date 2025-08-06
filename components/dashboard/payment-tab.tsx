@@ -1,200 +1,110 @@
-"use client"
+'use client'
 
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { CreditCard, PlusCircle, Trash2 } from 'lucide-react'
+import { CreditCard, Plus } from 'lucide-react'
+import { useState } from "react"
 
 interface PaymentMethod {
-  id: string
-  last4: string
-  brand: string
-  expiry: string
+  id: string;
+  type: "credit-card" | "paypal";
+  last4?: string;
+  expiry?: string;
+  email?: string;
+  isDefault: boolean;
 }
 
 export function PaymentTab() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    { id: "card1", last4: "4242", brand: "Visa", expiry: "12/25" },
-    { id: "card2", last4: "1234", brand: "MasterCard", expiry: "08/24" },
+    {
+      id: "card1",
+      type: "credit-card",
+      last4: "4242",
+      expiry: "12/25",
+      isDefault: true,
+    },
+    {
+      id: "paypal1",
+      type: "paypal",
+      email: "john.doe@example.com",
+      isDefault: false,
+    },
   ])
-  const [isAddingNew, setIsAddingNew] = useState(false)
-  const [newCard, setNewCard] = useState({
-    cardNumber: "",
-    cardName: "",
-    expiryDate: "",
-    cvv: "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
 
-  const handleNewCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setNewCard((prev) => ({ ...prev, [id]: value }))
+  const handleSetDefault = (id: string) => {
+    setPaymentMethods(paymentMethods.map(method => ({
+      ...method,
+      isDefault: method.id === id,
+    })))
   }
 
-  const handleAddCard = async () => {
-    setIsLoading(true)
-    // Basic validation
-    if (!newCard.cardNumber || !newCard.cardName || !newCard.expiryDate || !newCard.cvv) {
-      toast({
-        title: "Error",
-        description: "Por favor, completa todos los campos de la tarjeta.",
-        variant: "destructive",
-      })
-      setIsLoading(false)
-      return
-    }
-
-    // Simulate API call to add card
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    const last4 = newCard.cardNumber.slice(-4)
-    const brand = "Visa" // In a real app, detect card brand
-    const newPaymentMethod: PaymentMethod = {
-      id: `card${paymentMethods.length + 1}`,
-      last4,
-      brand,
-      expiry: newCard.expiryDate,
-    }
-    setPaymentMethods((prev) => [...prev, newPaymentMethod])
-    setNewCard({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" })
-    setIsAddingNew(false)
-    setIsLoading(false)
-    toast({
-      title: "Método de pago añadido",
-      description: `Tarjeta ${brand} terminada en ${last4} ha sido añadida.`,
-    })
-  }
-
-  const handleDeleteCard = async (id: string) => {
-    setIsLoading(true)
-    // Simulate API call to delete card
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    setPaymentMethods((prev) => prev.filter((method) => method.id !== id))
-    setIsLoading(false)
-    toast({
-      title: "Método de pago eliminado",
-      description: "La tarjeta ha sido eliminada correctamente.",
-      variant: "destructive",
-    })
+  const handleDelete = (id: string) => {
+    setPaymentMethods(paymentMethods.filter(method => method.id !== id))
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">Métodos de Pago</CardTitle>
-        <CardDescription>Gestiona tus tarjetas de crédito y débito.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          {paymentMethods.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No tienes métodos de pago guardados.</p>
-          ) : (
-            paymentMethods.map((method) => (
-              <div
-                key={method.id}
-                className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 dark:bg-gray-900"
-              >
-                <div className="flex items-center gap-3">
-                  <CreditCard className="h-6 w-6 text-[#4A1518] dark:text-[#FFD700]" />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {method.brand} **** {method.last4}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Expira: {method.expiry}</p>
-                  </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Métodos de Pago</h2>
+      {paymentMethods.length === 0 ? (
+        <p className="text-gray-500">No tienes métodos de pago guardados. Añade uno nuevo.</p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {paymentMethods.map(method => (
+            <Card key={method.id} className={method.isDefault ? "border-2 border-primary" : ""}>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  {method.type === "credit-card" ? "Tarjeta de Crédito" : "PayPal"}
+                  {method.isDefault && (
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary text-primary-foreground">
+                      Por Defecto
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {method.type === "credit-card" && (
+                  <>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <CreditCard className="h-5 w-5" />
+                      <span>**** **** **** {method.last4}</span>
+                    </div>
+                    <p className="text-sm text-gray-600">Expira: {method.expiry}</p>
+                  </>
+                )}
+                {method.type === "paypal" && (
+                  <p className="text-sm text-gray-600">Email: {method.email}</p>
+                )}
+                <div className="flex gap-2 mt-4">
+                  {!method.isDefault && (
+                    <Button variant="outline" size="sm" onClick={() => handleSetDefault(method.id)}>
+                      Establecer por Defecto
+                    </Button>
+                  )}
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(method.id)}>
+                    Eliminar
+                  </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleDeleteCard(method.id)}
-                  disabled={isLoading}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Eliminar tarjeta</span>
-                </Button>
-              </div>
-            ))
-          )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      )}
 
-        {!isAddingNew && (
-          <Button onClick={() => setIsAddingNew(true)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-            <PlusCircle className="h-5 w-5 mr-2" />
-            Añadir Nueva Tarjeta
+      <Card>
+        <CardHeader>
+          <CardTitle>Añadir Nuevo Método de Pago</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button className="w-full">
+            <Plus className="mr-2 h-4 w-4" />
+            Añadir Tarjeta de Crédito
           </Button>
-        )}
-
-        {isAddingNew && (
-          <Card className="border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">Nueva Tarjeta</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-                <Input
-                  id="cardNumber"
-                  type="text"
-                  placeholder="XXXX XXXX XXXX XXXX"
-                  value={newCard.cardNumber}
-                  onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })}
-                  maxLength={16}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
-                <Input
-                  id="cardName"
-                  type="text"
-                  placeholder="Nombre Apellido"
-                  value={newCard.cardName}
-                  onChange={(e) => setNewCard({ ...newCard, cardName: e.target.value })}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiryDate">Fecha de Vencimiento (MM/AA)</Label>
-                  <Input
-                    id="expiryDate"
-                    type="text"
-                    placeholder="MM/AA"
-                    value={newCard.expiryDate}
-                    onChange={(e) => setNewCard({ ...newCard, expiryDate: e.target.value })}
-                    maxLength={5}
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cvv">CVV</Label>
-                  <Input
-                    id="cvv"
-                    type="text"
-                    placeholder="XXX"
-                    value={newCard.cvv}
-                    onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
-                    maxLength={4}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setIsAddingNew(false)} disabled={isLoading}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleAddCard} disabled={isLoading}>
-                  {isLoading ? "Añadiendo..." : "Guardar Tarjeta"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </CardContent>
-    </Card>
+          <Button className="w-full" variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Añadir Cuenta de PayPal
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

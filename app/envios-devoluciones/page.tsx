@@ -1,72 +1,79 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Truck, RefreshCw, Mail } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function ShippingReturnsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
-      <h1 className="text-4xl font-bold text-center mb-8">Envíos y Devoluciones</h1>
-      <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-        Aquí encontrarás toda la información sobre nuestras políticas de envío y cómo gestionar tus devoluciones.
-      </p>
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">Envíos y Devoluciones</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid gap-8 md:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center space-x-4">
-            <Truck className="h-8 w-8 text-primary" />
-            <CardTitle className="text-xl">Política de Envíos</CardTitle>
+          <CardHeader>
+            <CardTitle>Política de Envíos</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
             <p>
-              Nos esforzamos por procesar y enviar todos los pedidos lo más rápido posible. Los pedidos suelen ser procesados dentro de <strong>1-2 días hábiles</strong>.
+              En 717 Store, nos esforzamos por procesar y enviar tus pedidos lo más rápido posible.
+              Todos los pedidos se procesan dentro de 1-2 días hábiles (excluyendo fines de semana y festivos)
+              después de recibir la confirmación de tu pedido. Recibirás otra notificación cuando tu pedido haya sido enviado.
             </p>
-            <h3 className="font-semibold">Tiempos de Entrega Estimados:</h3>
-            <ul className="list-disc list-inside text-muted-foreground">
-              <li><strong>Nacional:</strong> 3-7 días hábiles</li>
-              <li><strong>Internacional:</strong> 7-20 días hábiles (puede variar según el destino)</li>
+            <h3 className="font-semibold text-lg">Tarifas y Estimaciones de Envío Nacional</h3>
+            <p>
+              Las tarifas de envío para tu pedido se calcularán y mostrarán en el momento de la compra.
+              Ofrecemos envío estándar y express.
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Envío Estándar: 3-7 días hábiles.</li>
+              <li>Envío Express: 1-3 días hábiles.</li>
             </ul>
             <p>
-              Recibirás un email de confirmación con un número de seguimiento una vez que tu pedido haya sido enviado.
+              Los tiempos de entrega estimados son solo una guía y pueden variar debido a factores externos
+              fuera del control de 717 Store (por ejemplo, retrasos del servicio de mensajería, aduanas).
+            </p>
+            <h3 className="font-semibold text-lg">Envío Internacional</h3>
+            <p>
+              Actualmente, 717 Store solo realiza envíos dentro de Colombia. Estamos trabajando para
+              expandir nuestros servicios de envío internacional en el futuro.
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center space-x-4">
-            <RefreshCw className="h-8 w-8 text-primary" />
-            <CardTitle className="text-xl">Política de Devoluciones</CardTitle>
+          <CardHeader>
+            <CardTitle>Política de Devoluciones</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
             <p>
-              Queremos que estés completamente satisfecho con tu compra. Si no es así, puedes devolver los artículos dentro de los <strong>30 días</strong> posteriores a la recepción.
+              Aceptamos devoluciones de productos sin usar y en su estado original dentro de los 30 días
+              posteriores a la compra, acompañados del recibo original.
             </p>
-            <h3 className="font-semibold">Condiciones para Devolución:</h3>
-            <ul className="list-disc list-inside text-muted-foreground">
-              <li>Los artículos deben estar sin usar, sin lavar y en su estado original.</li>
-              <li>Deben incluir todas las etiquetas y el embalaje original.</li>
-              <li>Se requiere el comprobante de compra.</li>
-            </ul>
-            <p>
-              Los reembolsos se procesarán a la forma de pago original dentro de 5-10 días hábiles después de que recibamos y verifiquemos el artículo devuelto.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center space-x-4">
-            <Mail className="h-8 w-8 text-primary" />
-            <CardTitle className="text-xl">Cómo Iniciar una Devolución</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>
-              Para iniciar una devolución, por favor sigue estos pasos:
-            </p>
-            <ol className="list-decimal list-inside text-muted-foreground">
-              <li>Envía un email a <a href="mailto:devoluciones@717store.com" className="text-primary hover:underline">devoluciones@717store.com</a> con tu número de pedido y el motivo de la devolución.</li>
-              <li>Nuestro equipo de soporte te proporcionará instrucciones detalladas y una etiqueta de envío si aplica.</li>
-              <li>Empaqueta los artículos de forma segura y envíalos de vuelta.</li>
+            <h3 className="font-semibold text-lg">Proceso de Devolución</h3>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>
+                Para iniciar una devolución, por favor contáctanos a través de nuestro correo electrónico
+                <a href="mailto:info@717store.com" className="text-primary hover:underline"> info@717store.com</a>
+                con tu número de pedido y el motivo de la devolución.
+              </li>
+              <li>
+                Una vez aprobada tu solicitud, te proporcionaremos instrucciones sobre cómo y dónde enviar
+                tu paquete. Los artículos que nos sean devueltos sin solicitar primero una devolución no serán aceptados.
+              </li>
+              <li>
+                Los costos de envío de la devolución son responsabilidad del cliente, a menos que el artículo
+                sea defectuoso o se haya enviado incorrectamente.
+              </li>
             </ol>
+            <h3 className="font-semibold text-lg">Reembolsos</h3>
             <p>
-              Si tienes alguna pregunta adicional, no dudes en contactarnos.
+              Te notificaremos una vez que hayamos recibido e inspeccionado tu devolución, y te informaremos
+              si el reembolso fue aprobado o no. Si es aprobado, se te reembolsará automáticamente en tu
+              método de pago original. Ten en cuenta que puede tomar algún tiempo para que tu banco o
+              compañía de tarjeta de crédito procese y publique el reembolso.
+            </p>
+            <h3 className="font-semibold text-lg">Artículos No Retornables</h3>
+            <p>
+              Ciertos tipos de artículos no pueden ser devueltos, como productos perecederos, productos
+              personalizados, y artículos de cuidado personal. Por favor, ponte en contacto si tienes
+              preguntas o inquietudes sobre tu artículo específico.
             </p>
           </CardContent>
         </Card>

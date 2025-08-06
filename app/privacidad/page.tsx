@@ -1,121 +1,119 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function PrivacyPage() {
+export default function PrivacyPolicyPage() {
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
-      <h1 className="text-4xl font-bold text-center mb-8">Política de Privacidad</h1>
-      <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-        En 717 Store, nos comprometemos a proteger tu privacidad. Esta política explica cómo recopilamos, usamos y protegemos tu información personal.
-      </p>
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">Política de Privacidad</h1>
 
-      <div className="space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>1. Información que Recopilamos</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>Recopilamos información para proporcionar mejores servicios a todos nuestros usuarios. El tipo de información que recopilamos incluye:</p>
-            <ul className="list-disc list-inside text-muted-foreground">
-              <li><strong>Información que nos proporcionas directamente:</strong> Cuando creas una cuenta, realizas una compra o te suscribes a nuestro boletín, podemos recopilar información como tu nombre, dirección de correo electrónico, dirección de envío, número de teléfono e información de pago.</li>
-              <li><strong>Información que obtenemos de tu uso de nuestros servicios:</strong> Recopilamos información sobre los servicios que utilizas y cómo los utilizas, como cuando visitas una página en nuestro sitio web o interactúas con nuestro contenido. Esta información incluye:
-                <ul className="list-circle list-inside ml-4">
-                  <li>Información del dispositivo</li>
-                  <li>Información de registro (dirección IP, actividad del sistema, etc.)</li>
-                  <li>Información de ubicación</li>
-                  <li>Cookies y tecnologías similares</li>
-                </ul>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Tu Privacidad es Importante para Nosotros</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
+          <p>
+            En 717 Store, respetamos tu privacidad y estamos comprometidos a proteger tu información personal.
+            Esta Política de Privacidad describe cómo recopilamos, usamos y compartimos tu información cuando
+            visitas o realizas una compra en [TuDominio.com] (el "Sitio").
+          </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>2. Cómo Usamos la Información que Recopilamos</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>Utilizamos la información que recopilamos para:</p>
-            <ul className="list-disc list-inside text-muted-foreground">
-              <li>Proporcionar, mantener, proteger y mejorar nuestros servicios.</li>
-              <li>Desarrollar nuevos servicios.</li>
-              <li>Ofrecerte contenido personalizado, como resultados de búsqueda y anuncios relevantes.</li>
-              <li>Comunicarnos contigo, por ejemplo, para enviarte notificaciones sobre tus pedidos o actualizaciones de nuestros servicios.</li>
-              <li>Realizar análisis e investigaciones para mejorar la experiencia del usuario.</li>
-            </ul>
-          </CardContent>
-        </Card>
+          <h3 className="font-semibold text-lg">Información que Recopilamos</h3>
+          <p>
+            Cuando visitas el Sitio, recopilamos automáticamente cierta información sobre tu dispositivo,
+            incluida información sobre tu navegador web, dirección IP, zona horaria y algunas de las cookies
+            que están instaladas en tu dispositivo. Además, a medida que navegas por el Sitio, recopilamos
+            información sobre las páginas web o productos individuales que ves, qué sitios web o términos de
+            búsqueda te remitieron al Sitio e información sobre cómo interactúas con el Sitio. Nos referimos
+            a esta información recopilada automáticamente como "Información del Dispositivo".
+          </p>
+          <p>
+            Recopilamos Información del Dispositivo utilizando las siguientes tecnologías:
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <strong>Cookies:</strong> archivos de datos que se colocan en tu dispositivo o computadora y
+              a menudo incluyen un identificador único anónimo. Para obtener más información sobre las cookies
+              y cómo deshabilitarlas, visita <a href="http://www.allaboutcookies.org" className="text-primary hover:underline">http://www.allaboutcookies.org</a>.
+            </li>
+            <li>
+              <strong>Archivos de registro:</strong> rastrean las acciones que ocurren en el Sitio y recopilan
+              datos, incluida tu dirección IP, tipo de navegador, proveedor de servicios de Internet, páginas
+              de referencia/salida y sellos de fecha/hora.
+            </li>
+            <li>
+              <strong>Web beacons, tags y pixels:</strong> son archivos electrónicos utilizados para registrar
+              información sobre cómo navegas por el Sitio.
+            </li>
+          </ul>
+          <p>
+            Además, cuando realizas una compra o intentas realizar una compra a través del Sitio, recopilamos
+            cierta información tuya, incluido tu nombre, dirección de facturación, dirección de envío,
+            información de pago (incluidos números de tarjeta de crédito), dirección de correo electrónico y
+            número de teléfono. Nos referimos a esta información como "Información del Pedido".
+          </p>
+          <p>
+            Cuando hablamos de "Información Personal" en esta Política de Privacidad, nos referimos tanto a
+            la Información del Dispositivo como a la Información del Pedido.
+          </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>3. Compartir Información</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>No compartimos información personal con empresas, organizaciones e individuos ajenos a 717 Store, a menos que se aplique una de las siguientes circunstancias:</p>
-            <ul className="list-disc list-inside text-muted-foreground">
-              <li><strong>Con tu consentimiento:</strong> Compartiremos información personal con empresas, organizaciones o individuos ajenos a 717 Store cuando tengamos tu consentimiento para hacerlo.</li>
-              <li><strong>Para procesamiento externo:</strong> Proporcionamos información personal a nuestras afiliadas u otras empresas o personas de confianza para que la procesen por nosotros, según nuestras instrucciones y de conformidad con nuestra Política de Privacidad y cualquier otra medida de confidencialidad y seguridad apropiada.</li>
-              <li><strong>Por motivos legales:</strong> Compartiremos información personal con empresas, organizaciones o individuos ajenos a 717 Store si creemos de buena fe que el acceso, uso, conservación o divulgación de la información es razonablemente necesario para:
-                <ul className="list-circle list-inside ml-4">
-                  <li>Cumplir con cualquier ley, regulación, proceso legal o solicitud gubernamental aplicable.</li>
-                  <li>Hacer cumplir los Términos de Servicio aplicables, incluida la investigación de posibles violaciones.</li>
-                  <li>Detectar, prevenir o abordar de otro modo el fraude, la seguridad o los problemas técnicos.</li>
-                  <li>Proteger contra daños a los derechos, la propiedad o la seguridad de 717 Store, nuestros usuarios o el público según lo exija o permita la ley.</li>
-                </ul>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+          <h3 className="font-semibold text-lg">¿Cómo Usamos tu Información Personal?</h3>
+          <p>
+            Utilizamos la Información del Pedido que recopilamos generalmente para cumplir con cualquier pedido
+            realizado a través del Sitio (incluido el procesamiento de tu información de pago, la organización
+            del envío y el envío de facturas y/o confirmaciones de pedidos). Además, utilizamos esta Información
+            del Pedido para:
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Comunicarnos contigo.</li>
+            <li>Examinar nuestros pedidos para detectar posibles riesgos o fraudes.</li>
+            <li>Cuando esté en línea con las preferencias que has compartido con nosotros, proporcionarte
+              información o publicidad relacionada con nuestros productos o servicios.</li>
+          </ul>
+          <p>
+            Utilizamos la Información del Dispositivo que recopilamos para ayudarnos a detectar posibles riesgos
+            y fraudes (en particular, tu dirección IP) y, de manera más general, para mejorar y optimizar nuestro
+            Sitio (por ejemplo, generando análisis sobre cómo nuestros clientes navegan e interactúan con el Sitio,
+            y para evaluar el éxito de nuestras campañas de marketing y publicidad).
+          </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>4. Seguridad de la Información</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Trabajamos arduamente para proteger a 717 Store y a nuestros usuarios del acceso no autorizado o la alteración, divulgación o destrucción no autorizadas de la información que tenemos. En particular:
-            </p>
-            <ul className="list-disc list-inside text-muted-foreground">
-              <li>Ciframos muchos de nuestros servicios utilizando SSL.</li>
-              <li>Ofrecemos verificación en dos pasos cuando accedes a tu cuenta de 717 Store.</li>
-              <li>Revisamos nuestras prácticas de recopilación, almacenamiento y procesamiento de información, incluidas las medidas de seguridad físicas, para protegernos contra el acceso no autorizado a los sistemas.</li>
-              <li>Restringimos el acceso a la información personal a los empleados, contratistas y agentes de 717 Store que necesitan conocer esa información para procesarla por nosotros, y que están sujetos a estrictas obligaciones contractuales de confidencialidad y pueden ser disciplinados o despedidos si no cumplen con estas obligaciones.</li>
-            </ul>
-          </CardContent>
-        </Card>
+          <h3 className="font-semibold text-lg">Compartiendo tu Información Personal</h3>
+          <p>
+            Compartimos tu Información Personal con terceros para ayudarnos a usar tu Información Personal,
+            como se describe anteriormente. Por ejemplo, utilizamos Shopify para potenciar nuestra tienda en línea.
+            También utilizamos Google Analytics para ayudarnos a comprender cómo nuestros clientes usan el Sitio.
+          </p>
+          <p>
+            Finalmente, también podemos compartir tu Información Personal para cumplir con las leyes y regulaciones
+            aplicables, para responder a una citación, orden de registro u otra solicitud legal de información que
+            recibamos, o para proteger nuestros derechos.
+          </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>5. Acceso y Actualización de tu Información Personal</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Siempre que utilices nuestros servicios, nuestro objetivo es proporcionarte acceso a tu información personal. Si esa información es incorrecta, nos esforzamos por darte formas de actualizarla rápidamente o eliminarla, a menos que tengamos que conservar esa información para fines comerciales legítimos o legales. Al actualizar tu información personal, podemos pedirte que verifiques tu identidad antes de que podamos actuar sobre tu solicitud.
-            </p>
-          </CardContent>
-        </Card>
+          <h3 className="font-semibold text-lg">Tus Derechos</h3>
+          <p>
+            Si eres residente europeo, tienes derecho a acceder a la información personal que tenemos sobre ti
+            y a solicitar que tu información personal sea corregida, actualizada o eliminada. Si deseas ejercer
+            este derecho, contáctanos a través de la información de contacto a continuación.
+          </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>6. Cambios en la Política de Privacidad</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Nuestra Política de Privacidad puede cambiar de vez en cuando. Publicaremos cualquier cambio en la política de privacidad en esta página y, si los cambios son significativos, proporcionaremos un aviso más destacado (incluida, para ciertos servicios, una notificación por correo electrónico de los cambios en la política de privacidad).
-            </p>
-          </CardContent>
-        </Card>
+          <h3 className="font-semibold text-lg">Retención de Datos</h3>
+          <p>
+            Cuando realizas un pedido a través del Sitio, mantendremos tu Información del Pedido para nuestros
+            registros a menos y hasta que nos pidas que eliminemos esta información.
+          </p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>7. Contacto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Si tienes alguna pregunta sobre esta Política de Privacidad, contáctanos en <a href="mailto:privacidad@717store.com" className="text-primary hover:underline">privacidad@717store.com</a>.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <h3 className="font-semibold text-lg">Cambios</h3>
+          <p>
+            Podemos actualizar esta política de privacidad de vez en cuando para reflejar, por ejemplo, cambios
+            en nuestras prácticas o por otras razones operativas, legales o reglamentarias.
+          </p>
+
+          <h3 className="font-semibold text-lg">Contáctanos</h3>
+          <p>
+            Para obtener más información sobre nuestras prácticas de privacidad, si tienes preguntas o si deseas
+            presentar una queja, contáctanos por correo electrónico a
+            <a href="mailto:info@717store.com" className="text-primary hover:underline"> info@717store.com</a>.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

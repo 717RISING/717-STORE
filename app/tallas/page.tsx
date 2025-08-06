@@ -1,135 +1,109 @@
-"use client"
+import { SizeCalculator } from "@/components/size-calculator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { calculateSize } from '@/lib/size-calculator' // Assuming this utility exists
-import { Ruler } from 'lucide-react'
-
-export default function SizeCalculatorPage() {
-  const [gender, setGender] = useState<'male' | 'female' | ''>('')
-  const [itemType, setItemType] = useState<'tshirt' | 'pants' | 'jacket' | ''>('')
-  const [measurements, setMeasurements] = useState({
-    chest: '',
-    waist: '',
-    hips: '',
-    inseam: '',
-  })
-  const [recommendedSize, setRecommendedSize] = useState<string | null>(null)
-
-  const handleMeasurementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setMeasurements(prev => ({ ...prev, [id]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const { chest, waist, hips, inseam } = measurements
-    const size = calculateSize(
-      gender as 'male' | 'female',
-      itemType as 'tshirt' | 'pants' | 'jacket',
-      {
-        chest: parseFloat(chest),
-        waist: parseFloat(waist),
-        hips: parseFloat(hips),
-        inseam: parseFloat(inseam),
-      }
-    )
-    setRecommendedSize(size)
-  }
-
+export default function SizeGuidePage() {
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
-      <h1 className="text-4xl font-bold text-center mb-8">Calculadora de Tallas</h1>
-      <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-        Encuentra tu talla perfecta con nuestra calculadora. Ingresa tus medidas y te recomendaremos la talla ideal para nuestras prendas.
-      </p>
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">Guía de Tallas</h1>
 
-      <Card className="max-w-2xl mx-auto p-6">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Encuentra tu Talla Ideal</CardTitle>
+      <div className="grid gap-8 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Cómo Medirte</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
+            <p>
+              Para asegurarte de elegir la talla correcta, te recomendamos que te midas y compares tus medidas
+              con nuestra tabla de tallas.
+            </p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>
+                <strong>Pecho:</strong> Mide alrededor de la parte más ancha de tu pecho, justo debajo de las axilas.
+              </li>
+              <li>
+                <strong>Cintura:</strong> Mide alrededor de la parte más estrecha de tu cintura, generalmente
+                justo por encima del ombligo.
+              </li>
+              <li>
+                <strong>Cadera:</strong> Mide alrededor de la parte más ancha de tus caderas, manteniendo la cinta
+                horizontal.
+              </li>
+              <li>
+                <strong>Largo de Manga:</strong> Mide desde el centro de la parte posterior de tu cuello,
+                a lo largo del hombro y hasta la muñeca.
+              </li>
+              <li>
+                <strong>Entrepierna:</strong> Mide desde la parte superior de tu muslo interior hasta el tobillo.
+              </li>
+            </ul>
+            <p>
+              Si tus medidas están entre dos tallas, te recomendamos elegir la talla más grande para un ajuste
+              más cómodo, o la más pequeña para un ajuste más ceñido.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Calculadora de Tallas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SizeCalculator />
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Tabla de Tallas General</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="gender">Género</Label>
-                <Select value={gender} onValueChange={(value: 'male' | 'female') => setGender(value)} required>
-                  <SelectTrigger id="gender">
-                    <SelectValue placeholder="Selecciona tu género" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Masculino</SelectItem>
-                    <SelectItem value="female">Femenino</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="itemType">Tipo de Prenda</Label>
-                <Select value={itemType} onValueChange={(value: 'tshirt' | 'pants' | 'jacket') => setItemType(value)} required>
-                  <SelectTrigger id="itemType">
-                    <SelectValue placeholder="Selecciona tipo de prenda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tshirt">Camiseta</SelectItem>
-                    <SelectItem value="pants">Pantalón</SelectItem>
-                    <SelectItem value="jacket">Chaqueta</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="chest">Contorno de Pecho (cm)</Label>
-                <Input id="chest" type="number" value={measurements.chest} onChange={handleMeasurementChange} placeholder="Ej: 95" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="waist">Contorno de Cintura (cm)</Label>
-                <Input id="waist" type="number" value={measurements.waist} onChange={handleMeasurementChange} placeholder="Ej: 80" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hips">Contorno de Cadera (cm)</Label>
-                <Input id="hips" type="number" value={measurements.hips} onChange={handleMeasurementChange} placeholder="Ej: 100" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="inseam">Largo de Entrepierna (cm)</Label>
-                <Input id="inseam" type="number" value={measurements.inseam} onChange={handleMeasurementChange} placeholder="Ej: 75" required />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full">
-              <Ruler className="mr-2 h-4 w-4" /> Calcular Talla
-            </Button>
-          </form>
-
-          {recommendedSize && (
-            <div className="mt-8 text-center p-4 bg-muted rounded-md">
-              <h3 className="text-xl font-semibold">Tu Talla Recomendada es:</h3>
-              <p className="text-4xl font-bold text-primary mt-2">{recommendedSize}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Esta es una recomendación basada en tus medidas. Consulta siempre la tabla de tallas específica del producto para mayor precisión.
-              </p>
-            </div>
-          )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-800">
+                  <th className="py-2 px-4 border-b">Talla</th>
+                  <th className="py-2 px-4 border-b">Pecho (cm)</th>
+                  <th className="py-2 px-4 border-b">Cintura (cm)</th>
+                  <th className="py-2 px-4 border-b">Cadera (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="py-2 px-4">XS</td>
+                  <td className="py-2 px-4">80-85</td>
+                  <td className="py-2 px-4">65-70</td>
+                  <td className="py-2 px-4">85-90</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-4">S</td>
+                  <td className="py-2 px-4">86-91</td>
+                  <td className="py-2 px-4">71-76</td>
+                  <td className="py-2 px-4">91-96</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-4">M</td>
+                  <td className="py-2 px-4">92-97</td>
+                  <td className="py-2 px-4">77-82</td>
+                  <td className="py-2 px-4">97-102</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-4">L</td>
+                  <td className="py-2 px-4">98-103</td>
+                  <td className="py-2 px-4">83-88</td>
+                  <td className="py-2 px-4">103-108</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-4">XL</td>
+                  <td className="py-2 px-4">104-109</td>
+                  <td className="py-2 px-4">89-94</td>
+                  <td className="py-2 px-4">109-114</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
-
-      <div className="mt-12 text-center">
-        <h2 className="text-2xl font-bold mb-4">¿Cómo tomar tus medidas?</h2>
-        <p className="text-muted-foreground max-w-xl mx-auto">
-          Para obtener la mejor recomendación, asegúrate de tomar tus medidas correctamente. Utiliza una cinta métrica flexible y mide directamente sobre tu cuerpo, sin apretar demasiado.
-        </p>
-        {/* You could add an image or diagram here */}
-        <img
-          src="/placeholder.svg?height=300&width=600"
-          alt="Guía de Medidas"
-          className="mx-auto mt-6 rounded-lg shadow-md"
-        />
-      </div>
     </div>
   )
 }

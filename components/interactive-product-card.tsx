@@ -1,91 +1,68 @@
-"use client"
+'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ShoppingCart, Heart, Eye } from 'lucide-react'
-import { useCart } from '@/lib/cart-context'
-import { useToast } from '@/hooks/use-toast'
-import { Product } from '@/lib/types' // Assuming you have a types file for Product
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import Image from "next/image"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Heart, ShoppingCart } from 'lucide-react'
+import { Product } from "@/lib/products"
+import { useCart } from "@/lib/cart-context"
+import { useState } from "react"
+import { toast } from "sonner"
 
 interface InteractiveProductCardProps {
-  product: Product
+  product: Product;
 }
 
 export function InteractiveProductCard({ product }: InteractiveProductCardProps) {
   const { addToCart } = useCart()
-  const { toast } = useToast()
+  const [isWishlisted, setIsWishlisted] = useState(false)
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent navigating to product detail page
-    addToCart({ ...product, quantity: 1 })
-    toast({
-      title: "Añadido al carrito",
-      description: `${product.name} ha sido añadido a tu carrito.`,
-      variant: "default",
-    })
+  const handleAddToCart = () => {
+    addToCart(product, 1)
   }
 
-  const handleAddToWishlist = (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent navigating to product detail page
-    // Implement wishlist logic here
-    toast({
-      title: "Añadido a la lista de deseos",
-      description: `${product.name} ha sido añadido a tu lista de deseos.`,
-      variant: "default",
-    })
+  const handleToggleWishlist = () => {
+    setIsWishlisted(!isWishlisted)
+    if (!isWishlisted) {
+      toast.success(`${product.name} añadido a tu lista de deseos!`)
+    } else {
+      toast.info(`${product.name} eliminado de tu lista de deseos.`)
+    }
   }
 
   return (
-    <Link href={`/productos/${product.id}`} className="group block">
-      <Card className="relative overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-in-out">
-        <div className="relative w-full h-60 bg-gray-100 dark:bg-gray-800 overflow-hidden">
-          <Image
-            src={product.image || "/placeholder.svg"}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            style={{ objectFit: 'cover' }}
-            className="transition-transform duration-300 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <div className="flex space-x-2">
-              <Button
-                size="icon"
-                className="rounded-full bg-white text-gray-800 hover:bg-gray-100 transition-all duration-200 scale-0 group-hover:scale-100"
-                onClick={handleAddToCart}
-                aria-label="Añadir al carrito"
-              >
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
-              <Button
-                size="icon"
-                className="rounded-full bg-white text-gray-800 hover:bg-gray-100 transition-all duration-200 delay-100 scale-0 group-hover:scale-100"
-                onClick={handleAddToWishlist}
-                aria-label="Añadir a la lista de deseos"
-              >
-                <Heart className="h-5 w-5" />
-              </Button>
-              <Button
-                size="icon"
-                className="rounded-full bg-white text-gray-800 hover:bg-gray-100 transition-all duration-200 delay-200 scale-0 group-hover:scale-100"
-                asChild
-                aria-label="Ver detalles del producto"
-              >
-                <Link href={`/productos/${product.id}`}>
-                  <Eye className="h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-        <CardContent className="p-4 text-center">
-          <h3 className="text-lg font-semibold truncate">{product.name}</h3>
-          <p className="text-muted-foreground text-sm">{product.category}</p>
-          <p className="text-xl font-bold mt-2">${product.price.toFixed(2)}</p>
-        </CardContent>
-      </Card>
-    </Link>
+    <Card className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-2">
+      <Link href={`/productos/${product.id}`} className="absolute inset-0 z-10" prefetch={false}>
+        <span className="sr-only">Ver producto: {product.name}</span>
+      </Link>
+      <Image
+        src={product.imageUrl || "/placeholder.svg?height=300&width=300&text=Product"}
+        alt={product.name}
+        width={300}
+        height={300}
+        className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+      <CardContent className="p-4 bg-background">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{product.name}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{product.category}</p>
+        <p className="text-xl font-bold text-gray-900 dark:text-gray-50 mt-2">${product.price.toFixed(2)}</p>
+      </CardContent>
+      <CardFooter className="p-4 bg-background flex justify-between items-center">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleToggleWishlist}
+          className={isWishlisted ? "text-red-500 border-red-500 hover:text-red-600 hover:border-red-600" : ""}
+        >
+          <Heart className="h-5 w-5" fill={isWishlisted ? "currentColor" : "none"} />
+          <span className="sr-only">Añadir a lista de deseos</span>
+        </Button>
+        <Button onClick={handleAddToCart}>
+          <ShoppingCart className="mr-2 h-5 w-5" />
+          Añadir al Carrito
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }
