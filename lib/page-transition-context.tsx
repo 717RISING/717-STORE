@@ -1,67 +1,35 @@
 "use client"
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
-type TransitionType = "fade" | "slide" | "zoom" | "flip" | "default"
-
 interface PageTransitionContextType {
-  isLoading: boolean
-  transitionType: TransitionType
-  setTransitionType: (type: TransitionType) => void
-  setIsLoading: (loading: boolean) => void
-  progress: number
-  setProgress: (progress: number) => void
+  startTransition: () => void
+  endTransition: () => void
+  isTransitioning: boolean
 }
 
 const PageTransitionContext = createContext<PageTransitionContextType | undefined>(undefined)
 
-export function PageTransitionProvider({ children }: { children: React.ReactNode }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [transitionType, setTransitionType] = useState<TransitionType>("default")
-  const [progress, setProgress] = useState(0)
+export function PageTransitionProvider({ children }: { children: ReactNode }) {
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const pathname = usePathname()
 
-  useEffect(() => {
-    setIsLoading(true)
-    setProgress(0)
+  const startTransition = useCallback(() => {
+    setIsTransitioning(true)
+  }, [])
 
-    // Simulate loading progress
-    const timer = setTimeout(() => {
-      setProgress(30)
-    }, 100)
+  const endTransition = useCallback(() => {
+    setIsTransitioning(false)
+  }, [])
 
-    const timer2 = setTimeout(() => {
-      setProgress(70)
-    }, 300)
-
-    const timer3 = setTimeout(() => {
-      setProgress(100)
-      setTimeout(() => {
-        setIsLoading(false)
-        setProgress(0)
-      }, 200)
-    }, 500)
-
-    return () => {
-      clearTimeout(timer)
-      clearTimeout(timer2)
-      clearTimeout(timer3)
-    }
-  }, [pathname])
+  // Optional: You might want to trigger endTransition when route changes
+  // useEffect(() => {
+  //   setIsTransitioning(false);
+  // }, [pathname]);
 
   return (
-    <PageTransitionContext.Provider
-      value={{
-        isLoading,
-        transitionType,
-        setTransitionType,
-        setIsLoading,
-        progress,
-        setProgress,
-      }}
-    >
+    <PageTransitionContext.Provider value={{ startTransition, endTransition, isTransitioning }}>
       {children}
     </PageTransitionContext.Provider>
   )

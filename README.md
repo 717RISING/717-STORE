@@ -1,97 +1,102 @@
-# 717 Store Clone
+# 717 Store - Ropa Urbana y Exclusiva
 
-Este es un clon de la tienda 717 Store, construido con Next.js, React y Tailwind CSS.
+Bienvenido al repositorio de 717 Store, tu destino para la moda urbana y piezas exclusivas. Este proyecto está construido con Next.js y Tailwind CSS, ofreciendo una experiencia de compra moderna y responsiva.
 
 ## Características
 
--   **Página de Inicio**: Muestra productos destacados y un slider de héroe.
--   **Página de Productos**: Lista de todos los productos con detalles.
--   **Página de Detalles de Producto**: Información detallada de cada producto, selección de talla y adición al carrito.
--   **Carrito de Compras**: Permite ver, actualizar y eliminar productos del carrito.
--   **Proceso de Checkout**: Flujo de compra con pasos de envío, pago y confirmación.
--   **Panel de Administración**: Dashboard para gestionar pedidos, clientes y productos (funcionalidad mock).
--   **Autenticación de Admin**: Login simple para el panel de administración.
--   **Chat en Vivo**: Widget de chat interactivo para soporte al cliente.
--   **Diseño Responsivo**: Adaptado para dispositivos móviles y de escritorio.
--   **Manejo de Estado Global**: Context API para el carrito de compras.
--   **Simulación de Base de Datos**: Utiliza un objeto mock en memoria para los datos.
--   **Envío de Correos**: Simulación de envío de correos de confirmación de pedido (requiere configuración de variables de entorno SMTP).
+-   **Catálogo de Productos:** Explora una amplia gama de camisetas, sudaderas, pantalones y accesorios.
+-   **Detalles de Producto:** Páginas dedicadas con información detallada, imágenes y opciones de compra.
+-   **Carrito de Compras:** Añade, actualiza y gestiona tus productos antes de finalizar la compra.
+-   **Proceso de Checkout:** Un flujo de compra simplificado y seguro.
+-   **Panel de Usuario:** Gestión de perfil, pedidos, direcciones y métodos de pago.
+-   **Panel de Administración:** (En desarrollo) Para gestionar productos, pedidos y clientes.
+-   **Diseño Responsivo:** Experiencia optimizada para dispositivos móviles, tabletas y escritorios.
+-   **Modo Oscuro/Claro:** Alterna entre temas para una visualización cómoda.
+-   **Chat en Vivo:** Soporte al cliente integrado.
+-   **Guía de Tallas:** Ayuda a los clientes a encontrar el ajuste perfecto.
+-   **Información de Envíos y Devoluciones:** Políticas claras para una experiencia de compra transparente.
 
-## Configuración del Proyecto
+## Tecnologías Utilizadas
 
-### Requisitos
-
--   Node.js (v18 o superior)
--   pnpm (recomendado) o npm/yarn
-
-### Instalación
-
-1.  Clona el repositorio:
-    \`\`\`bash
-    git clone https://github.com/717RISING/717-STORE.git
-    cd 717-STORE
-    \`\`\`
-2.  Instala las dependencias:
-    \`\`\`bash
-    pnpm install
-    # o npm install
-    # o yarn install
-    \`\`\`
-
-### Variables de Entorno
-
-Crea un archivo `.env.local` en la raíz del proyecto y añade las siguientes variables para la funcionalidad de envío de correos:
-
-\`\`\`env
-# Configuración de SMTP para Nodemailer
-EMAIL_USER="tu_correo@gmail.com" # O el correo que usarás para enviar
-EMAIL_PASS="tu_contraseña_de_aplicacion" # Contraseña de aplicación si usas Gmail, o contraseña normal
-SMTP_HOST="smtp.gmail.com" # O el host de tu proveedor de correo
-SMTP_PORT="587" # O el puerto de tu proveedor de correo (ej. 465 para SSL)
-SMTP_SECURE="false" # 'true' si usas SSL/TLS (puerto 465), 'false' para STARTTLS (puerto 587)
-SMTP_USER="tu_correo@gmail.com" # Debe ser el mismo que EMAIL_USER
-SMTP_PASS="tu_contraseña_de_aplicacion" # Debe ser el mismo que EMAIL_PASS
-EMAIL_FROM="717 Store <no-reply@717store.com>" # Remitente del correo
-\`\`\`
-
-**Nota sobre Gmail**: Si usas Gmail, necesitarás generar una "contraseña de aplicación" en la configuración de seguridad de tu cuenta de Google, ya que las contraseñas normales no funcionan para aplicaciones de terceros.
-
-### Ejecutar el Proyecto
-
-\`\`\`bash
-pnpm dev
-# o npm run dev
-# o yarn dev
-\`\`\`
-
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
-
-### Acceso al Panel de Administración
-
-El usuario administrador predefinido es:
--   **Correo**: `717days@gmail.com`
--   **Contraseña**: `JP7CR1DM7CM_STREETWEAR`
-
-Puedes acceder al panel de administración en [http://localhost:3000/admin](http://localhost:3000/admin).
+-   **Next.js 14+ (App Router):** Framework de React para aplicaciones web full-stack.
+-   **React:** Biblioteca de JavaScript para construir interfaces de usuario.
+-   **Tailwind CSS:** Framework CSS utility-first para un diseño rápido y personalizable.
+-   **shadcn/ui:** Componentes de UI reutilizables y accesibles.
+-   **Lucide React:** Iconos de código abierto.
+-   **Recharts:** Librería de gráficos para visualización de datos en el panel de administración.
+-   **Zustand:** (o similar para estado global) Para la gestión del estado del carrito.
+-   **TypeScript:** Para tipado estático y mejor mantenibilidad del código.
 
 ## Estructura del Proyecto
 
--   `app/`: Rutas de Next.js (App Router).
--   `components/`: Componentes reutilizables de UI.
-    -   `admin/`: Componentes específicos del panel de administración.
-    -   `checkout/`: Componentes relacionados con el proceso de compra.
-    -   `live-chat/`: Componentes del widget de chat.
-    -   `loaders/`: Componentes de carga y esqueletos.
+-   `app/`: Contiene las rutas de la aplicación (App Router).
+    -   `layout.tsx`: Layout principal de la aplicación.
+    -   `page.tsx`: Página de inicio.
+    -   `productos/`: Rutas para el catálogo de productos y detalles.
+    -   `checkout/`: Rutas para el proceso de compra.
+    -   `cuenta/`: Rutas para el panel de usuario.
+    -   `admin/`: Rutas para el panel de administración (protegidas).
+-   `components/`: Componentes reutilizables de React.
     -   `ui/`: Componentes de shadcn/ui.
--   `lib/`: Funciones de utilidad, lógica de negocio y simulación de base de datos.
+    -   `loaders/`: Componentes de carga adaptativos.
+    -   `admin/`: Componentes específicos del panel de administración.
+    -   `checkout/`: Componentes específicos del checkout.
+    -   `live-chat/`: Componentes del chat en vivo.
+-   `lib/`: Funciones de utilidad, lógica de negocio, y simulación de base de datos.
+    -   `database.ts`: Simulación de base de datos en memoria.
+    -   `products.ts`: Definiciones y funciones relacionadas con productos.
+    -   `orders.ts`: Definiciones y funciones relacionadas con pedidos.
+    -   `users.ts`: Definiciones y funciones relacionadas con usuarios y autenticación.
+    -   `cart-context.tsx`: Contexto de React para la gestión del carrito.
+    -   `theme-context.tsx`: Contexto de React para la gestión del tema (claro/oscuro).
+    -   `utils.ts`: Funciones de utilidad generales (ej. `cn` para clases de Tailwind).
 -   `hooks/`: Custom React Hooks.
--   `public/`: Archivos estáticos (imágenes, etc.).
--   `scripts/`: Scripts de utilidad (ej. para simular actualizaciones de pedidos).
+-   `public/`: Activos estáticos como imágenes.
+-   `scripts/`: Scripts para inicialización de datos o tareas de desarrollo.
+
+## Configuración y Ejecución Local
+
+1.  **Clonar el repositorio:**
+    \`\`\`bash
+    git clone [URL_DEL_REPOSITORIO]
+    cd 717-store-clone
+    \`\`\`
+
+2.  **Instalar dependencias:**
+    \`\`\`bash
+    npm install
+    # o
+    yarn install
+    # o
+    pnpm install
+    \`\`\`
+
+3.  **Variables de Entorno:**
+    Crea un archivo `.env.local` en la raíz del proyecto y añade las variables de entorno necesarias. Por ejemplo, para el usuario administrador (en un entorno de producción, las contraseñas deben ser hasheadas y gestionadas de forma segura):
+    \`\`\`
+    ADMIN_EMAIL=admin@717store.com
+    ADMIN_PASSWORD=adminpassword
+    \`\`\`
+    *(Nota: Para este proyecto mock, las credenciales están hardcodeadas en `lib/users.ts` y `lib/database.ts` para simplificar, pero en una aplicación real, usarías variables de entorno y un sistema de autenticación robusto.)*
+
+4.  **Ejecutar el servidor de desarrollo:**
+    \`\`\`bash
+    npm run dev
+    # o
+    yarn dev
+    # o
+    pnpm dev
+    \`\`\`
+    La aplicación estará disponible en `http://localhost:3000`.
 
 ## Despliegue
 
-Este proyecto está optimizado para ser desplegado en Vercel. Asegúrate de configurar las variables de entorno en tu proyecto de Vercel.
+Este proyecto está optimizado para ser desplegado en Vercel. Simplemente conecta tu repositorio de GitHub a Vercel, y Vercel detectará automáticamente la configuración de Next.js y desplegará tu aplicación.
 
-## Contacto
+## Contribuciones
 
-Para cualquier pregunta o sugerencia, contacta a [717days@gmail.com](mailto:717days@gmail.com).
+Las contribuciones son bienvenidas. Por favor, abre un "issue" o un "pull request" si tienes sugerencias o mejoras.
+
+---
+
+¡Gracias por usar 717 Store! Si tienes alguna pregunta, no dudes en contactarnos.

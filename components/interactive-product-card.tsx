@@ -1,176 +1,87 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingCart, Eye } from "lucide-react"
+import { Heart, ShoppingCart, Eye } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useCart } from "@/lib/cart-context"
-import { useToast } from "@/hooks/use-toast"
-import { formatPrice, type Product } from "@/lib/products"
-import { useThemeSafe } from "@/hooks/use-theme-safe"
+import { Card, CardContent } from "@/components/ui/card"
+import { Product } from "@/lib/types"
+import { formatPrice } from "@/lib/products"
 
 interface InteractiveProductCardProps {
   product: Product
 }
 
-export default function InteractiveProductCard({ product }: InteractiveProductCardProps) {
+export function InteractiveProductCard({ product }: InteractiveProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0])
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  const { addToCart } = useCart()
-  const { toast } = useToast()
-  const { theme } = useThemeSafe()
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[0],
-      size: selectedSize,
-      quantity: 1,
-    })
-
-    toast({
-      title: "Producto agregado",
-      description: `${product.name} (${selectedSize}) agregado al carrito`,
-    })
-  }
-
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsWishlisted(!isWishlisted)
-
-    toast({
-      title: isWishlisted ? "Eliminado de favoritos" : "Agregado a favoritos",
-      description: `${product.name} ${isWishlisted ? "eliminado de" : "agregado a"} tu lista de deseos`,
-    })
-  }
 
   return (
-    <div
-      className={`group relative bg-gray-900 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-        theme === "dark" ? "hover:shadow-red-900/20" : "hover:shadow-gray-900/20"
-      }`}
+    <Card
+      className="relative overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/productos/${product.id}`}>
-        {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden">
+      <Link href={`/productos/${product.id}`} className="block">
+        <div className="relative w-full h-60 bg-gray-100 dark:bg-gray-700 overflow-hidden">
           <Image
             src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            style={{ objectFit: "cover" }}
+            className="transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={true}
           />
-
-          {/* Overlay */}
-          <div
-            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-              isHovered ? "opacity-100" : "opacity-0"
-            }`}
-          />
-
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {product.isNew && <Badge className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">NUEVO</Badge>}
-          </div>
-
-          {/* Action Buttons */}
-          <div
-            className={`absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 ${
-              isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
-            }`}
-          >
-            <Button
-              size="icon"
-              variant="secondary"
-              className="bg-white/90 hover:bg-white text-black"
-              onClick={handleWishlist}
-            >
-              <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
-            </Button>
-            <Button size="icon" variant="secondary" className="bg-white/90 hover:bg-white text-black">
-              <Eye className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Quick Add to Cart */}
-          <div
-            className={`absolute bottom-3 left-3 right-3 transition-all duration-300 ${
-              isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            <div className="flex gap-2 mb-2">
-              {product.sizes.slice(0, 4).map((size) => (
-                <Button
-                  key={size}
-                  size="sm"
-                  variant={selectedSize === size ? "default" : "secondary"}
-                  className={`text-xs ${
-                    selectedSize === size
-                      ? "bg-[#5D1A1D] text-white hover:bg-[#6B1E22]"
-                      : "bg-white/90 hover:bg-white text-black"
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    setSelectedSize(size)
-                  }}
-                >
-                  {size}
-                </Button>
-              ))}
+          {product.discountPercentage > 0 && (
+            <div className="absolute top-2 left-2 bg-[#5D1A1D] text-white text-xs font-bold px-2 py-1 rounded-full">
+              -{product.discountPercentage}%
             </div>
-            <Button className="w-full bg-[#5D1A1D] text-white hover:bg-[#6B1E22]" onClick={handleAddToCart}>
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Agregar al Carrito
-            </Button>
-          </div>
-        </div>
-
-        {/* Product Info */}
-        <div className="p-4">
-          <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#5D1A1D] transition-colors">
-            {product.name}
-          </h3>
-          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
-
-          {/* Price */}
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-[#5D1A1D]">{formatPrice(product.price)}</span>
-            <div className="flex gap-1">
-              {product.sizes.slice(0, 3).map((size) => (
-                <span key={size} className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
-                  {size}
-                </span>
-              ))}
-              {product.sizes.length > 3 && (
-                <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">+{product.sizes.length - 3}</span>
-              )}
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1 mt-3">
-            {product.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
-                {tag}
-              </span>
-            ))}
-          </div>
+          )}
         </div>
       </Link>
-    </div>
+      <CardContent className="p-4 text-center">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 truncate">
+          {product.name}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          {product.category}
+        </p>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          {product.discountPercentage > 0 ? (
+            <>
+              <span className="text-xl font-bold text-[#5D1A1D]">
+                {formatPrice(product.price * (1 - product.discountPercentage / 100))}
+              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                {formatPrice(product.price)}
+              </span>
+            </>
+          ) : (
+            <span className="text-xl font-bold text-gray-900 dark:text-white">
+              {formatPrice(product.price)}
+            </span>
+          )}
+        </div>
+        <div
+          className={`absolute inset-x-0 bottom-0 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 p-4 flex justify-center gap-2 transition-transform duration-300 ${
+            isHovered ? "translate-y-0" : "translate-y-full"
+          }`}
+        >
+          <Button variant="outline" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <span className="sr-only">Añadir a la lista de deseos</span>
+          </Button>
+          <Button size="sm" className="flex-1 bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            Añadir al carrito
+          </Button>
+          <Button variant="outline" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Eye className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <span className="sr-only">Ver detalles</span>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

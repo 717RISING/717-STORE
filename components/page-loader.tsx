@@ -1,69 +1,47 @@
 "use client"
 
-import { usePageTransition } from "@/lib/page-transition-context"
+import { motion, AnimatePresence } from "framer-motion"
+import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
-type LoaderType = "spin" | "pulse" | "bounce" | "dots" | "wave"
-
 interface PageLoaderProps {
-  type?: LoaderType
+  isLoading: boolean
 }
 
-export default function PageLoader({ type = "spin" }: PageLoaderProps) {
-  const { isLoading } = usePageTransition()
-  const [mounted, setMounted] = useState(false)
+export default function PageLoader({ isLoading }: PageLoaderProps) {
+  const [showLoader, setShowLoader] = useState(isLoading)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted || !isLoading) {
-    return null
-  }
-
-  const renderLoader = () => {
-    switch (type) {
-      case "spin":
-        return <div className="w-12 h-12 border-4 border-[#4A1518] border-t-transparent rounded-full animate-spin" />
-      case "pulse":
-        return <div className="w-12 h-12 bg-[#4A1518] rounded-full animate-pulse" />
-      case "bounce":
-        return (
-          <div className="flex space-x-2">
-            <div className="w-3 h-3 bg-[#4A1518] rounded-full animate-bounce" />
-            <div className="w-3 h-3 bg-[#4A1518] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-            <div className="w-3 h-3 bg-[#4A1518] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
-          </div>
-        )
-      case "dots":
-        return (
-          <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-[#4A1518] rounded-full animate-pulse" />
-            <div className="w-2 h-2 bg-[#4A1518] rounded-full animate-pulse" style={{ animationDelay: "0.2s" }} />
-            <div className="w-2 h-2 bg-[#4A1518] rounded-full animate-pulse" style={{ animationDelay: "0.4s" }} />
-          </div>
-        )
-      case "wave":
-        return (
-          <div className="flex space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="w-1 h-8 bg-[#4A1518] animate-wave" style={{ animationDelay: `${i * 0.1}s` }} />
-            ))}
-          </div>
-        )
-      default:
-        return <div className="w-12 h-12 border-4 border-[#4A1518] border-t-transparent rounded-full animate-spin" />
+    if (isLoading) {
+      setShowLoader(true)
+    } else {
+      const timer = setTimeout(() => setShowLoader(false), 300) // Delay hiding for smooth transition
+      return () => clearTimeout(timer)
     }
-  }
+  }, [isLoading])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="flex flex-col items-center space-y-4">
-        {renderLoader()}
-        <div className="text-white text-sm animate-pulse">
-          Cargando<span className="animate-dots">...</span>
-        </div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {showLoader && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-950/90 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="flex flex-col items-center text-[#5D1A1D]"
+          >
+            <Loader2 className="h-16 w-16 animate-spin" />
+            <p className="mt-4 text-xl font-semibold">Cargando...</p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

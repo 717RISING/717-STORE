@@ -1,91 +1,46 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ProductLoaderProps {
-  size?: "sm" | "md" | "lg"
   message?: string
+  size?: "sm" | "md" | "lg"
 }
 
-export default function ProductLoader({ size = "md", message = "Cargando productos..." }: ProductLoaderProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-
-  const steps = ["Explorando tendencias...", "Seleccionando estilos...", "Preparando colección...", message]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length)
-    }, 1500)
-    return () => clearInterval(interval)
-  }, [steps.length])
-
-  const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-12 h-12",
-    lg: "w-16 h-16",
+export default function ProductLoader({ message = "Cargando productos...", size = "md" }: ProductLoaderProps) {
+  const getSkeletonHeight = () => {
+    switch (size) {
+      case "sm":
+        return "h-40"
+      case "md":
+        return "h-64"
+      case "lg":
+        return "h-80"
+      default:
+        return "h-64"
+    }
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-6 p-8">
-      {/* Animated Hanger */}
-      <div className="relative">
-        <div className={`${sizeClasses[size]} relative`}>
-          {/* Hanger Hook */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-3 bg-[#4A1518] rounded-t-full animate-swing" />
-
-          {/* Hanger Bar */}
-          <div
-            className="absolute top-3 left-1/2 transform -translate-x-1/2 w-10 h-1 bg-[#4A1518] rounded-full animate-swing"
-            style={{ animationDelay: "0.2s" }}
-          />
-
-          {/* Clothing Items */}
-          <div
-            className="absolute top-4 left-1/2 transform -translate-x-1/2 space-x-1 flex animate-swing"
-            style={{ animationDelay: "0.4s" }}
-          >
-            <div className="w-3 h-6 bg-gradient-to-b from-[#4A1518] to-[#6B1E22] rounded-modern animate-pulse" />
-            <div
-              className="w-3 h-6 bg-gradient-to-b from-gray-600 to-gray-800 rounded-modern animate-pulse"
-              style={{ animationDelay: "0.3s" }}
-            />
-            <div
-              className="w-3 h-6 bg-gradient-to-b from-[#4A1518] to-[#6B1E22] rounded-modern animate-pulse"
-              style={{ animationDelay: "0.6s" }}
-            />
-          </div>
-        </div>
-
-        {/* Floating Particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-[#4A1518] rounded-full animate-float"
-              style={{
-                left: `${20 + i * 15}%`,
-                top: `${30 + (i % 2) * 20}%`,
-                animationDelay: `${i * 0.5}s`,
-                animationDuration: `${2 + i * 0.3}s`,
-              }}
-            />
-          ))}
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-950 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+        {[...Array(8)].map((_, i) => (
+          <Card key={i} className="w-full bg-gray-800 border-gray-700 shadow-lg">
+            <CardContent className="p-4 space-y-3">
+              <Skeleton className={`w-full ${getSkeletonHeight()} rounded-md bg-gray-700`} />
+              <Skeleton className="h-5 w-3/4 bg-gray-700" />
+              <Skeleton className="h-4 w-1/2 bg-gray-700" />
+              <Skeleton className="h-10 w-full bg-gray-700" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      {/* Loading Text */}
-      <div className="text-center">
-        <p className="text-white font-medium animate-fade-in-out">{steps[currentStep]}</p>
-        <div className="flex space-x-1 mt-2 justify-center">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="w-2 h-2 bg-[#4A1518] rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.2}s` }}
-            />
-          ))}
-        </div>
-      </div>
+      {message && (
+        <p className="mt-10 text-xl font-medium text-gray-300 animate-pulse">
+          {message}
+        </p>
+      )}
     </div>
   )
 }

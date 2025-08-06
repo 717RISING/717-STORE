@@ -1,142 +1,97 @@
 "use client"
 
-import { useState } from "react"
-import { DollarSign, ShoppingBag, Users, RefreshCw } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import SalesChart from "@/components/admin/charts/sales-chart"
-import SalesByProductChart from "@/components/admin/charts/sales-by-product-chart"
-import SalesByChannelChart from "@/components/admin/charts/sales-by-channel-chart"
+import { Input } from "@/components/ui/input"
+import { Search } from 'lucide-react'
+import { getOrders } from "@/lib/database" // Assuming getOrders is in lib/database.ts
+import { formatPrice } from "@/lib/products" // Import formatPrice
+
+interface OrderItem {
+  productId: string
+  name: string
+  quantity: number
+  price: number
+}
+
+interface Order {
+  id: string
+  customerName: string
+  orderDate: string
+  totalAmount: number
+  status: string
+  items: OrderItem[]
+}
 
 export default function SalesTab() {
-  const [timeRange, setTimeRange] = useState("7d")
+  const [orders, setOrders] = useState<Order[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const fetchOrders = async () => {
+    const fetchedOrders = await getOrders()
+    setOrders(fetchedOrders)
+  }
+
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.status.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-2xl font-semibold">Análisis de Ventas</h2>
-        <div className="flex items-center space-x-2">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-40 bg-gray-900 border-gray-700 text-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-gray-700">
-              <SelectItem value="24h">Últimas 24 horas</SelectItem>
-              <SelectItem value="7d">Últimos 7 días</SelectItem>
-              <SelectItem value="30d">Últimos 30 días</SelectItem>
-              <SelectItem value="90d">Últimos 90 días</SelectItem>
-              <SelectItem value="1y">Último año</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            className="border-gray-700 text-gray-400 hover:text-white bg-transparent"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Ventas</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="relative mb-4">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Buscar ventas..."
+            className="w-full rounded-lg bg-background pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      </div>
-
-      {/* Sales Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-blue-500" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-gray-400 text-sm">Ingresos Netos</p>
-              <h3 className="text-3xl font-bold">$0</h3>
-              <p className="text-gray-400 text-xs mt-1">0% desde el mes pasado</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-6 h-6 text-green-500" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-gray-400 text-sm">Pedidos Completados</p>
-              <h3 className="text-3xl font-bold">0</h3>
-              <p className="text-gray-400 text-xs mt-1">0% desde el mes pasado</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-500" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-gray-400 text-sm">Valor Promedio del Pedido</p>
-              <h3 className="text-3xl font-bold">$0</h3>
-              <p className="text-gray-400 text-xs mt-1">0% desde el mes pasado</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Sales Chart */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-white text-lg">Tendencia de Ventas</CardTitle>
-            <Tabs defaultValue="revenue">
-              <TabsList className="bg-gray-800">
-                <TabsTrigger value="revenue" className="data-[state=active]:bg-white data-[state=active]:text-black">
-                  Ingresos
-                </TabsTrigger>
-                <TabsTrigger value="orders" className="data-[state=active]:bg-white data-[state=active]:text-black">
-                  Pedidos
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="h-80">
-            <SalesChart />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Sales by Product & Channel Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-900 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-white text-lg">Ventas por Producto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <SalesByProductChart />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-white text-lg">Ventas por Canal</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <SalesByChannelChart />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID Pedido</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium text-gray-900 dark:text-white">{order.id}</TableCell>
+                <TableCell className="text-gray-700 dark:text-gray-300">{order.customerName}</TableCell>
+                <TableCell className="text-gray-700 dark:text-gray-300">
+                  {new Date(order.orderDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="text-gray-900 dark:text-white">{formatPrice(order.totalAmount)}</TableCell>
+                <TableCell className="text-gray-700 dark:text-gray-300">{order.status}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm">
+                    Ver Detalles
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
 }

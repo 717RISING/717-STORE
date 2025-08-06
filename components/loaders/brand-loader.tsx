@@ -1,120 +1,37 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Star } from 'lucide-react'
 
 interface BrandLoaderProps {
-  size?: "sm" | "md" | "lg"
   message?: string
 }
 
-export default function BrandLoader({ size = "md", message = "Cargando 717 Store..." }: BrandLoaderProps) {
-  const [glitchActive, setGlitchActive] = useState(false)
-  const [logoScale, setLogoScale] = useState(1)
-
-  useEffect(() => {
-    const glitchInterval = setInterval(() => {
-      setGlitchActive(true)
-      setTimeout(() => setGlitchActive(false), 200)
-    }, 2000)
-
-    const scaleInterval = setInterval(() => {
-      setLogoScale((prev) => (prev === 1 ? 1.1 : 1))
-    }, 1000)
-
-    return () => {
-      clearInterval(glitchInterval)
-      clearInterval(scaleInterval)
-    }
-  }, [])
-
-  const sizeClasses = {
-    sm: "w-12 h-12",
-    md: "w-20 h-20",
-    lg: "w-32 h-32",
-  }
-
+export function BrandLoader({ message = "Cargando marcas destacadas..." }: BrandLoaderProps) {
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 p-8">
-      {/* Animated Logo */}
-      <div className="relative">
-        <div className={`${sizeClasses[size]} relative`}>
-          {/* Main Logo */}
-          <div
-            className={`w-full h-full relative transition-transform duration-500 ${glitchActive ? "animate-glitch" : ""}`}
-            style={{ transform: `scale(${logoScale})` }}
-          >
-            <Image
-              src="/logo.png"
-              alt="717 Logo"
-              fill
-              className="object-contain filter invert animate-pulse-glow"
-              priority
-            />
-          </div>
-
-          {/* Glitch Layers */}
-          {glitchActive && (
-            <>
-              <div className="absolute inset-0 opacity-70 mix-blend-multiply">
-                <Image
-                  src="/logo.png"
-                  alt="717 Logo Glitch"
-                  fill
-                  className="object-contain filter invert hue-rotate-180"
-                />
-              </div>
-              <div className="absolute inset-0 opacity-50 mix-blend-screen translate-x-1">
-                <Image
-                  src="/logo.png"
-                  alt="717 Logo Glitch"
-                  fill
-                  className="object-contain filter invert hue-rotate-90"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Rotating Ring */}
-          <div className="absolute inset-0 border-2 border-[#4A1518] rounded-full animate-spin-slow opacity-30" />
-
-          {/* Pulsing Ring */}
-          <div className="absolute inset-0 border border-white rounded-full animate-ping opacity-20" />
+    <div className="min-h-[calc(100vh-100px)] flex flex-col items-center justify-center bg-gray-950 p-4">
+      <div className="relative mb-8">
+        <div className="w-24 h-24 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
+          <Star className="w-12 h-12 text-white animate-spin" />
         </div>
-
-        {/* Floating Numbers */}
-        <div className="absolute inset-0 pointer-events-none">
-          {["7", "1", "7"].map((num, i) => (
-            <div
-              key={i}
-              className="absolute text-[#4A1518] font-bold text-lg animate-float opacity-60"
-              style={{
-                left: `${20 + i * 30}%`,
-                top: `${10 + (i % 2) * 70}%`,
-                animationDelay: `${i * 0.5}s`,
-                animationDuration: `${3 + i * 0.5}s`,
-              }}
-            >
-              {num}
-            </div>
-          ))}
-        </div>
+        <div className="absolute inset-0 border-4 border-[#4A1518] rounded-full animate-ping opacity-40" />
       </div>
 
-      {/* Brand Text */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2 animate-fade-in-out">717 STORE</h2>
-        <p className="text-gray-400 text-sm mb-4 animate-fade-in-out" style={{ animationDelay: "0.5s" }}>
-          {message}
-        </p>
+      <div className="text-center max-w-md">
+        <p className="text-2xl font-semibold mb-2 text-white">{message}</p>
+        <p className="text-gray-400 text-base">Descubriendo las últimas colecciones y tendencias.</p>
+      </div>
 
-        {/* Loading Bar */}
-        <div className="w-48 h-1 bg-gray-800 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-[#4A1518] via-white to-[#4A1518] animate-loading-bar" />
-        </div>
-
-        {/* Tagline */}
-        <p className="text-[#4A1518] text-xs font-medium mt-3 animate-pulse">STREETWEAR AUTÉNTICO</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 w-full max-w-4xl">
+        {[...Array(8)].map((_, i) => (
+          <Card key={i} className="w-full bg-gray-800 border-gray-700 shadow-lg">
+            <CardContent className="p-4 flex flex-col items-center space-y-3">
+              <Skeleton className="h-20 w-20 rounded-full bg-gray-700" />
+              <Skeleton className="h-5 w-3/4 bg-gray-700" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   )

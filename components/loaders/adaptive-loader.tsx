@@ -1,67 +1,76 @@
 "use client"
 
 import { useMobileDetection } from "@/hooks/use-mobile-detection"
-import ProductLoader from "./product-loader"
-import CheckoutLoader from "./checkout-loader"
-import ProfileLoader from "./profile-loader"
-import SearchLoader from "./search-loader"
-import ChatLoader from "./chat-loader"
-import BrandLoader from "./brand-loader"
-
-// Mobile versions
-import MobileProductLoader from "./mobile/mobile-product-loader"
-import MobileCheckoutLoader from "./mobile/mobile-checkout-loader"
-import MobileProfileLoader from "./mobile/mobile-profile-loader"
-import MobileSearchLoader from "./mobile/mobile-search-loader"
-import MobileChatLoader from "./mobile/mobile-chat-loader"
-import MobileBrandLoader from "./mobile/mobile-brand-loader"
+import DesktopProductLoader from "./product-loader" // Changed to default import
+import MobileProductLoader from "./mobile/mobile-product-loader" // Changed to default import
+import DesktopProfileLoader from "./profile-loader" // Changed to default import
+import MobileProfileLoader from "./mobile/mobile-profile-loader" // Already default
+import { SearchLoader as DesktopSearchLoader } from "./search-loader" // Keep named
+import MobileSearchLoader from "./mobile/mobile-search-loader" // Already default
+import { ChatLoader as DesktopChatLoader } from "./chat-loader" // Keep named
+import MobileChatLoader from "./mobile/mobile-chat-loader" // Already default
+import { BrandLoader as DesktopBrandLoader } from "./brand-loader" // Keep named
+import MobileBrandLoader from "./mobile/mobile-brand-loader" // Already default
+import { CheckoutLoader as DesktopCheckoutLoader } from "./checkout-loader" // Keep named
+import MobileCheckoutLoader from "./mobile/mobile-checkout-loader" // Already default
+import { ImageLoader as DesktopImageLoader } from "./image-loader" // Keep named
+import { FormLoader as DesktopFormLoader } from "./form-loader" // Keep named
+import { LoadingSpinner as DesktopLoadingSpinner } from "./loading-spinner" // Keep named
 
 interface AdaptiveLoaderProps {
-  type: "product" | "checkout" | "profile" | "search" | "chat" | "brand"
+  type: "product" | "profile" | "search" | "chat" | "brand" | "checkout" | "image" | "form" | "spinner"
+  message?: string
   size?: "sm" | "md" | "lg"
-  context?: Record<string, any>
+  pullToRefresh?: boolean // Only for product loader
 }
 
-export default function AdaptiveLoader({ type, size = "md", context = {} }: AdaptiveLoaderProps) {
-  const { isMobile, touchSupport } = useMobileDetection()
+export default function AdaptiveLoader({ type, message, size, pullToRefresh }: AdaptiveLoaderProps) {
+  const { isMobile } = useMobileDetection()
 
-  // Use mobile versions for mobile devices or touch-enabled devices
-  const useMobileVersion = isMobile || touchSupport
-
-  if (useMobileVersion) {
-    switch (type) {
-      case "product":
-        return <MobileProductLoader size={size} {...context} />
-      case "checkout":
-        return <MobileCheckoutLoader size={size} {...context} />
-      case "profile":
-        return <MobileProfileLoader size={size} {...context} />
-      case "search":
-        return <MobileSearchLoader size={size} {...context} />
-      case "chat":
-        return <MobileChatLoader size={size} {...context} />
-      case "brand":
-        return <MobileBrandLoader size={size} {...context} />
-      default:
-        return <MobileProductLoader size={size} {...context} />
-    }
-  }
-
-  // Desktop versions
   switch (type) {
     case "product":
-      return <ProductLoader size={size} {...context} />
-    case "checkout":
-      return <CheckoutLoader size={size} {...context} />
+      return isMobile ? (
+        <MobileProductLoader message={message} size={size} pullToRefresh={pullToRefresh} />
+      ) : (
+        <DesktopProductLoader message={message} size={size} />
+      )
     case "profile":
-      return <ProfileLoader size={size} {...context} />
+      return isMobile ? (
+        <MobileProfileLoader message={message} />
+      ) : (
+        <DesktopProfileLoader message={message} />
+      )
     case "search":
-      return <SearchLoader size={size} {...context} />
+      return isMobile ? (
+        <MobileSearchLoader message={message} />
+      ) : (
+        <DesktopSearchLoader message={message} />
+      )
     case "chat":
-      return <ChatLoader size={size} {...context} />
+      return isMobile ? (
+        <MobileChatLoader message={message} />
+      ) : (
+        <DesktopChatLoader message={message} />
+      )
     case "brand":
-      return <BrandLoader size={size} {...context} />
+      return isMobile ? (
+        <MobileBrandLoader message={message} />
+      ) : (
+        <DesktopBrandLoader message={message} />
+      )
+    case "checkout":
+      return isMobile ? (
+        <MobileCheckoutLoader message={message} />
+      ) : (
+        <DesktopCheckoutLoader message={message} />
+      )
+    case "image":
+      return <DesktopImageLoader message={message} />
+    case "form":
+      return <DesktopFormLoader message={message} />
+    case "spinner":
+      return <DesktopLoadingSpinner message={message} />
     default:
-      return <ProductLoader size={size} {...context} />
+      return null
   }
 }

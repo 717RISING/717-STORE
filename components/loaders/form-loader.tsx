@@ -1,29 +1,26 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Send, CheckCircle, AlertCircle, Clock } from "lucide-react"
+import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface FormLoaderProps {
-  size?: "sm" | "md" | "lg"
-  type?: "sending" | "validating" | "success" | "error"
   message?: string
 }
 
-export default function FormLoader({
-  size = "md",
-  type = "sending",
-  message = "Enviando formulario...",
-}: FormLoaderProps) {
+export default function FormLoader({ message = "Enviando datos..." }: FormLoaderProps) {
   const [progress, setProgress] = useState(0)
   const [pulseIntensity, setPulseIntensity] = useState(1)
 
   const configs = {
     sending: { icon: Send, color: "from-[#4A1518] to-[#6B1E22]", message: message },
-    validating: { icon: Clock, color: "from-yellow-500 to-orange-500", message: "Validando datos..." },
+    validating: { icon: Loader2, color: "from-yellow-500 to-orange-500", message: "Validando datos..." },
     success: { icon: CheckCircle, color: "from-green-500 to-green-600", message: "¡Enviado correctamente!" },
     error: { icon: AlertCircle, color: "from-red-500 to-red-600", message: "Error al enviar" },
   }
 
+  const type = "sending" // Default type for now, can be updated based on requirements
   const config = configs[type]
   const IconComponent = config.icon
 
@@ -50,94 +47,63 @@ export default function FormLoader({
     lg: "w-16 h-16",
   }
 
+  const inputHeight = "h-10" // Default size for now, can be updated based on requirements
+  const buttonHeight = "h-11" // Default size for now, can be updated based on requirements
+
   return (
-    <div className="flex flex-col items-center justify-center space-y-6 p-8">
-      {/* Main Icon Container */}
-      <div className="relative">
-        <div className={`${sizeClasses[size]} relative`}>
-          {/* Background Circle */}
-          <div
-            className={`w-full h-full bg-gradient-to-br ${config.color} rounded-full flex items-center justify-center transition-transform duration-300`}
-            style={{ transform: `scale(${pulseIntensity})` }}
-          >
-            <IconComponent className="w-6 h-6 text-white animate-bounce" />
-          </div>
-
-          {/* Progress Ring */}
-          {(type === "sending" || type === "validating") && (
-            <svg className={`absolute inset-0 ${sizeClasses[size]} transform -rotate-90`}>
-              <circle cx="50%" cy="50%" r="45%" fill="none" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="2" />
-              <circle
-                cx="50%"
-                cy="50%"
-                r="45%"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeDasharray={`${2 * Math.PI * 45} ${2 * Math.PI * 45}`}
-                strokeDashoffset={`${2 * Math.PI * 45 * (1 - progress / 100)}`}
-                className="transition-all duration-300 ease-out"
-              />
-            </svg>
+    <div className="min-h-[calc(100vh-100px)] flex items-center justify-center bg-gray-950 p-4">
+      <Card className="w-full max-w-md shadow-lg bg-gray-800 border-gray-700">
+        <CardHeader className="text-center">
+          {type === "sending" || type === "validating" ? (
+            <IconComponent className="mx-auto h-12 w-12 text-[#5D1A1D] animate-spin" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br rounded-full flex items-center justify-center transition-transform duration-300">
+              <IconComponent className="w-6 h-6 text-white animate-bounce" />
+            </div>
           )}
-
-          {/* Success/Error Pulse */}
-          {(type === "success" || type === "error") && (
-            <div
-              className={`absolute inset-0 bg-gradient-to-br ${config.color} rounded-full animate-ping opacity-30`}
-            />
-          )}
-        </div>
-
-        {/* Floating Particles */}
-        {type === "sending" && (
-          <div className="absolute inset-0 pointer-events-none">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1 h-1 bg-white rounded-full animate-float"
-                style={{
-                  left: `${20 + i * 15}%`,
-                  top: `${30 + (i % 2) * 40}%`,
-                  animationDelay: `${i * 0.3}s`,
-                  animationDuration: `${2 + i * 0.2}s`,
-                }}
-              />
-            ))}
+          <CardTitle className="text-2xl font-bold text-white">{message}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            {type === "sending" || type === "validating" ? (
+              <>
+                <Skeleton className="h-10 w-full bg-gray-700" />
+                <Skeleton className="h-10 w-full bg-gray-700" />
+                <Skeleton className="h-24 w-full bg-gray-700" />
+              </>
+            ) : (
+              <div className="relative">
+                <div className="w-full h-full bg-gradient-to-br rounded-full flex items-center justify-center transition-transform duration-300">
+                  <IconComponent className="w-6 h-6 text-white animate-bounce" />
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      {/* Status Text */}
-      <div className="text-center">
-        <p className="text-white font-medium mb-2">{config.message}</p>
-
-        {(type === "sending" || type === "validating") && (
-          <>
+          {type === "sending" || type === "validating" ? (
+            <Skeleton className={`${buttonHeight} w-full bg-gray-700`} />
+          ) : (
             <div className="w-40 h-1 bg-gray-800 rounded-full overflow-hidden mb-2">
               <div
                 className={`h-full bg-gradient-to-r ${config.color} rounded-full transition-all duration-300 ease-out`}
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-gray-400 text-sm">{progress}% completado</p>
-          </>
-        )}
-
-        {type === "success" && (
-          <div className="flex items-center justify-center space-x-2 text-green-400">
-            <CheckCircle className="w-4 h-4" />
-            <span className="text-sm">Operación exitosa</span>
+          )}
+          <div className="flex justify-between">
+            {type === "sending" || type === "validating" ? (
+              <>
+                <Skeleton className="h-4 w-1/3 bg-gray-700" />
+                <Skeleton className="h-4 w-1/4 bg-gray-700" />
+              </>
+            ) : (
+              <div className="flex items-center justify-center space-x-2 text-green-400">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm">Operación exitosa</span>
+              </div>
+            )}
           </div>
-        )}
-
-        {type === "error" && (
-          <div className="flex items-center justify-center space-x-2 text-red-400">
-            <AlertCircle className="w-4 h-4" />
-            <span className="text-sm">Intenta nuevamente</span>
-          </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

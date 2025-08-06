@@ -1,606 +1,141 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Smartphone, Tablet, Monitor, Wifi, Battery, Signal } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
+import { useMobileDetection } from "@/hooks/use-mobile-detection"
 import { cn } from "@/lib/utils"
 
-interface DeviceInfo {
-  userAgent: string
-  platform: string
-  deviceType: "mobile" | "tablet" | "desktop"
-  deviceModel: string
-  browser: string
-  browserVersion: string
-  screenWidth: number
-  screenHeight: number
-  devicePixelRatio: number
-  orientation: "portrait" | "landscape"
-  touchSupport: boolean
-  connectionType: string
-  batteryLevel?: number
-  isOnline: boolean
-}
-
-interface ViewportTest {
-  name: string
-  width: number
-  height: number
-  devicePixelRatio: number
-  icon: React.ReactNode
-}
-
-const DEVICE_PRESETS: ViewportTest[] = [
-  {
-    name: "iPhone SE",
-    width: 375,
-    height: 667,
-    devicePixelRatio: 2,
-    icon: <Smartphone className="w-4 h-4" />,
-  },
-  {
-    name: "iPhone 12/13/14",
-    width: 390,
-    height: 844,
-    devicePixelRatio: 3,
-    icon: <Smartphone className="w-4 h-4" />,
-  },
-  {
-    name: "iPhone 14 Pro Max",
-    width: 430,
-    height: 932,
-    devicePixelRatio: 3,
-    icon: <Smartphone className="w-4 h-4" />,
-  },
-  {
-    name: "Samsung Galaxy S21",
-    width: 384,
-    height: 854,
-    devicePixelRatio: 2.75,
-    icon: <Smartphone className="w-4 h-4" />,
-  },
-  {
-    name: "iPad",
-    width: 768,
-    height: 1024,
-    devicePixelRatio: 2,
-    icon: <Tablet className="w-4 h-4" />,
-  },
-  {
-    name: "iPad Pro",
-    width: 1024,
-    height: 1366,
-    devicePixelRatio: 2,
-    icon: <Tablet className="w-4 h-4" />,
-  },
-  {
-    name: "Desktop",
-    width: 1920,
-    height: 1080,
-    devicePixelRatio: 1,
-    icon: <Monitor className="w-4 h-4" />,
-  },
-]
-
 export default function DeviceTestingSuite() {
-  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null)
-  const [selectedPreset, setSelectedPreset] = useState<ViewportTest | null>(null)
-  const [testResults, setTestResults] = useState<string[]>([])
-  const [width, setWidth] = useState(375) // Default to iPhone SE width
-  const [height, setHeight] = useState(667) // Default to iPhone SE height
-  const [url, setUrl] = useState("/") // Default to homepage
-
-  const devices = [
-    { name: "iPhone SE", width: 375, height: 667 },
-    { name: "iPhone 12 Pro", width: 390, height: 844 },
-    { name: "iPad Mini", width: 768, height: 1024 },
-    { name: "iPad Pro", width: 1024, height: 1366 },
-    { name: "Desktop (Small)", width: 1280, height: 800 },
-    { name: "Desktop (Large)", width: 1920, height: 1080 },
-  ]
-
-  const handleDeviceChange = (value: string) => {
-    const [w, h] = value.split("x").map(Number)
-    setWidth(w)
-    setHeight(h)
-  }
+  const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0)
+  const [height, setHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0)
+  const { isMobile, isTablet, isDesktop } = useMobileDetection()
 
   useEffect(() => {
-    const getDeviceInfo = async (): Promise<DeviceInfo> => {
-      const ua = navigator.userAgent
-      const platform = navigator.platform
-
-      // Detect device type
-      let deviceType: "mobile" | "tablet" | "desktop" = "desktop"
-      let deviceModel = "Unknown"
-
-      if (/iPhone|iPod/.test(ua)) {
-        deviceType = "mobile"
-        deviceModel = ua.match(/iPhone OS [\d_]+/)?.[0] || "iPhone"
-      } else if (/iPad/.test(ua)) {
-        deviceType = "tablet"
-        deviceModel = "iPad"
-      } else if (/Android/.test(ua)) {
-        if (/Mobile/.test(ua)) {
-          deviceType = "mobile"
-          deviceModel = ua.match(/Android [\d.]+/)?.[0] || "Android Phone"
-        } else {
-          deviceType = "tablet"
-          deviceModel = "Android Tablet"
-        }
-      }
-
-      // Detect browser
-      let browser = "Unknown"
-      let browserVersion = "Unknown"
-
-      if (/Chrome/.test(ua)) {
-        browser = "Chrome"
-        browserVersion = ua.match(/Chrome\/([\d.]+)/)?.[1] || "Unknown"
-      } else if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
-        browser = "Safari"
-        browserVersion = ua.match(/Version\/([\d.]+)/)?.[1] || "Unknown"
-      } else if (/Firefox/.test(ua)) {
-        browser = "Firefox"
-        browserVersion = ua.match(/Firefox\/([\d.]+)/)?.[1] || "Unknown"
-      }
-
-      // Get connection info
-      const connection =
-        (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-      const connectionType = connection?.effectiveType || "unknown"
-
-      // Get battery info (if available)
-      let batteryLevel: number | undefined
-      try {
-        const battery = await (navigator as any).getBattery?.()
-        batteryLevel = battery?.level ? Math.round(battery.level * 100) : undefined
-      } catch (e) {
-        // Battery API not available
-      }
-
-      return {
-        userAgent: ua,
-        platform,
-        deviceType,
-        deviceModel,
-        browser,
-        browserVersion,
-        screenWidth: window.screen.width,
-        screenHeight: window.screen.height,
-        devicePixelRatio: window.devicePixelRatio,
-        orientation: window.innerHeight > window.innerWidth ? "portrait" : "landscape",
-        touchSupport: "ontouchstart" in window,
-        connectionType,
-        batteryLevel,
-        isOnline: navigator.onLine,
-      }
-    }
-
-    getDeviceInfo().then(setDeviceInfo)
-
     const handleResize = () => {
-      if (deviceInfo) {
-        setDeviceInfo((prev) =>
-          prev
-            ? {
-                ...prev,
-                orientation: window.innerHeight > window.innerWidth ? "portrait" : "landscape",
-              }
-            : null,
-        )
+      setWidth(window.innerWidth)
+      setHeight(window.innerHeight)
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleResize)
+      return () => window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
+  const handleWidthChange = (value: number[]) => {
+    if (typeof window !== "undefined") {
+      // This will only work if the window is a popup or if the browser allows it
+      try {
+        window.resizeTo(value[0], window.innerHeight)
+      } catch (e) {
+        console.warn("Window.resizeTo is blocked by browser security policies.", e)
       }
+      setWidth(value[0]) // Update state immediately for UI feedback
     }
-
-    const handleOnlineStatus = () => {
-      setDeviceInfo((prev) => (prev ? { ...prev, isOnline: navigator.onLine } : null))
-    }
-
-    window.addEventListener("resize", handleResize)
-    window.addEventListener("online", handleOnlineStatus)
-    window.addEventListener("offline", handleOnlineStatus)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      window.removeEventListener("online", handleOnlineStatus)
-      window.removeEventListener("offline", handleOnlineStatus)
-    }
-  }, [deviceInfo])
-
-  const runDeviceTests = () => {
-    const results: string[] = []
-
-    // Test touch support
-    if ("ontouchstart" in window) {
-      results.push("✅ Touch events supported")
-    } else {
-      results.push("❌ Touch events not supported")
-    }
-
-    // Test viewport meta tag
-    const viewportMeta = document.querySelector('meta[name="viewport"]')
-    if (viewportMeta) {
-      results.push("✅ Viewport meta tag present")
-    } else {
-      results.push("❌ Viewport meta tag missing")
-    }
-
-    // Test safe area support
-    const safeAreaTop = getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")
-    if (safeAreaTop) {
-      results.push("✅ Safe area insets supported")
-    } else {
-      results.push("⚠️ Safe area insets not detected")
-    }
-
-    // Test device pixel ratio
-    if (window.devicePixelRatio > 1) {
-      results.push(`✅ High DPI display detected (${window.devicePixelRatio}x)`)
-    } else {
-      results.push("ℹ️ Standard DPI display")
-    }
-
-    // Test orientation support
-    if ("orientation" in window) {
-      results.push("✅ Orientation API supported")
-    } else {
-      results.push("❌ Orientation API not supported")
-    }
-
-    // Test connection API
-    const connection = (navigator as any).connection
-    if (connection) {
-      results.push(`✅ Network info: ${connection.effectiveType || "unknown"}`)
-    } else {
-      results.push("❌ Network Connection API not supported")
-    }
-
-    // Test battery API
-    if ("getBattery" in navigator) {
-      results.push("✅ Battery API supported")
-    } else {
-      results.push("❌ Battery API not supported")
-    }
-
-    // Test WebP support
-    const canvas = document.createElement("canvas")
-    canvas.width = 1
-    canvas.height = 1
-    const webpSupport = canvas.toDataURL("image/webp").indexOf("data:image/webp") === 0
-    if (webpSupport) {
-      results.push("✅ WebP images supported")
-    } else {
-      results.push("❌ WebP images not supported")
-    }
-
-    setTestResults(results)
   }
 
-  const simulateViewport = (preset: ViewportTest) => {
-    setSelectedPreset(preset)
-    // In a real implementation, you would resize the viewport or create an iframe
-    console.log(`Simulating ${preset.name}: ${preset.width}x${preset.height}`)
+  const handleHeightChange = (value: number[]) => {
+    if (typeof window !== "undefined") {
+      try {
+        window.resizeTo(window.innerWidth, value[0])
+      } catch (e) {
+        console.warn("Window.resizeTo is blocked by browser security policies.", e)
+      }
+      setHeight(value[0]) // Update state immediately for UI feedback
+    }
   }
 
-  if (!deviceInfo) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-      </div>
-    )
+  const setPreset = (w: number, h: number) => {
+    if (typeof window !== "undefined") {
+      try {
+        window.resizeTo(w, h)
+      } catch (e) {
+        console.warn("Window.resizeTo is blocked by browser security policies.", e)
+      }
+      setWidth(w)
+      setHeight(h)
+    }
+  }
+
+  const getDeviceType = () => {
+    if (isMobile) return "Móvil"
+    if (isTablet) return "Tableta"
+    if (isDesktop) return "Escritorio"
+    return "Desconocido"
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Device Testing Suite</h1>
-        <p className="text-gray-400">Comprehensive testing for mobile devices</p>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
+      <Card className="w-full max-w-2xl shadow-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">Suite de Pruebas de Dispositivos</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-center text-lg font-medium">
+            <p>
+              Ancho Actual: <span className="font-bold">{width}px</span>
+            </p>
+            <p>
+              Alto Actual: <span className="font-bold">{height}px</span>
+            </p>
+            <p>
+              Tipo de Dispositivo Detectado: <span className="font-bold">{getDeviceType()}</span>
+            </p>
+          </div>
 
-      <div className="flex h-full flex-col bg-gray-950 text-white">
-        <div className="flex flex-wrap items-center justify-center gap-4 p-4">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="device-select" className="sr-only">
-              Seleccionar Dispositivo
-            </Label>
-            <Select onValueChange={handleDeviceChange} value={`${width}x${height}`}>
-              <SelectTrigger id="device-select" className="w-[180px] bg-gray-800 border-gray-700 text-white">
-                <SelectValue placeholder="Seleccionar Dispositivo" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                {devices.map((device) => (
-                  <SelectItem key={device.name} value={`${device.width}x${device.height}`}>
-                    {device.name} ({device.width}x{device.height})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="custom-width" className="sr-only">
-              Ancho Personalizado
-            </Label>
-            <Input
-              id="custom-width"
-              type="number"
-              placeholder="Ancho"
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
-              className="w-24 bg-gray-800 border-gray-700 text-white"
+          <div className="space-y-4">
+            <Label htmlFor="width-slider" className="text-gray-700 dark:text-gray-300">Ajustar Ancho</Label>
+            <Slider
+              id="width-slider"
+              min={320}
+              max={1920}
+              step={10}
+              value={[width]}
+              onValueChange={handleWidthChange}
+              className="w-full"
             />
-            <span className="text-gray-400">x</span>
-            <Label htmlFor="custom-height" className="sr-only">
-              Alto Personalizado
-            </Label>
-            <Input
-              id="custom-height"
-              type="number"
-              placeholder="Alto"
-              value={height}
-              onChange={(e) => setHeight(Number(e.target.value))}
-              className="w-24 bg-gray-800 border-gray-700 text-white"
+            <Label htmlFor="height-slider" className="text-gray-700 dark:text-gray-300">Ajustar Alto</Label>
+            <Slider
+              id="height-slider"
+              min={480}
+              max={1080}
+              step={10}
+              value={[height]}
+              onValueChange={handleHeightChange}
+              className="w-full"
             />
           </div>
-          <div className="flex items-center gap-2 flex-1 max-w-sm">
-            <Label htmlFor="url-input" className="sr-only">
-              URL
-            </Label>
-            <Input
-              id="url-input"
-              type="text"
-              placeholder="URL (ej. /productos)"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="flex-1 bg-gray-800 border-gray-700 text-white"
-            />
-            <Button onClick={() => setUrl(url)} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-              Ir
+
+          <div className="grid grid-cols-2 gap-4">
+            <Button onClick={() => setPreset(375, 667)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              iPhone 8 (375x667)
+            </Button>
+            <Button onClick={() => setPreset(414, 896)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              iPhone XR (414x896)
+            </Button>
+            <Button onClick={() => setPreset(768, 1024)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              iPad (768x1024)
+            </Button>
+            <Button onClick={() => setPreset(1024, 768)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              iPad Horizontal (1024x768)
+            </Button>
+            <Button onClick={() => setPreset(1280, 800)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              Laptop (1280x800)
+            </Button>
+            <Button onClick={() => setPreset(1920, 1080)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              Full HD (1920x1080)
             </Button>
           </div>
-        </div>
 
-        <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
-          <div
-            className={cn(
-              "relative border-[16px] border-gray-800 rounded-[36px] shadow-2xl overflow-hidden bg-white",
-              "transition-all duration-300 ease-in-out",
-            )}
-            style={{ width: `${width}px`, height: `${height}px` }}
-          >
-            {/* Simulate device notch/bezel */}
-            {width < 768 && (
-              <>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/5 h-6 bg-gray-800 rounded-b-xl z-10"></div>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-gray-700 rounded-full z-10"></div>
-              </>
-            )}
-            <iframe
-              src={url}
-              title="Responsive Test Frame"
-              className="w-full h-full border-none"
-              style={{ transform: "scale(1)", transformOrigin: "top left" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <Tabs defaultValue="device-info" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="device-info">Device Info</TabsTrigger>
-          <TabsTrigger value="viewport-test">Viewport Test</TabsTrigger>
-          <TabsTrigger value="compatibility">Compatibility</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="device-info" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {deviceInfo.deviceType === "mobile" && <Smartphone className="w-5 h-5" />}
-                {deviceInfo.deviceType === "tablet" && <Tablet className="w-5 h-5" />}
-                {deviceInfo.deviceType === "desktop" && <Monitor className="w-5 h-5" />}
-                Current Device Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Device Details</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Type:</span>
-                      <Badge variant="outline">{deviceInfo.deviceType}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Model:</span>
-                      <span>{deviceInfo.deviceModel}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Platform:</span>
-                      <span>{deviceInfo.platform}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Browser:</span>
-                      <span>
-                        {deviceInfo.browser} {deviceInfo.browserVersion}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Display & Hardware</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Screen:</span>
-                      <span>
-                        {deviceInfo.screenWidth}×{deviceInfo.screenHeight}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Pixel Ratio:</span>
-                      <span>{deviceInfo.devicePixelRatio}x</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Orientation:</span>
-                      <Badge variant="outline">{deviceInfo.orientation}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Touch:</span>
-                      <Badge variant={deviceInfo.touchSupport ? "default" : "secondary"}>
-                        {deviceInfo.touchSupport ? "Supported" : "Not Supported"}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <h3 className="font-semibold mb-2">Network & Status</h3>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Wifi className="w-4 h-4" />
-                    <span>Connection: {deviceInfo.connectionType}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Signal className="w-4 h-4" />
-                    <Badge variant={deviceInfo.isOnline ? "default" : "destructive"}>
-                      {deviceInfo.isOnline ? "Online" : "Offline"}
-                    </Badge>
-                  </div>
-                  {deviceInfo.batteryLevel && (
-                    <div className="flex items-center gap-2">
-                      <Battery className="w-4 h-4" />
-                      <span>Battery: {deviceInfo.batteryLevel}%</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="viewport-test" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Viewport Simulation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                {DEVICE_PRESETS.map((preset) => (
-                  <Button
-                    key={preset.name}
-                    variant={selectedPreset?.name === preset.name ? "default" : "outline"}
-                    className="flex items-center gap-2 h-auto p-4"
-                    onClick={() => simulateViewport(preset)}
-                  >
-                    {preset.icon}
-                    <div className="text-left">
-                      <div className="font-semibold">{preset.name}</div>
-                      <div className="text-xs opacity-70">
-                        {preset.width}×{preset.height} ({preset.devicePixelRatio}x)
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-
-              {selectedPreset && (
-                <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-                  <h3 className="font-semibold mb-2">Simulating: {selectedPreset.name}</h3>
-                  <div className="text-sm space-y-1">
-                    <div>
-                      Viewport: {selectedPreset.width}×{selectedPreset.height}
-                    </div>
-                    <div>Device Pixel Ratio: {selectedPreset.devicePixelRatio}x</div>
-                    <div>
-                      Effective Resolution: {selectedPreset.width * selectedPreset.devicePixelRatio}×
-                      {selectedPreset.height * selectedPreset.devicePixelRatio}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="compatibility" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Compatibility Tests</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={runDeviceTests} className="mb-4">
-                Run Compatibility Tests
-              </Button>
-
-              {testResults.length > 0 && (
-                <div className="space-y-2">
-                  {testResults.map((result, index) => (
-                    <div key={index} className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono">
-                      {result}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="performance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Memory Usage</h3>
-                  <div className="text-sm space-y-1">
-                    <div>
-                      Used JS Heap:{" "}
-                      {((window.performance as any).memory?.usedJSHeapSize / 1024 / 1024).toFixed(2) || "N/A"} MB
-                    </div>
-                    <div>
-                      Total JS Heap:{" "}
-                      {((window.performance as any).memory?.totalJSHeapSize / 1024 / 1024).toFixed(2) || "N/A"} MB
-                    </div>
-                    <div>
-                      Heap Limit:{" "}
-                      {((window.performance as any).memory?.jsHeapSizeLimit / 1024 / 1024).toFixed(2) || "N/A"} MB
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Navigation Timing</h3>
-                  <div className="text-sm space-y-1">
-                    <div>
-                      DOM Content Loaded:{" "}
-                      {window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart}ms
-                    </div>
-                    <div>
-                      Page Load: {window.performance.timing.loadEventEnd - window.performance.timing.navigationStart}ms
-                    </div>
-                    <div>
-                      DNS Lookup:{" "}
-                      {window.performance.timing.domainLookupEnd - window.performance.timing.domainLookupStart}ms
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+            Nota: La funcionalidad de redimensionamiento de la ventana puede ser limitada o comportarse de manera
+            diferente en algunos entornos de navegador o si no se ejecuta en una ventana de navegador independiente.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

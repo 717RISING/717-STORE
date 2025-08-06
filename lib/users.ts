@@ -1,87 +1,80 @@
-// lib/users.ts
-// Este archivo maneja la lógica de autenticación y gestión de usuarios.
+import { sql } from "@vercel/postgres"
+import { User } from "@/lib/types"
 
-import { getUserFromDatabase, saveUserToDatabase, ADMIN_USER, type User as DBUser } from "./database"
-
-// Interfaz para el usuario (sin el hash de contraseña para el frontend)
-export interface User {
-  id: string
-  name: string
-  email: string
-  role: "admin" | "user"
-  createdAt: string // No está en DBUser, pero se puede añadir si es necesario
-}
-
-// Función para verificar credenciales de usuario
-export async function verifyUserCredentials(email: string, password: string): Promise<DBUser | null> {
+export async function getUserById(id: string): Promise<User | null> {
   try {
-    // Verificar admin primero (usando la contraseña en texto plano del mock)
-    if (email === ADMIN_USER.email && password === ADMIN_USER.passwordHash) {
-      return ADMIN_USER
-    }
-
-    // Buscar en la base de datos mock para otros usuarios (si los hubiera)
-    const user = await getUserFromDatabase(email)
-    if (user && user.passwordHash === password) {
-      return user
-    }
-
-    return null
+    const result = await sql`SELECT * FROM users WHERE id = ${id}`
+    return result.rows[0] as User || null
   } catch (error) {
-    console.error("Error verifying user credentials:", error)
+    console.error("Error fetching user by ID:", error)
     return null
   }
 }
 
-// Función para registrar un nuevo usuario
-export async function registerUser(name: string, email: string, password: string): Promise<DBUser | null> {
+export async function getUserByEmail(email: string): Promise<User | null> {
   try {
-    // Verificar si el email ya existe
-    const existingUser = await getUserFromDatabase(email)
-    if (existingUser) {
-      return null // Email ya registrado
-    }
-
-    // Crear nuevo usuario
-    const newUser: DBUser = {
-      id: `user-${Date.now()}`,
-      name,
-      email,
-      passwordHash: password, // ¡En producción, hashear la contraseña!
-      isAdmin: false,
-      addresses: [],
-      wishlist: [],
-    }
-
-    // Guardar en la base de datos mock
-    await saveUserToDatabase(newUser)
-    return newUser
+    const result = await sql`SELECT * FROM users WHERE email = ${email}`
+    return result.rows[0] as User || null
   } catch (error) {
-    console.error("Error registering user:", error)
+    console.error("Error fetching user by email:", error)
     return null
   }
 }
 
-// Función para verificar si un usuario es admin
-export async function isAdmin(email: string): Promise<boolean> {
+export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User | null> {
   try {
-    const user = await getUserFromDatabase(email)
-    return user?.isAdmin || false
+    const result = await sql`
+      INSERT INTO users (name, email, password, role)
+      VALUES (${user.name}, ${user.email}, ${user.password}, ${user.role})
+      RETURNING *
+    `
+    return result.rows[0] as User || null
   } catch (error) {
-    console.error("Error checking admin status:", error)
+    console.error("Error creating user:", error)
+    return null
+  }
+}
+
+export async function updateUser(id: string, updates: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>): Promise<User | null> {
+  try {
+    const setClauses = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 2}`)
+      .join(", ")
+    const values = Object.values(updates)
+
+    if (values.length === 0) {
+      return await getUserById(id) // No updates, just return current user
+    }
+
+    const result = await sql`
+      UPDATE users
+      SET ${sql.raw(setClauses)}
+      WHERE id = ${id}
+      RETURNING *
+    `
+    return result.rows[0] as User || null
+  } catch (error) {
+    console.error("Error updating user:", error)
+    return null
+  }
+}
+
+export async function deleteUser(id: string): Promise<boolean> {
+  try {
+    const result = await sql`DELETE FROM users WHERE id = ${id}`
+    return result.rowCount > 0
+  } catch (error) {
+    console.error("Error deleting user:", error)
     return false
   }
 }
 
-// Función para obtener todos los usuarios (solo para admin)
-export async function getAllUsers(): Promise<DBUser[]> {
-  // En un entorno real, esto obtendría todos los usuarios de la base de datos
-  // Por ahora, devuelve los usuarios del mock db
-  return (await import("./database")).db.users
-}
-
-// Función para obtener un usuario por ID
-export async function getUserById(id: string): Promise<DBUser | null> {
-  // En un entorno real, buscaría por ID en la base de datos
-  return (await import("./database")).db.users.find((user) => user.id === id) || null
+export async function getAllUsers(): Promise<User[]> {
+  try {
+    const result = await sql`SELECT * FROM users ORDER BY created_at DESC`
+    return result.rows as User[]
+  } catch (error) {
+    console.error("Error fetching all users:", error)
+    return []
+  }
 }

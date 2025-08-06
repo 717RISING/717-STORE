@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from "react"
 import { createContext } from "react"
+import { useTheme } from "next-themes"
 
 type Theme = "dark" | "light"
 
@@ -17,8 +18,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 export { ThemeContext }
 
 export function useThemeSafe() {
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [theme, setThemeState] = useState<Theme>("dark")
 
   useEffect(() => {
     setMounted(true)
@@ -30,14 +31,15 @@ export function useThemeSafe() {
   if (!mounted || !context) {
     return {
       theme: "dark" as Theme,
-      toggleTheme: () => {},
       setTheme: () => {},
+      resolvedTheme: "dark" as Theme,
       mounted: false,
     }
   }
 
   return {
     ...context,
+    resolvedTheme,
     mounted: true,
   }
 }

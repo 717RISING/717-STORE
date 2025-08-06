@@ -1,193 +1,154 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { calculateRecommendedSize } from "@/lib/size-calculator"
+import type React from "react"
 
-interface UserMeasurements {
-  height: number
-  weight: number
-  chest: number
-  waist: number
-  hips: number
-  productType: string
-  fitPreference: string
-}
+import { useState } from "react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { calculateRecommendedSize } from "@/lib/size-calculator"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function SizeCalculator() {
-  const [measurements, setMeasurements] = useState<UserMeasurements>({
-    height: 0,
-    weight: 0,
-    chest: 0,
-    waist: 0,
-    hips: 0,
-    productType: "camiseta",
-    fitPreference: "regular",
-  })
+  const [gender, setGender] = useState<"male" | "female" | "unisex">("unisex")
+  const [height, setHeight] = useState("")
+  const [weight, setWeight] = useState("")
+  const [chest, setChest] = useState("")
+  const [waist, setWaist] = useState("")
+  const [recommendedSize, setRecommendedSize] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const [result, setResult] = useState<any>(null)
-  const [isCalculating, setIsCalculating] = useState(false)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setRecommendedSize(null)
 
-  const handleInputChange = (field: keyof UserMeasurements, value: string | number) => {
-    setMeasurements((prev) => ({
-      ...prev,
-      [field]: typeof value === "string" ? value : Number(value),
-    }))
+    const heightNum = Number.parseFloat(height)
+    const weightNum = Number.parseFloat(weight)
+    const chestNum = Number.parseFloat(chest)
+    const waistNum = Number.parseFloat(waist)
+
+    if (
+      isNaN(heightNum) ||
+      isNaN(weightNum) ||
+      isNaN(chestNum) ||
+      isNaN(waistNum) ||
+      heightNum <= 0 ||
+      weightNum <= 0 ||
+      chestNum <= 0 ||
+      waistNum <= 0
+    ) {
+      setError("Por favor, introduce valores numéricos válidos y positivos para todas las medidas.")
+      return
+    }
+
+    const size = calculateRecommendedSize({
+      gender,
+      height: heightNum,
+      weight: weightNum,
+      chest: chestNum,
+      waist: waistNum,
+    })
+    setRecommendedSize(size)
   }
-
-  const handleCalculate = () => {
-    setIsCalculating(true)
-
-    // Simular cálculo
-    setTimeout(() => {
-      const recommendation = calculateRecommendedSize(measurements)
-      setResult(recommendation)
-      setIsCalculating(false)
-    }, 1000)
-  }
-
-  const isFormValid =
-    measurements.height > 0 && measurements.weight > 0 && measurements.chest > 0 && measurements.waist > 0
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Datos Básicos */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Datos Básicos</h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Altura (cm)</label>
-            <input
-              type="number"
-              placeholder="170"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("height", e.target.value)}
-            />
+    <Card className="bg-gray-800 border-gray-700 text-white p-6">
+      <CardContent className="grid gap-6">
+        <form onSubmit={handleSubmit} className="grid gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="gender" className="text-gray-300">
+              Género
+            </Label>
+            <Select value={gender} onValueChange={(value: "male" | "female" | "unisex") => setGender(value)}>
+              <SelectTrigger id="gender" className="bg-gray-700 border-gray-600 text-white">
+                <SelectValue placeholder="Selecciona tu género" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-700 border-gray-600 text-white">
+                <SelectItem value="male">Masculino</SelectItem>
+                <SelectItem value="female">Femenino</SelectItem>
+                <SelectItem value="unisex">Unisex</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Peso (kg)</label>
-            <input
-              type="number"
-              placeholder="70"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("weight", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Tipo de Producto</label>
-            <select
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("productType", e.target.value)}
-            >
-              <option value="camiseta">Camiseta / T-Shirt</option>
-              <option value="hoodie">Hoodie / Sudadera</option>
-              <option value="pantalon">Pantalón / Jeans</option>
-              <option value="gorra">Gorra</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Medidas Específicas */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Medidas Específicas</h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Pecho/Busto (cm)</label>
-            <input
-              type="number"
-              placeholder="96"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("chest", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Cintura (cm)</label>
-            <input
-              type="number"
-              placeholder="81"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("waist", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Cadera (cm) - Opcional</label>
-            <input
-              type="number"
-              placeholder="96"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("hips", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Preferencia de Ajuste</label>
-            <select
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#5D1A1D]"
-              onChange={(e) => handleInputChange("fitPreference", e.target.value)}
-            >
-              <option value="ajustado">Ajustado</option>
-              <option value="regular">Regular</option>
-              <option value="holgado">Holgado</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Botón de Cálculo */}
-      <div className="text-center">
-        <Button
-          onClick={handleCalculate}
-          disabled={!isFormValid || isCalculating}
-          className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] px-8 py-3"
-        >
-          {isCalculating ? "Calculando..." : "Calcular Mi Talla"}
-        </Button>
-      </div>
-
-      {/* Resultado */}
-      {result && (
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="text-center mb-4">
-              <h3 className="text-2xl font-bold text-white mb-2">Tu Talla Recomendada</h3>
-              <Badge className="bg-[#5D1A1D] text-white text-2xl px-6 py-2">{result.recommendedSize}</Badge>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="height" className="text-gray-300">
+                Altura (cm)
+              </Label>
+              <Input
+                id="height"
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                placeholder="Ej: 175"
+                className="bg-gray-700 border-gray-600 text-white"
+              />
             </div>
-
-            <div className="space-y-4 text-gray-300">
-              <div>
-                <h4 className="font-semibold text-white mb-2">¿Por qué esta talla?</h4>
-                <p>{result.explanation}</p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-white mb-2">Consejos adicionales:</h4>
-                <ul className="space-y-1">
-                  {result.tips.map((tip: string, index: number) => (
-                    <li key={index}>• {tip}</li>
-                  ))}
-                </ul>
-              </div>
-
-              {result.alternativeSize && (
-                <div>
-                  <h4 className="font-semibold text-white mb-2">Talla alternativa:</h4>
-                  <p>
-                    También podrías considerar la talla <strong>{result.alternativeSize}</strong>{" "}
-                    {result.alternativeReason}
-                  </p>
-                </div>
-              )}
+            <div className="grid gap-2">
+              <Label htmlFor="weight" className="text-gray-300">
+                Peso (kg)
+              </Label>
+              <Input
+                id="weight"
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="Ej: 70"
+                className="bg-gray-700 border-gray-600 text-white"
+              />
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="chest" className="text-gray-300">
+                Contorno de Pecho (cm)
+              </Label>
+              <Input
+                id="chest"
+                type="number"
+                value={chest}
+                onChange={(e) => setChest(e.target.value)}
+                placeholder="Ej: 98"
+                className="bg-gray-700 border-gray-600 text-white"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="waist" className="text-gray-300">
+                Contorno de Cintura (cm)
+              </Label>
+              <Input
+                id="waist"
+                type="number"
+                value={waist}
+                onChange={(e) => setWaist(e.target.value)}
+                placeholder="Ej: 82"
+                className="bg-gray-700 border-gray-600 text-white"
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          <Button type="submit" className="w-full bg-[#5D1A1D] hover:bg-[#4a1518] text-white">
+            Calcular Talla Recomendada
+          </Button>
+        </form>
+
+        {recommendedSize && (
+          <div className="mt-6 p-4 bg-gray-700 rounded-md text-center">
+            <p className="text-lg font-semibold text-white">Tu talla recomendada es:</p>
+            <p className="text-5xl font-bold text-[#5D1A1D] mt-2">{recommendedSize}</p>
+            <p className="text-sm text-gray-300 mt-2">
+              Esta es una recomendación basada en tus medidas. Para un ajuste más holgado, considera una talla más
+              grande.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

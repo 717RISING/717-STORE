@@ -6,33 +6,33 @@ import { useState } from "react"
 interface ImageWithFallbackProps {
   src: string
   alt: string
-  width: number
-  height: number
-  className?: string
   fallbackSrc?: string
+  width?: number
+  height?: number
+  fill?: boolean
+  className?: string
+  sizes?: string
   priority?: boolean
 }
 
 export default function ImageWithFallback({
   src,
   alt,
-  width,
-  height,
-  className,
-  fallbackSrc = "/placeholder.svg", // Default fallback
-  priority = false,
+  fallbackSrc = "/placeholder.svg",
+  ...props
 }: ImageWithFallbackProps) {
   const [imgSrc, setImgSrc] = useState(src)
 
   return (
     <Image
+      {...props}
       src={imgSrc || "/placeholder.svg"}
       alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      onError={() => setImgSrc(fallbackSrc)}
-      priority={priority}
+      onError={() => {
+        if (imgSrc !== fallbackSrc) {
+          setImgSrc(fallbackSrc)
+        }
+      }}
     />
   )
 }

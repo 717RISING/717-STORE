@@ -3,35 +3,36 @@
 import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { cn } from "@/lib/utils"
 
 const slides = [
   {
     id: 1,
     image: "/slider-1.png",
-    alt: "Colección de ropa urbana 717",
-    title: "Nueva Colección Urbana",
-    description: "Descubre los diseños más frescos para tu estilo.",
+    alt: "Colección de Verano 717 Store",
+    title: "Nueva Colección de Verano",
+    description: "Descubre las últimas tendencias y piezas exclusivas para esta temporada.",
     buttonText: "Comprar Ahora",
-    buttonLink: "/productos",
+    link: "/productos",
   },
   {
     id: 2,
     image: "/slider-2.png",
-    alt: "Ofertas especiales en 717 Store",
+    alt: "Ofertas Especiales 717 Store",
     title: "Ofertas Exclusivas",
-    description: "No te pierdas nuestros descuentos por tiempo limitado.",
+    description: "No te pierdas nuestros descuentos por tiempo limitado en artículos seleccionados.",
     buttonText: "Ver Ofertas",
-    buttonLink: "/productos",
+    link: "/productos?filter=ofertas",
   },
   {
     id: 3,
     image: "/slider-3.png",
-    alt: "Ropa de alta calidad 717",
-    title: "Calidad que Sientes",
-    description: "Prendas diseñadas para durar y destacar.",
-    buttonText: "Conocer Más",
-    buttonLink: "/productos",
+    alt: "Lanzamientos Recientes 717 Store",
+    title: "Lanzamientos Recientes",
+    description: "Sé el primero en tener lo más nuevo de 717 Store. ¡Stock limitado!",
+    buttonText: "Explorar",
+    link: "/productos?filter=nuevos",
   },
 ]
 
@@ -40,81 +41,83 @@ export default function HeroSlider() {
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length)
-  }, [])
+  }, [slides.length])
 
   const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
-  }, [])
+  }, [slides.length])
 
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000) // Cambia de slide cada 5 segundos
+    const interval = setInterval(nextSlide, 5000) // Auto-advance every 5 seconds
     return () => clearInterval(interval)
   }, [nextSlide])
 
   return (
-    <div className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden">
+    <section className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden">
       {slides.map((slide, index) => (
         <div
           key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
+          className={cn(
+            "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+            index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+          )}
         >
           <Image
             src={slide.image || "/placeholder.svg"}
             alt={slide.alt}
             fill
-            priority={index === 0} // Carga prioritaria para la primera imagen
+            priority={index === 0} // Prioritize loading the first image
             className="object-cover object-center"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
           />
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 animate-fade-in-up">{slide.title}</h2>
-            <p className="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl animate-fade-in-up delay-200">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 animate-fade-in-up">
+              {slide.title}
+            </h2>
+            <p className="text-lg md:text-xl text-white/90 max-w-2xl mb-8 animate-fade-in-up delay-200">
               {slide.description}
             </p>
-            <Button
-              className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] text-lg px-8 py-3 rounded-full animate-fade-in-up delay-400"
-              asChild
-            >
-              <a href={slide.buttonLink}>{slide.buttonText}</a>
+            <Button asChild className="bg-[#4A1518] hover:bg-[#6B1E22] text-white text-lg px-8 py-3 animate-fade-in-up delay-400">
+              <Link href={slide.link}>{slide.buttonText}</Link>
             </Button>
           </div>
         </div>
       ))}
 
-      {/* Navigation Buttons */}
+      {/* Navigation Arrows */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white hover:bg-white/20 rounded-full p-2 z-10"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/30 hover:bg-white/50 text-white rounded-full p-2"
         onClick={prevSlide}
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-8 h-8" />
+        <ChevronLeft className="h-8 w-8" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white hover:bg-white/20 rounded-full p-2 z-10"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/30 hover:bg-white/50 text-white rounded-full p-2"
         onClick={nextSlide}
         aria-label="Next slide"
       >
-        <ChevronRight className="w-8 h-8" />
+        <ChevronRight className="h-8 w-8" />
       </Button>
 
-      {/* Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+      {/* Dots Indicator */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
         {slides.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide ? "bg-white scale-125" : "bg-gray-400/70 hover:bg-white/70"
-            }`}
+            className={cn(
+              "h-3 w-3 rounded-full bg-white transition-all duration-300",
+              index === currentSlide ? "w-8 bg-[#4A1518]" : "bg-white/50"
+            )}
             onClick={() => setCurrentSlide(index)}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
-    </div>
+    </section>
   )
 }

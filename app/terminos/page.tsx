@@ -1,139 +1,90 @@
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function TerminosPage() {
+export default function TermsAndConditionsPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="px-4 py-6 border-b border-gray-800">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/">
-            <Button variant="ghost" className="text-white hover:text-gray-300 hover:bg-gray-900 mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al inicio
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold">Términos y Condiciones</h1>
-          <p className="text-gray-400 mt-2">Última actualización: Diciembre 2024</p>
-        </div>
-      </header>
+    <div className="min-h-[calc(100vh-100px)] bg-gray-950 text-white p-4 md:p-8 flex justify-center">
+      <Card className="w-full max-w-4xl bg-gray-900 border-gray-800 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-[#5D1A1D] text-center">Términos y Condiciones</CardTitle>
+        </CardHeader>
+        <CardContent className="prose prose-invert max-w-none text-gray-300">
+          <p>
+            Bienvenido a 717 Store. Al acceder y utilizar nuestro sitio web, aceptas cumplir y estar sujeto a los
+            siguientes términos y condiciones de uso. Por favor, léelos detenidamente.
+          </p>
 
-      {/* Content */}
-      <main className="px-4 py-12">
-        <div className="max-w-4xl mx-auto prose prose-invert prose-lg">
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">1. Aceptación de los Términos</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Al acceder y utilizar el sitio web de 717 Store, usted acepta estar sujeto a estos términos y condiciones
-              de uso. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestro sitio web.
-            </p>
-          </section>
+          <h2>1. Aceptación de los Términos</h2>
+          <p>
+            Al utilizar nuestro sitio web, confirmas que aceptas estos términos de uso y que te comprometes a
+            cumplirlos. Si no estás de acuerdo con estos términos, no debes utilizar nuestro sitio.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">2. Uso del Sitio Web</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Usted puede utilizar nuestro sitio web para fines legales únicamente. Está prohibido:
-            </p>
-            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-              <li>Usar el sitio de manera que pueda dañar, deshabilitar o sobrecargar el sitio</li>
-              <li>Intentar obtener acceso no autorizado a cualquier parte del sitio</li>
-              <li>Usar el sitio para transmitir material ofensivo o ilegal</li>
-              <li>Violar cualquier ley local, nacional o internacional aplicable</li>
-            </ul>
-          </section>
+          <h2>2. Cambios en los Términos</h2>
+          <p>
+            Nos reservamos el derecho de revisar y modificar estos términos de uso en cualquier momento. Es tu
+            responsabilidad revisar periódicamente estos términos para estar al tanto de cualquier cambio. El uso
+            continuado del sitio después de la publicación de cambios significa que aceptas y estás de acuerdo con los
+            cambios.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">3. Productos y Precios</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Todos los productos están sujetos a disponibilidad. Los precios pueden cambiar sin previo aviso. Nos
-              reservamos el derecho de modificar o discontinuar productos en cualquier momento.
-            </p>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Los precios mostrados incluyen impuestos aplicables. Los costos de envío se calculan al momento del
-              checkout.
-            </p>
-          </section>
+          <h2>3. Acceso al Sitio</h2>
+          <p>
+            Nuestro sitio se pone a tu disposición de forma gratuita. No garantizamos que nuestro sitio, o cualquier
+            contenido en él, esté siempre disponible o sea ininterrumpido. Podemos suspender o retirar la disponibilidad
+            de todo o parte de nuestro sitio por razones comerciales y operativas.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">4. Pedidos y Pagos</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">Al realizar un pedido, usted garantiza que:</p>
-            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-              <li>Tiene la autoridad legal para realizar la compra</li>
-              <li>La información proporcionada es verdadera y precisa</li>
-              <li>El método de pago utilizado es válido y le pertenece</li>
-            </ul>
-            <p className="text-gray-300 leading-relaxed mt-4">
-              Nos reservamos el derecho de rechazar o cancelar pedidos por cualquier motivo.
-            </p>
-          </section>
+          <h2>4. Tu Cuenta</h2>
+          <p>
+            Si creas una cuenta en nuestro sitio, eres responsable de mantener la confidencialidad de tu información de
+            inicio de sesión y de todas las actividades que ocurran bajo tu cuenta. Nos reservamos el derecho de
+            suspender o cancelar cuentas a nuestra discreción.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">5. Envíos y Entregas</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Los tiempos de entrega son estimados y pueden variar. No somos responsables por retrasos causados por
-              terceros o circunstancias fuera de nuestro control.
-            </p>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              El riesgo de pérdida o daño pasa al comprador una vez que el producto es entregado al transportista.
-            </p>
-          </section>
+          <h2>5. Propiedad Intelectual</h2>
+          <p>
+            Todo el contenido de este sitio, incluyendo textos, gráficos, logotipos, iconos, imágenes, clips de audio,
+            descargas digitales y software, es propiedad de 717 Store o de sus proveedores de contenido y está protegido
+            por las leyes de derechos de autor internacionales.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">6. Devoluciones y Reembolsos</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Aceptamos devoluciones dentro de los 30 días posteriores a la compra, siempre que los productos estén en
-              su estado original y con las etiquetas intactas.
-            </p>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Los costos de envío para devoluciones corren por cuenta del cliente, excepto en casos de productos
-              defectuosos.
-            </p>
-          </section>
+          <h2>6. Uso Prohibido</h2>
+          <p>
+            No puedes utilizar nuestro sitio para fines ilegales o no autorizados. No debes, en el uso del Servicio,
+            violar ninguna ley en tu jurisdicción (incluyendo, entre otras, las leyes de derechos de autor).
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">7. Propiedad Intelectual</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Todo el contenido del sitio web, incluyendo textos, gráficos, logos, imágenes y software, es propiedad de
-              717 Store y está protegido por las leyes de derechos de autor y marcas registradas.
-            </p>
-          </section>
+          <h2>7. Limitación de Responsabilidad</h2>
+          <p>
+            En la medida máxima permitida por la ley, no seremos responsables ante ningún usuario por ninguna pérdida o
+            daño, ya sea contractual, extracontractual (incluida la negligencia), incumplimiento de un deber legal o de
+            otro tipo, incluso si es previsible, que surja de o en conexión con:
+          </p>
+          <ul>
+            <li>El uso o la imposibilidad de usar nuestro sitio.</li>
+            <li>El uso o la dependencia de cualquier contenido mostrado en nuestro sitio.</li>
+          </ul>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">8. Limitación de Responsabilidad</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              717 Store no será responsable por daños indirectos, incidentales, especiales o consecuentes que resulten
-              del uso o la imposibilidad de usar nuestros productos o servicios.
-            </p>
-          </section>
+          <h2>8. Enlaces a Terceros</h2>
+          <p>
+            Nuestro sitio puede contener enlaces a sitios web de terceros que no son operados por nosotros. No tenemos
+            control sobre el contenido, las políticas de privacidad o las prácticas de ningún sitio o servicio de
+            terceros.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">9. Modificaciones</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor
-              inmediatamente después de su publicación en el sitio web.
-            </p>
-          </section>
+          <h2>9. Ley Aplicable</h2>
+          <p>
+            Estos términos de uso, su objeto y su formación, se rigen por las leyes de [País/Jurisdicción]. Tú y
+            nosotros acordamos que los tribunales de [País/Jurisdicción] tendrán jurisdicción exclusiva.
+          </p>
 
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">10. Contacto</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Si tiene preguntas sobre estos términos y condiciones, puede contactarnos a través de:
-            </p>
-            <div className="bg-gray-900 p-6 rounded-lg">
-              <p className="text-white mb-2">
-                <strong>Email:</strong> legal@717store.com
-              </p>
-              <p className="text-white mb-2">
-                <strong>Teléfono:</strong> +1 (555) 717-0717
-              </p>
-              <p className="text-white">
-                <strong>Dirección:</strong> 717 Streetwear Ave, Fashion District, NY 10001
-              </p>
-            </div>
-          </section>
-        </div>
-      </main>
+          <h2>10. Contacto</h2>
+          <p>
+            Si tienes alguna pregunta sobre estos Términos y Condiciones, puedes contactarnos a través de nuestra página
+            de contacto.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

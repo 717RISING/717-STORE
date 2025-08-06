@@ -1,238 +1,192 @@
 "use client"
 
-import { useState } from "react"
-import { Search, Eye, Download, Package, Truck, CheckCircle, XCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getOrders, updateOrderStatus } from "@/lib/database" // Assuming these functions exist in lib/database.ts
+import { formatPrice } from "@/lib/products" // Import formatPrice
 
-const mockOrders = [
-  {
-    id: "ORD-001",
-    customer: "Juan Pérez",
-    email: "juan@email.com",
-    total: 125000,
-    status: "Entregado",
-    date: "2024-01-15",
-    items: 3,
-  },
-  {
-    id: "ORD-002",
-    customer: "María García",
-    email: "maria@email.com",
-    total: 85000,
-    status: "En Tránsito",
-    date: "2024-01-14",
-    items: 2,
-  },
-  {
-    id: "ORD-003",
-    customer: "Carlos López",
-    email: "carlos@email.com",
-    total: 65000,
-    status: "Procesando",
-    date: "2024-01-13",
-    items: 1,
-  },
-  {
-    id: "ORD-004",
-    customer: "Ana Martínez",
-    email: "ana@email.com",
-    total: 95000,
-    status: "Cancelado",
-    date: "2024-01-12",
-    items: 2,
-  },
-]
+interface OrderItem {
+  productId: string
+  name: string
+  quantity: number
+  price: number
+  size?: string
+  image?: string
+}
+
+interface Order {
+  id: string
+  userId: string
+  customerName: string
+  customerEmail: string
+  orderDate: string
+  totalAmount: number
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+  paymentStatus: "paid" | "pending" | "refunded"
+  shippingAddress: {
+    street: string
+    city: string
+    zip: string
+    country: string
+  }
+  items: OrderItem[]
+  channel?: string
+}
 
 export default function OrdersTab() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [orders, setOrders] = useState<Order[]>([])
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
+  const [newStatus, setNewStatus] = useState<Order["status"]>("pending")
 
-  const filteredOrders = mockOrders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  useEffect(() => {
+    fetchOrders()
+  }, [])
 
-  const getStatusBadge = (status: string) => {
+  const fetchOrders = async () => {
+    const fetchedOrders = await getOrders()
+    setOrders(fetchedOrders)
+  }
+
+  const openDialogForEdit = (order: Order) => {
+    setCurrentOrder(order)
+    setNewStatus(order.status)
+    setIsDialogOpen(true)
+  }
+
+  const handleStatusChange = async () => {
+    if (currentOrder) {
+      await updateOrderStatus(currentOrder.id, newStatus)
+      fetchOrders()
+      setIsDialogOpen(false)
+    }
+  }
+
+  const getStatusVariant = (status: Order["status"]) => {
     switch (status) {
-      case "Entregado":
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Entregado
-          </Badge>
-        )
-      case "En Tránsito":
-        return (
-          <Badge className="bg-blue-100 text-blue-800">
-            <Truck className="w-3 h-3 mr-1" />
-            En Tránsito
-          </Badge>
-        )
-      case "Procesando":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800">
-            <Package className="w-3 h-3 mr-1" />
-            Procesando
-          </Badge>
-        )
-      case "Cancelado":
-        return (
-          <Badge variant="destructive">
-            <XCircle className="w-3 h-3 mr-1" />
-            Cancelado
-          </Badge>
-        )
+      case "pending":
+        return "outline"
+      case "processing":
+        return "secondary"
+      case "shipped":
+        return "default"
+      case "delivered":
+        return "success" // Assuming a success variant exists or can be styled
+      case "cancelled":
+        return "destructive"
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return "outline"
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Gestión de Pedidos</h1>
-        <p className="text-gray-400">Administra y rastrea todos los pedidos de la tienda</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Pedidos</p>
-                <p className="text-2xl font-bold text-white">1,247</p>
-              </div>
-              <Package className="w-8 h-8 text-blue-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Procesando</p>
-                <p className="text-2xl font-bold text-yellow-400">23</p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                <Package className="w-4 h-4 text-yellow-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">En Tránsito</p>
-                <p className="text-2xl font-bold text-blue-400">45</p>
-              </div>
-              <Truck className="w-8 h-8 text-blue-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Entregados</p>
-                <p className="text-2xl font-bold text-green-400">1,179</p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-400" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar por ID o cliente..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-gray-800 border-gray-700 text-white"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48 bg-gray-800 border-gray-700 text-white">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="Procesando">Procesando</SelectItem>
-                <SelectItem value="En Tránsito">En Tránsito</SelectItem>
-                <SelectItem value="Entregado">Entregado</SelectItem>
-                <SelectItem value="Cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Orders Table */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Lista de Pedidos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-gray-800">
-                <TableHead className="text-gray-400">ID Pedido</TableHead>
-                <TableHead className="text-gray-400">Cliente</TableHead>
-                <TableHead className="text-gray-400">Fecha</TableHead>
-                <TableHead className="text-gray-400">Items</TableHead>
-                <TableHead className="text-gray-400">Total</TableHead>
-                <TableHead className="text-gray-400">Estado</TableHead>
-                <TableHead className="text-gray-400">Acciones</TableHead>
+    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Pedidos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID Pedido</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium text-gray-900 dark:text-white">{order.id}</TableCell>
+                <TableCell className="text-gray-700 dark:text-gray-300">{order.customerName}</TableCell>
+                <TableCell className="text-gray-900 dark:text-white">{formatPrice(order.totalAmount)}</TableCell>
+                <TableCell>
+                  <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                </TableCell>
+                <TableCell className="text-gray-700 dark:text-gray-300">
+                  {new Date(order.orderDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => openDialogForEdit(order)}>
+                    Ver/Editar
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id} className="border-gray-800">
-                  <TableCell className="font-medium text-white">{order.id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium text-white">{order.customer}</p>
-                      <p className="text-sm text-gray-400">{order.email}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-gray-300">{order.date}</TableCell>
-                  <TableCell className="text-gray-300">{order.items} items</TableCell>
-                  <TableCell className="text-gray-300">${order.total.toLocaleString()}</TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+            ))}
+          </TableBody>
+        </Table>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">Detalles del Pedido #{currentOrder?.id}</DialogTitle>
+            </DialogHeader>
+            {currentOrder && (
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right text-gray-700 dark:text-gray-300">Cliente:</Label>
+                  <span className="col-span-3 text-gray-900 dark:text-white">{currentOrder.customerName} ({currentOrder.customerEmail})</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right text-gray-700 dark:text-gray-300">Total:</Label>
+                  <span className="col-span-3 text-gray-900 dark:text-white">{formatPrice(currentOrder.totalAmount)}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right text-gray-700 dark:text-gray-300">Dirección:</Label>
+                  <span className="col-span-3 text-gray-900 dark:text-white">
+                    {currentOrder.shippingAddress.street}, {currentOrder.shippingAddress.city},{" "}
+                    {currentOrder.shippingAddress.zip}, {currentOrder.shippingAddress.country}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right text-gray-700 dark:text-gray-300">
+                    Estado:
+                  </Label>
+                  <Select value={newStatus} onValueChange={(value: Order["status"]) => setNewStatus(value)}>
+                    <SelectTrigger className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-700 text-gray-900 dark:text-white">
+                      <SelectItem value="pending">Pendiente</SelectItem>
+                      <SelectItem value="processing">Procesando</SelectItem>
+                      <SelectItem value="shipped">Enviado</SelectItem>
+                      <SelectItem value="delivered">Entregado</SelectItem>
+                      <SelectItem value="cancelled">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-4">
+                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Artículos:</h4>
+                  <ul className="space-y-1">
+                    {currentOrder.items.map((item, index) => (
+                      <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
+                        {item.name} (x{item.quantity}) - {formatPrice(item.price)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                type="submit"
+                onClick={handleStatusChange}
+                className="bg-[#4A1518] hover:bg-[#6B1E22] text-white"
+              >
+                Actualizar Estado
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
   )
 }

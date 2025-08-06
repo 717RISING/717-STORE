@@ -1,253 +1,142 @@
 "use client"
 
+import { Input } from "@/components/ui/input"
+
 import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
-import { ArrowLeft, Plus, Minus, ShoppingCart, User, Ruler } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Star, ShoppingCart, Heart } from "lucide-react"
+import { type Product, formatPrice } from "@/lib/products"
 import { useCart } from "@/lib/cart-context"
-import type { Product } from "@/lib/products"
 import { useToast } from "@/hooks/use-toast"
-import CartSidebar from "@/components/cart-sidebar"
-import MobileMenu from "@/components/mobile-menu"
 
 interface ProductDetailProps {
   product: Product
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {
-  const [selectedSize, setSelectedSize] = useState<string>("")
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes[0])
   const [quantity, setQuantity] = useState(1)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const { dispatch } = useCart()
+  const { addItem } = useCart()
   const { toast } = useToast()
 
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast({
-        title: "Selecciona una talla",
-        description: "Por favor selecciona una talla antes de agregar al carrito.",
+        title: "Error",
+        description: "Por favor, selecciona una talla.",
         variant: "destructive",
       })
       return
     }
-
-    dispatch({
-      type: "ADD_ITEM",
-      payload: {
-        id: `${product.id}-${selectedSize}`,
-        name: product.name,
-        price: product.price,
-        size: selectedSize,
-        quantity,
-        image: product.images[0],
-      },
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      selectedSize: selectedSize,
+      quantity: quantity,
     })
-
     toast({
-      title: "Producto agregado",
-      description: `${product.name} (${selectedSize}) agregado al carrito.`,
+      title: "Producto añadido",
+      description: `${quantity}x ${product.name} (${selectedSize}) añadido al carrito.`,
     })
   }
 
-  const incrementQuantity = () => setQuantity((prev) => prev + 1)
-  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1))
+  const availableStock = selectedSize ? product.stock[selectedSize] || 0 : 0
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <header className="px-4 py-6 bg-transparent border-b border-gray-800">
-        <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons Only */}
-          <div className="flex justify-end items-center mb-4">
-            <div className="flex items-center space-x-4">
-              <Link href="/login" className="text-white hover:text-gray-300 transition-colors">
-                <User className="w-6 h-6" />
-              </Link>
-              <CartSidebar />
-            </div>
-          </div>
-
-          {/* Center Logo */}
-          <div className="flex justify-center mb-6">
-            <Link href="/" className="flex items-center">
-              <div className="w-16 h-16 relative">
-                <Image
-                  src="/logo.png"
-                  alt="717 Logo"
-                  width={64}
-                  height={64}
-                  className="object-contain filter invert"
-                  priority
-                />
-              </div>
-            </Link>
-          </div>
-
-          {/* Bottom Row - Navigation Links */}
-          <div className="flex justify-center">
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-white hover:text-gray-300 transition-colors font-medium">
-                INICIO
-              </Link>
-              <Link href="/productos" className="text-white hover:text-gray-300 transition-colors font-medium">
-                PRODUCTOS
-              </Link>
-              <Link href="/contacto" className="text-white hover:text-gray-300 transition-colors font-medium">
-                CONTACTO
-              </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <MobileMenu />
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      {/* Breadcrumb */}
-      <div className="px-4 py-4">
-        <Link href="/productos" className="inline-flex items-center text-gray-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver a productos
-        </Link>
+    <div className="grid md:grid-cols-2 gap-8 lg:gap-12 p-4 md:p-8 bg-gray-950 text-white min-h-[calc(100vh-100px)]">
+      <div className="relative h-[400px] md:h-[550px] rounded-lg overflow-hidden shadow-lg">
+        <Image
+          src={product.imageUrl || "/placeholder.svg"}
+          alt={product.name}
+          fill
+          style={{ objectFit: "cover" }}
+          className="transition-transform duration-300 hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+        />
       </div>
+      <div className="flex flex-col justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-[#5D1A1D] mb-2">{product.name}</h1>
+          <p className="text-2xl font-semibold text-gray-200 mb-4">{formatPrice(product.price)}</p>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Images */}
-          <div className="space-y-4">
-            {/* Main Image */}
-            <div className="relative aspect-square bg-gray-900 rounded-lg overflow-hidden">
-              <Image
-                src={product.images[selectedImageIndex] || "/placeholder.svg"}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-              />
-              {product.isNew && <Badge className="absolute top-4 left-4 bg-red-600 hover:bg-red-700">NUEVO</Badge>}
-            </div>
-
-            {/* Thumbnail Images */}
-            <div className="flex space-x-2">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`relative w-20 h-20 bg-gray-900 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImageIndex === index ? "border-white" : "border-transparent"
+          <div className="flex items-center gap-2 mb-4 text-gray-300">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-5 w-5 ${
+                    i < Math.floor(product.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-500"
                   }`}
-                >
-                  <Image
-                    src={image || "/placeholder.svg"}
-                    alt={`${product.name} ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </button>
+                />
               ))}
             </div>
+            <span className="text-sm">({product.reviews} reseñas)</span>
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
+          <p className="text-gray-300 leading-relaxed mb-6">{product.description}</p>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
-              <p className="text-3xl font-bold text-white">${product.price}</p>
+              <label htmlFor="size" className="block text-sm font-medium text-gray-300 mb-1">
+                Talla
+              </label>
+              <Select value={selectedSize} onValueChange={setSelectedSize}>
+                <SelectTrigger id="size" className="w-full bg-gray-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Selecciona una talla" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  {product.sizes.map((size) => (
+                    <SelectItem key={size} value={size} disabled={product.stock[size] === 0}>
+                      {size} {product.stock[size] === 0 && "(Agotado)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-
-            <p className="text-gray-300 text-lg leading-relaxed">{product.description}</p>
-
-            {/* Size Selection */}
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold">Talla</h3>
-                <Link
-                  href="/tallas"
-                  className="text-[#4A1518] hover:text-[#3A1014] text-sm font-medium flex items-center transition-colors cursor-pointer"
-                >
-                  <Ruler className="w-4 h-4 mr-1" />
-                  Guía de tallas
-                </Link>
-              </div>
-              <div className="grid grid-cols-6 gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`py-3 px-4 border rounded-lg font-medium transition-colors cursor-pointer ${
-                      selectedSize === size
-                        ? "border-[#4A1518] bg-[#4A1518] text-white"
-                        : "border-gray-600 hover:border-gray-400 text-white"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Quantity Selection */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Cantidad</h3>
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={decrementQuantity}
-                  disabled={quantity <= 1}
-                  className="border-[#4A1518] text-white hover:bg-[#4A1518] cursor-pointer"
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="text-xl font-semibold w-8 text-center">{quantity}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={incrementQuantity}
-                  className="border-[#4A1518] text-white hover:bg-[#4A1518] cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Add to Cart Button */}
-            <Button
-              onClick={handleAddToCart}
-              size="lg"
-              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] font-semibold py-4 text-lg cursor-pointer"
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              AGREGAR AL CARRITO
-            </Button>
-
-            {/* Product Details */}
-            <div className="border-t border-gray-800 pt-6 space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Detalles del producto</h4>
-                <ul className="text-gray-400 space-y-1">
-                  <li>• Material: 100% Algodón premium</li>
-                  <li>• Cuidado: Lavar a máquina en agua fría</li>
-                  <li>• Origen: Diseñado y confeccionado localmente</li>
-                  <li>• Ajuste: Regular fit</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Envío y devoluciones</h4>
-                <ul className="text-gray-400 space-y-1">
-                  <li>• Envío gratis en pedidos superiores a $50</li>
-                  <li>• Entrega en 3-5 días hábiles</li>
-                  <li>• Devoluciones gratuitas en 30 días</li>
-                  <li>• Cambios de talla sin costo adicional</li>
-                </ul>
-              </div>
+              <label htmlFor="quantity" className="block text-sm font-medium text-gray-300 mb-1">
+                Cantidad
+              </label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                max={availableStock}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Math.min(availableStock, Number(e.target.value))))}
+                className="w-full bg-gray-800 border-gray-700 text-white"
+                disabled={availableStock === 0}
+              />
             </div>
           </div>
+
+          {availableStock === 0 && (
+            <p className="text-red-500 text-sm mb-4">Producto agotado en la talla seleccionada.</p>
+          )}
+          {availableStock > 0 && availableStock < 5 && (
+            <p className="text-yellow-500 text-sm mb-4">¡Solo quedan {availableStock} unidades!</p>
+          )}
+        </div>
+
+        <div className="flex gap-4 mt-8">
+          <Button
+            className="flex-1 bg-[#5D1A1D] hover:bg-[#4a1518] text-white py-3 text-lg font-semibold"
+            onClick={handleAddToCart}
+            disabled={!selectedSize || quantity <= 0 || availableStock === 0}
+          >
+            <ShoppingCart className="mr-2 h-5 w-5" /> Añadir al Carrito
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="border-[#5D1A1D] text-[#5D1A1D] hover:bg-[#5D1A1D] hover:text-white bg-transparent"
+          >
+            <Heart className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </div>

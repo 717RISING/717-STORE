@@ -1,120 +1,67 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Search, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import Link from "next/link"
-import { getAllProducts, type Product } from "@/lib/database" // Importar Product de database
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Search, X } from 'lucide-react'
+import { useRouter } from "next/navigation"
 
-interface ProductSearchProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export default function ProductSearch({ isOpen, onClose }: ProductSearchProps) {
+export default function ProductSearch() {
+  const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [searchResults, setSearchResults] = useState<Product[]>([])
-  const [allProducts, setAllProducts] = useState<Product[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
-  useEffect(() => {
-    const fetchAllProducts = async () => {
-      const products = await getAllProducts()
-      setAllProducts(products)
-    }
-    fetchAllProducts()
-  }, [])
-
-  useEffect(() => {
-    if (isOpen) {
-      // Focus on input when search opens
-      setTimeout(() => inputRef.current?.focus(), 100)
-    } else {
-      // Clear search term and results when search closes
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      router.push(`/productos?search=${encodeURIComponent(searchTerm.trim())}`)
+      setIsOpen(false)
       setSearchTerm("")
-      setSearchResults([])
     }
-  }, [isOpen])
-
-  useEffect(() => {
-    if (searchTerm.length > 1) {
-      const filtered = allProducts.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-      setSearchResults(filtered)
-    } else {
-      setSearchResults([])
-    }
-  }, [searchTerm, allProducts])
-
-  if (!isOpen) return null
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black bg-opacity-95 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div className="relative flex-1 mr-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="hidden md:flex text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        onClick={() => setIsOpen(true)}
+        aria-label="Open search dialog"
+      >
+        <Search className="h-5 w-5" />
+      </Button>
+      <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-900 border-gray-700 p-6">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">Buscar Productos</DialogTitle>
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+            <X className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+          </Button>
+        </DialogHeader>
+        <form onSubmit={handleSearch} className="relative mt-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400" />
           <Input
-            ref={inputRef}
-            type="text"
-            placeholder="Buscar productos..."
+            type="search"
+            placeholder="Escribe el nombre del producto o categoría..."
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#4A1518] focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-full bg-gray-800 border-gray-700 text-white placeholder-gray-400 text-lg focus:border-[#5D1A1D]"
           />
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
-          aria-label="Cerrar búsqueda"
-        >
-          <X className="h-7 w-7" />
-        </Button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {searchTerm.length > 1 && searchResults.length === 0 && (
-          <p className="text-center text-gray-400 text-lg mt-10">No se encontraron resultados para "{searchTerm}".</p>
-        )}
-        {searchTerm.length <= 1 && (
-          <p className="text-center text-gray-400 text-lg mt-10">Escribe al menos 2 caracteres para buscar.</p>
-        )}
-        {searchResults.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {searchResults.map((product) => (
-              <Link
-                key={product.id}
-                href={`/productos/${product.id}`}
-                onClick={onClose}
-                className="block bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group"
-              >
-                <div className="relative w-full h-48">
-                  <Image
-                    src={product.imageUrl || "/placeholder.svg"}
-                    alt={product.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white group-hover:text-[#5D1A1D] transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-400 text-sm">{product.category}</p>
-                  <p className="text-white font-bold mt-2">${product.price.toLocaleString()}</p>
-                </div>
-              </Link>
-            ))}
+          <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+            Buscar
+          </Button>
+        </form>
+        <div className="mt-6 text-gray-600 dark:text-gray-400">
+          <p className="font-semibold mb-2">Sugerencias Populares:</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm("Camisetas")} className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">Camisetas</Button>
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm("Sudaderas")} className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">Sudaderas</Button>
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm("Pantalones")} className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">Pantalones</Button>
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm("Accesorios")} className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">Accesorios</Button>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

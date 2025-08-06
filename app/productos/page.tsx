@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { User, Grid, List, Filter } from "lucide-react"
+import { User, Grid, List, Filter } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { products, formatPrice } from "@/lib/products"
+import { getProducts, formatPrice } from "@/lib/products"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import ProductSearch from "@/components/product-search"
@@ -15,8 +15,11 @@ import InteractiveProductCard from "@/components/interactive-product-card"
 import ProductLoader from "@/components/loaders/product-loader"
 import { useThemeSafe } from "@/hooks/use-theme-safe"
 import ThemeToggle from "@/components/theme-toggle"
+import { ProductGrid } from "@/components/product-grid"
+import { Suspense } from "react"
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products = await getProducts()
   const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -176,7 +179,7 @@ export default function ProductsPage() {
       </header>
 
       {/* Products Section */}
-      <div className="max-w-7xl mx-auto px-4 py-8 animate-slide-up">
+      <div className="container mx-auto px-4 py-8 animate-slide-up">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters */}
           <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
@@ -305,11 +308,9 @@ export default function ProductsPage() {
                 </p>
               </div>
             ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product, index) => (
-                  <InteractiveProductCard key={product.id} product={product} delay={index * 100} />
-                ))}
-              </div>
+              <Suspense fallback={<ProductLoader />}>
+                <ProductGrid products={filteredProducts} />
+              </Suspense>
             ) : (
               <div className="space-y-6">
                 {filteredProducts.map((product, index) => (

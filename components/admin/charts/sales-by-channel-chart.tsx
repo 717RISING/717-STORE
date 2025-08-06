@@ -1,30 +1,60 @@
 "use client"
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts"
+import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export default function SalesByChannelChart() {
-  const data = [
-    { name: "Online", value: 0 },
-    { name: "Tienda Física", value: 0 },
-    { name: "Redes Sociales", value: 0 },
-  ]
+interface SalesByChannelChartProps {
+  data: { name: string; value: number; color: string }[]
+}
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"]
-
+export default function SalesByChannelChart({ data }: SalesByChannelChartProps) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie data={data} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value">
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip
-          contentStyle={{ backgroundColor: "#333", border: "none", borderRadius: "8px" }}
-          itemStyle={{ color: "#fff" }}
-        />
-        <Legend wrapperStyle={{ color: "#fff" }} />
-      </PieChart>
-    </ResponsiveContainer>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Ventas por Canal</CardTitle>
+        <CardDescription>Distribución de ventas por diferentes canales</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={{
+            desktop: {
+              label: "Escritorio",
+              color: "hsl(var(--chart-1))",
+            },
+            mobile: {
+              label: "Móvil",
+              color: "hsl(var(--chart-2))",
+            },
+            inStore: {
+              label: "En Tienda",
+              color: "hsl(var(--chart-3))",
+            },
+          }}
+          className="h-[300px]"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Tooltip content={<ChartTooltipContent nameKey="name" />} />
+              <Legend />
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,226 +1,118 @@
-import Link from "next/link"
-import { ArrowLeft, Shield, Eye, Lock, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function PrivacidadPage() {
+export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="px-4 py-6 border-b border-gray-800">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/">
-            <Button variant="ghost" className="text-white hover:text-gray-300 hover:bg-gray-900 mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al inicio
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold">Política de Privacidad</h1>
-          <p className="text-gray-400 mt-2">Última actualización: Diciembre 2024</p>
-        </div>
-      </header>
+    <div className="min-h-[calc(100vh-100px)] bg-gray-950 text-white p-4 md:p-8 flex justify-center">
+      <Card className="w-full max-w-4xl bg-gray-900 border-gray-800 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-[#5D1A1D] text-center">Política de Privacidad</CardTitle>
+        </CardHeader>
+        <CardContent className="prose prose-invert max-w-none text-gray-300">
+          <p>
+            En 717 Store, nos comprometemos a proteger tu privacidad. Esta Política de Privacidad describe cómo
+            recopilamos, usamos y compartimos tu información personal cuando visitas o realizas una compra en nuestro
+            sitio web.
+          </p>
 
-      {/* Content */}
-      <main className="px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Intro */}
-          <section className="mb-12">
-            <div className="bg-gray-900 p-6 rounded-lg mb-8">
-              <div className="flex items-center mb-4">
-                <Shield className="w-8 h-8 text-[#5D1A1D] mr-3" />
-                <h2 className="text-2xl font-semibold text-white">Tu Privacidad es Nuestra Prioridad</h2>
-              </div>
-              <p className="text-gray-300 leading-relaxed">
-                En 717 Store, respetamos y protegemos tu privacidad. Esta política explica cómo recopilamos, utilizamos
-                y protegemos tu información personal cuando utilizas nuestro sitio web y servicios.
-              </p>
-            </div>
-          </section>
+          <h2>1. Información Personal que Recopilamos</h2>
+          <p>
+            Cuando visitas el Sitio, recopilamos automáticamente cierta información sobre tu dispositivo, incluyendo
+            información sobre tu navegador web, dirección IP, zona horaria y algunas de las cookies que están instaladas
+            en tu dispositivo. Además, a medida que navegas por el Sitio, recopilamos información sobre las páginas web
+            o productos individuales que ves, qué sitios web o términos de búsqueda te remitieron al Sitio, e
+            información sobre cómo interactúas con el Sitio. Nos referimos a esta información recopilada automáticamente
+            como "Información del Dispositivo".
+          </p>
+          <p>Recopilamos Información del Dispositivo utilizando las siguientes tecnologías:</p>
+          <ul>
+            <li>
+              **Cookies:** Son archivos de datos que se colocan en tu dispositivo o computadora y a menudo incluyen un
+              identificador único anónimo. Para obtener más información sobre las cookies y cómo deshabilitarlas, visita
+              http://www.allaboutcookies.org.
+            </li>
+            <li>
+              **Archivos de registro:** Rastrean las acciones que ocurren en el Sitio y recopilan datos, incluyendo tu
+              dirección IP, tipo de navegador, proveedor de servicios de Internet, páginas de referencia/salida y sellos
+              de fecha/hora.
+            </li>
+            <li>
+              **Web beacons, tags y píxeles:** Son archivos electrónicos utilizados para registrar información sobre
+              cómo navegas por el Sitio.
+            </li>
+          </ul>
+          <p>
+            Además, cuando realizas una compra o intentas realizar una compra a través del Sitio, recopilamos cierta
+            información tuya, incluyendo tu nombre, dirección de facturación, dirección de envío, dirección de correo
+            electrónico y número de teléfono. Nos referimos a esta información como "Información del Pedido".
+          </p>
+          <p>
+            Cuando hablamos de "Información Personal" en esta Política de Privacidad, nos referimos tanto a la
+            Información del Dispositivo como a la Información del Pedido.
+          </p>
 
-          {/* Information We Collect */}
-          <section className="mb-12">
-            <div className="flex items-center mb-6">
-              <Eye className="w-6 h-6 text-[#5D1A1D] mr-3" />
-              <h2 className="text-2xl font-semibold text-white">1. Información que Recopilamos</h2>
-            </div>
+          <h2>2. ¿Cómo Utilizamos tu Información Personal?</h2>
+          <p>
+            Utilizamos la Información del Pedido que recopilamos generalmente para cumplir con cualquier pedido
+            realizado a través del Sitio (incluyendo el procesamiento de tu información de pago, la organización del
+            envío y el envío de facturas y/o confirmaciones de pedido). Además, utilizamos esta Información del Pedido
+            para:
+          </p>
+          <ul>
+            <li>Comunicarnos contigo.</li>
+            <li>Examinar nuestros pedidos para detectar posibles riesgos o fraudes.</li>
+            <li>
+              Cuando esté en línea con las preferencias que has compartido con nosotros, proporcionarte información o
+              publicidad relacionada con nuestros productos o servicios.
+            </li>
+          </ul>
+          <p>
+            Utilizamos la Información del Dispositivo que recopilamos para ayudarnos a detectar posibles riesgos y
+            fraudes (en particular, tu dirección IP) y, de manera más general, para mejorar y optimizar nuestro Sitio
+            (por ejemplo, generando análisis sobre cómo nuestros clientes navegan e interactúan con el Sitio, y para
+            evaluar el éxito de nuestras campañas de marketing y publicidad).
+          </p>
 
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-3 text-white">Información Personal</h3>
-                <p className="text-gray-300 leading-relaxed mb-4">
-                  Recopilamos información que nos proporcionas directamente, incluyendo:
-                </p>
-                <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-                  <li>Nombre completo y información de contacto</li>
-                  <li>Dirección de envío y facturación</li>
-                  <li>Información de pago (procesada de forma segura)</li>
-                  <li>Historial de pedidos y preferencias</li>
-                  <li>Comunicaciones contigo</li>
-                </ul>
-              </div>
+          <h2>3. Compartir tu Información Personal</h2>
+          <p>
+            Compartimos tu Información Personal con terceros para ayudarnos a utilizar tu Información Personal, como se
+            describe anteriormente. Por ejemplo, utilizamos Google Analytics para ayudarnos a comprender cómo nuestros
+            clientes utilizan el Sitio. También podemos compartir tu Información Personal para cumplir con las leyes y
+            regulaciones aplicables, para responder a una citación, orden de registro u otra solicitud legal de
+            información que recibamos, o para proteger nuestros derechos.
+          </p>
 
-              <div>
-                <h3 className="text-xl font-semibold mb-3 text-white">Información Automática</h3>
-                <p className="text-gray-300 leading-relaxed mb-4">
-                  También recopilamos información automáticamente cuando utilizas nuestro sitio:
-                </p>
-                <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-                  <li>Dirección IP y ubicación geográfica</li>
-                  <li>Tipo de navegador y dispositivo</li>
-                  <li>Páginas visitadas y tiempo de navegación</li>
-                  <li>Cookies y tecnologías similares</li>
-                </ul>
-              </div>
-            </div>
-          </section>
+          <h2>4. Tus Derechos</h2>
+          <p>
+            Si eres residente europeo, tienes derecho a acceder a la información personal que tenemos sobre ti y a
+            solicitar que tu información personal sea corregida, actualizada o eliminada. Si deseas ejercer este
+            derecho, contáctanos a través de la información de contacto a continuación.
+          </p>
+          <p>
+            Además, si eres residente europeo, notamos que estamos procesando tu información para cumplir con los
+            contratos que podamos tener contigo (por ejemplo, si realizas un pedido a través del Sitio) o para perseguir
+            nuestros intereses comerciales legítimos enumerados anteriormente.
+          </p>
 
-          {/* How We Use Information */}
-          <section className="mb-12">
-            <div className="flex items-center mb-6">
-              <Users className="w-6 h-6 text-[#5D1A1D] mr-3" />
-              <h2 className="text-2xl font-semibold text-white">2. Cómo Utilizamos tu Información</h2>
-            </div>
+          <h2>5. Retención de Datos</h2>
+          <p>
+            Cuando realizas un pedido a través del Sitio, mantendremos tu Información del Pedido para nuestros registros
+            a menos y hasta que nos pidas que eliminemos esta información.
+          </p>
 
-            <p className="text-gray-300 leading-relaxed mb-4">Utilizamos tu información para:</p>
-            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-              <li>Procesar y cumplir tus pedidos</li>
-              <li>Comunicarnos contigo sobre tu cuenta y pedidos</li>
-              <li>Proporcionar atención al cliente</li>
-              <li>Personalizar tu experiencia de compra</li>
-              <li>Enviar promociones y ofertas (con tu consentimiento)</li>
-              <li>Mejorar nuestros productos y servicios</li>
-              <li>Cumplir con obligaciones legales</li>
-            </ul>
-          </section>
+          <h2>6. Cambios</h2>
+          <p>
+            Podemos actualizar esta política de privacidad de vez en cuando para reflejar, por ejemplo, cambios en
+            nuestras prácticas o por otras razones operativas, legales o reglamentarias.
+          </p>
 
-          {/* Information Sharing */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">3. Compartir Información</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              No vendemos, alquilamos ni compartimos tu información personal con terceros, excepto en las siguientes
-              circunstancias:
-            </p>
-            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-              <li>
-                <strong>Proveedores de servicios:</strong> Para procesar pagos, envíos y otros servicios
-              </li>
-              <li>
-                <strong>Cumplimiento legal:</strong> Cuando sea requerido por ley o autoridades
-              </li>
-              <li>
-                <strong>Protección de derechos:</strong> Para proteger nuestros derechos y seguridad
-              </li>
-              <li>
-                <strong>Consentimiento:</strong> Cuando hayas dado tu consentimiento explícito
-              </li>
-            </ul>
-          </section>
-
-          {/* Data Security */}
-          <section className="mb-12">
-            <div className="flex items-center mb-6">
-              <Lock className="w-6 h-6 text-[#5D1A1D] mr-3" />
-              <h2 className="text-2xl font-semibold text-white">4. Seguridad de Datos</h2>
-            </div>
-
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger tu información:
-            </p>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-gray-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-white mb-2">Encriptación</h4>
-                <p className="text-gray-300 text-sm">Toda la información sensible se encripta usando SSL/TLS</p>
-              </div>
-              <div className="bg-gray-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-white mb-2">Acceso Limitado</h4>
-                <p className="text-gray-300 text-sm">Solo personal autorizado tiene acceso a datos personales</p>
-              </div>
-              <div className="bg-gray-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-white mb-2">Monitoreo</h4>
-                <p className="text-gray-300 text-sm">Supervisamos continuamente nuestros sistemas</p>
-              </div>
-              <div className="bg-gray-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-white mb-2">Actualizaciones</h4>
-                <p className="text-gray-300 text-sm">Mantenemos nuestros sistemas actualizados</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Your Rights */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">5. Tus Derechos</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Tienes los siguientes derechos respecto a tu información personal:
-            </p>
-            <div className="space-y-4">
-              <div className="border-l-4 border-[#5D1A1D] pl-4">
-                <h4 className="font-semibold text-white">Acceso</h4>
-                <p className="text-gray-300 text-sm">Solicitar una copia de la información que tenemos sobre ti</p>
-              </div>
-              <div className="border-l-4 border-[#5D1A1D] pl-4">
-                <h4 className="font-semibold text-white">Rectificación</h4>
-                <p className="text-gray-300 text-sm">Corregir información inexacta o incompleta</p>
-              </div>
-              <div className="border-l-4 border-[#5D1A1D] pl-4">
-                <h4 className="font-semibold text-white">Eliminación</h4>
-                <p className="text-gray-300 text-sm">Solicitar la eliminación de tu información personal</p>
-              </div>
-              <div className="border-l-4 border-[#5D1A1D] pl-4">
-                <h4 className="font-semibold text-white">Portabilidad</h4>
-                <p className="text-gray-300 text-sm">Recibir tus datos en un formato estructurado</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Cookies */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">6. Cookies y Tecnologías Similares</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Utilizamos cookies para mejorar tu experiencia. Puedes controlar las cookies a través de la configuración
-              de tu navegador.
-            </p>
-            <div className="bg-gray-900 p-4 rounded-lg">
-              <p className="text-gray-300 text-sm">
-                <strong>Cookies esenciales:</strong> Necesarias para el funcionamiento del sitio
-                <br />
-                <strong>Cookies de rendimiento:</strong> Nos ayudan a entender cómo usas el sitio
-                <br />
-                <strong>Cookies de marketing:</strong> Para personalizar anuncios (con tu consentimiento)
-              </p>
-            </div>
-          </section>
-
-          {/* Changes to Policy */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">7. Cambios a esta Política</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Podemos actualizar esta política ocasionalmente. Te notificaremos sobre cambios significativos por email o
-              mediante un aviso prominente en nuestro sitio web.
-            </p>
-          </section>
-
-          {/* Contact */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 text-white">8. Contacto</h2>
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Si tienes preguntas sobre esta política de privacidad o quieres ejercer tus derechos, contáctanos:
-            </p>
-            <div className="bg-gray-900 p-6 rounded-lg">
-              <p className="text-white mb-2">
-                <strong>Email de Privacidad:</strong> privacy@717store.com
-              </p>
-              <p className="text-white mb-2">
-                <strong>Teléfono:</strong> +1 (555) 717-0717
-              </p>
-              <p className="text-white mb-2">
-                <strong>Dirección:</strong> 717 Streetwear Ave, Fashion District, NY 10001
-              </p>
-              <p className="text-white">
-                <strong>Horario:</strong> Lunes a Viernes, 9:00 AM - 6:00 PM EST
-              </p>
-            </div>
-          </section>
-        </div>
-      </main>
+          <h2>7. Contacto</h2>
+          <p>
+            Para obtener más información sobre nuestras prácticas de privacidad, si tienes preguntas o si deseas
+            presentar una queja, contáctanos por correo electrónico a [tu correo electrónico de contacto] o por correo
+            postal utilizando los detalles proporcionados en nuestra página de contacto.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

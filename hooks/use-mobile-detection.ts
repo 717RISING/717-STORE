@@ -2,52 +2,40 @@
 
 import { useState, useEffect } from "react"
 
-export function useMobileDetection() {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(true)
-  const [touchSupport, setTouchSupport] = useState(false)
-  const [screenWidth, setScreenWidth] = useState(1920)
-  const [screenHeight, setScreenHeight] = useState(1080)
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">("landscape")
-  const [deviceType, setDeviceType] = useState<"mobile" | "tablet" | "desktop">("desktop")
+interface DeviceDetection {
+  isMobile: boolean
+  isTablet: boolean
+  isDesktop: boolean
+}
+
+export function useMobileDetection(): DeviceDetection {
+  const [device, setDevice] = useState<DeviceDetection>({
+    isMobile: false,
+    isTablet: false,
+    isDesktop: false,
+  })
 
   useEffect(() => {
-    const updateDetection = () => {
+    const checkDevice = () => {
       const width = window.innerWidth
-      const height = window.innerHeight
-      const isMobile = width < 768
-      const isTablet = width >= 768 && width < 1024
-      const isDesktop = width >= 1024
-      const touchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0
-      const orientation = width > height ? "landscape" : "portrait"
-
-      let deviceType: "mobile" | "tablet" | "desktop" = "desktop"
-      if (isMobile) deviceType = "mobile"
-      else if (isTablet) deviceType = "tablet"
-
-      setIsMobile(isMobile)
-      setIsTablet(isTablet)
-      setIsDesktop(isDesktop)
-      setTouchSupport(touchSupport)
-      setScreenWidth(width)
-      setScreenHeight(height)
-      setOrientation(orientation)
-      setDeviceType(deviceType)
+      setDevice({
+        isMobile: width < 768,
+        isTablet: width >= 768 && width < 1024,
+        isDesktop: width >= 1024,
+      })
     }
 
-    // Initial detection
-    updateDetection()
+    // Initial check
+    checkDevice()
 
-    // Listen for resize events
-    window.addEventListener("resize", updateDetection)
-    window.addEventListener("orientationchange", updateDetection)
+    // Add event listener for window resize
+    window.addEventListener("resize", checkDevice)
 
+    // Clean up
     return () => {
-      window.removeEventListener("resize", updateDetection)
-      window.removeEventListener("orientationchange", updateDetection)
+      window.removeEventListener("resize", checkDevice)
     }
   }, [])
 
-  return { isMobile, isTablet, isDesktop, touchSupport, screenWidth, screenHeight, orientation, deviceType }
+  return device
 }

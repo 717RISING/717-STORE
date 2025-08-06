@@ -1,40 +1,47 @@
 "use client"
 
-import { CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts"
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export default function SalesChart() {
-  // Datos de ejemplo para el gráfico de ventas (inicialmente vacíos o con valores bajos)
-  const data = [
-    { name: "Ene", ingresos: 0, pedidos: 0 },
-    { name: "Feb", ingresos: 0, pedidos: 0 },
-    { name: "Mar", ingresos: 0, pedidos: 0 },
-    { name: "Abr", ingresos: 0, pedidos: 0 },
-    { name: "May", ingresos: 0, pedidos: 0 },
-    { name: "Jun", ingresos: 0, pedidos: 0 },
-  ]
+interface SalesChartProps {
+  data: { name: string; sales: number; revenue: number }[]
+}
 
+export function SalesChart({ data }: SalesChartProps) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart
-        data={data}
-        margin={{
-          top: 10,
-          right: 30,
-          left: 0,
-          bottom: 0,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-        <XAxis dataKey="name" stroke="#999" />
-        <YAxis stroke="#999" />
-        <Tooltip
-          contentStyle={{ backgroundColor: "#333", border: "none", borderRadius: "8px" }}
-          itemStyle={{ color: "#fff" }}
-        />
-        <Legend wrapperStyle={{ color: "#fff" }} />
-        <Area type="monotone" dataKey="ingresos" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-        <Area type="monotone" dataKey="pedidos" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.3} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Tendencia de Ventas y Ingresos</CardTitle>
+        <CardDescription>Ventas y ingresos por mes</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={{
+            sales: {
+              label: "Ventas",
+              color: "hsl(var(--chart-1))",
+            },
+            revenue: {
+              label: "Ingresos",
+              color: "hsl(var(--chart-2))",
+            },
+          }}
+          className="h-[300px]"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend />
+              <Line type="monotone" dataKey="sales" stroke="var(--color-sales)" name="Ventas" />
+              <Line type="monotone" dataKey="revenue" stroke="var(--color-revenue)" name="Ingresos" />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   )
 }

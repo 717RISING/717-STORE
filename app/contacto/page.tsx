@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -10,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare } from "lucide-react"
+import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare } from 'lucide-react'
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import { useToast } from "@/hooks/use-toast"
@@ -106,183 +105,115 @@ export default function ContactPage() {
 
       {/* Contact Content */}
       <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-3xl font-bold mb-8">Información de Contacto</h2>
-
-                <div className="space-y-6">
-                  <Card className="bg-gray-900 border-gray-800">
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <MapPin className="w-6 h-6 text-[#5D1A1D] mt-1" />
-                        <div>
-                          <h3 className="text-white font-semibold mb-2">Dirección</h3>
-                          <p className="text-gray-300">
-                            Carrera 70 #45-32
-                            <br />
-                            Medellín, Antioquia
-                            <br />
-                            Colombia, 050001
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gray-900 border-gray-800">
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <Phone className="w-6 h-6 text-[#5D1A1D] mt-1" />
-                        <div>
-                          <h3 className="text-white font-semibold mb-2">Teléfonos</h3>
-                          <p className="text-gray-300">
-                            +57 (4) 123-4567
-                            <br />
-                            +57 300 123 4567 (WhatsApp)
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gray-900 border-gray-800">
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <Mail className="w-6 h-6 text-[#5D1A1D] mt-1" />
-                        <div>
-                          <h3 className="text-white font-semibold mb-2">Email</h3>
-                          <p className="text-gray-300">
-                            info@717store.com
-                            <br />
-                            soporte@717store.com
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gray-900 border-gray-800">
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <Clock className="w-6 h-6 text-[#5D1A1D] mt-1" />
-                        <div>
-                          <h3 className="text-white font-semibold mb-2">Horarios de Atención</h3>
-                          <p className="text-gray-300">
-                            Lunes a Viernes: 8:00 AM - 8:00 PM
-                            <br />
-                            Sábados: 9:00 AM - 6:00 PM
-                            <br />
-                            Domingos: 10:00 AM - 4:00 PM
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Contact Form */}
-            <div>
-              <Card className="bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-[#5D1A1D]" />
-                    Envíanos un Mensaje
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name" className="text-white">
-                          Nombre *
-                        </Label>
-                        <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={(e) => handleInputChange("name", e.target.value)}
-                          className="bg-gray-800 border-gray-700 text-white"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email" className="text-white">
-                          Email *
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => handleInputChange("email", e.target.value)}
-                          className="bg-gray-800 border-gray-700 text-white"
-                          required
-                        />
-                      </div>
-                    </div>
+            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Envíanos un Mensaje</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <Label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Nombre Completo
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Tu nombre"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Correo Electrónico
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="tu@ejemplo.com"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Asunto
+                    </Label>
+                    <Input
+                      id="subject"
+                      type="text"
+                      placeholder="Asunto de tu mensaje"
+                      value={formData.subject}
+                      onChange={(e) => handleInputChange("subject", e.target.value)}
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Mensaje
+                    </Label>
+                    <Textarea
+                      id="message"
+                      rows={5}
+                      placeholder="Escribe tu mensaje aquí..."
+                      value={formData.message}
+                      onChange={(e) => handleInputChange("message", e.target.value)}
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white py-3 text-lg"
+                  >
+                    {isSubmitting ? (
+                      "Enviando..."
+                    ) : (
+                      "Enviar Mensaje"
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
-                    <div>
-                      <Label htmlFor="subject" className="text-white">
-                        Asunto *
-                      </Label>
-                      <Input
-                        id="subject"
-                        value={formData.subject}
-                        onChange={(e) => handleInputChange("subject", e.target.value)}
-                        className="bg-gray-800 border-gray-700 text-white"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="message" className="text-white">
-                        Mensaje *
-                      </Label>
-                      <Textarea
-                        id="message"
-                        value={formData.message}
-                        onChange={(e) => handleInputChange("message", e.target.value)}
-                        className="bg-gray-800 border-gray-700 text-white min-h-[120px]"
-                        placeholder="Cuéntanos en qué podemos ayudarte..."
-                        required
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-[#5D1A1D] hover:bg-[#6B1E22] text-white py-3"
-                    >
-                      {isSubmitting ? (
-                        "Enviando..."
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Enviar Mensaje
-                        </>
-                      )}
-                    </Button>
-                  </form>
+            {/* Contact Info */}
+            <div className="space-y-8">
+              <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <Mail className="h-8 w-8 text-[#4A1518]" />
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Correo Electrónico</h3>
+                    <p className="text-gray-600 dark:text-gray-400">info@717store.com</p>
+                  </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
-        </div>
-      </section>
+              <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <Phone className="h-8 w-8 text-[#4A1518]" />
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Teléfono</h3>
+                    <p className="text-gray-600 dark:text-gray-400">+57 310 123 4567</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <MapPin className="h-8 w-8 text-[#4A1518]" />
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Dirección</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Calle 71 # 7-17, Bogotá, Colombia</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-      {/* Map Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">Nuestra Ubicación</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-            <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-12 h-12 text-[#5D1A1D] mx-auto mb-4" />
-                <p className="text-white font-semibold">717 Store</p>
-                <p className="text-gray-300">Carrera 70 #45-32, Medellín</p>
+              {/* Map Placeholder */}
+              <div className="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden shadow-lg h-64 flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg">
+                Mapa de Ubicación (Próximamente)
               </div>
             </div>
           </div>

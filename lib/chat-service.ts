@@ -1,3 +1,31 @@
+// lib/chat-service.ts
+// This file simulates an AI chat service. In a real application, you would integrate with an actual AI API.
+
+export async function fetchChatResponse(message: string): Promise<string> {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  const lowerCaseMessage = message.toLowerCase()
+
+  if (lowerCaseMessage.includes("hola") || lowerCaseMessage.includes("saludo")) {
+    return "¡Hola! ¿En qué puedo ayudarte hoy? Puedes preguntar sobre productos, envíos o devoluciones."
+  } else if (lowerCaseMessage.includes("envío") || lowerCaseMessage.includes("envios")) {
+    return "Los envíos nacionales tardan de 3 a 7 días hábiles. Los envíos internacionales pueden tardar de 7 a 20 días hábiles. ¿Necesitas más detalles?"
+  } else if (lowerCaseMessage.includes("devolución") || lowerCaseMessage.includes("devoluciones")) {
+    return "Puedes solicitar una devolución dentro de los 30 días posteriores a la compra, siempre que el artículo esté sin usar y con sus etiquetas. Visita nuestra sección de 'Envíos y Devoluciones' para más información."
+  } else if (lowerCaseMessage.includes("producto") || lowerCaseMessage.includes("productos")) {
+    return "Tenemos una amplia variedad de camisetas, sudaderas, pantalones y accesorios. ¿Estás buscando algo en particular?"
+  } else if (lowerCaseMessage.includes("gracias")) {
+    return "De nada. ¡Estoy aquí para ayudarte!"
+  } else if (lowerCaseMessage.includes("horario") || lowerCaseMessage.includes("abren")) {
+    return "Nuestra tienda online está abierta 24/7. Para soporte, estamos disponibles de lunes a viernes, de 9 AM a 6 PM (hora de Colombia)."
+  } else if (lowerCaseMessage.includes("contacto")) {
+    return "Puedes contactarnos por correo electrónico en info@717store.com o llamarnos al +57 310 123 4567."
+  } else {
+    return "Lo siento, no entendí tu pregunta. ¿Podrías reformularla o preguntar algo diferente?"
+  }
+}
+
 export function getChatResponse(message: string): string {
   const lowerMessage = message.toLowerCase()
 
@@ -257,7 +285,7 @@ export function getQuickReplies(message: string): string[] {
     ]
   }
 
-  if (lowerMessage.includes("contacto") || lowerMessage.includes("soporte")) {
+  if (lowerMessage.includes("contacto")) {
     return ["WhatsApp", "Email soporte", "Teléfono", "Tienda física", "Horarios", "Chat en vivo"]
   }
 

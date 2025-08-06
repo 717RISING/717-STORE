@@ -1,121 +1,93 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
+import { useToast } from "@/hooks/use-toast"
 
-export default function ProfileTab() {
-  const [name, setName] = useState("Juan Pérez")
-  const [email, setEmail] = useState("juan.perez@example.com")
-  const [phone, setPhone] = useState("+1 (555) 123-4567")
-  const [bio, setBio] = useState("Desarrollador de software apasionado por la tecnología y el diseño.")
+interface UserProfile {
+  firstName: string
+  lastName: string
+  email: string
+}
 
-  const handleSaveChanges = () => {
-    // Aquí iría la lógica para guardar los cambios en la base de datos o API
-    console.log("Guardando perfil:", { name, email, phone, bio })
-    toast.success("Perfil actualizado correctamente.")
+export function ProfileTab() {
+  const [profile, setProfile] = useState<UserProfile>({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+  })
+  const [isEditing, setIsEditing] = useState(false)
+  const { toast } = useToast()
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setProfile((prev) => ({ ...prev, [id]: value }))
+  }
+
+  const handleSave = () => {
+    // Simulate API call to save profile
+    console.log("Saving profile:", profile)
+    setIsEditing(false)
+    toast({
+      title: "Perfil Actualizado",
+      description: "Tu información de perfil ha sido guardada.",
+      variant: "success",
+    })
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Mi Perfil</h1>
-        <p className="text-gray-400">Actualiza tu información personal y preferencias.</p>
-      </div>
-
-      {/* Profile Information Card */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Información Personal</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="name" className="text-gray-300">
-              Nombre Completo
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-          <div>
-            <Label htmlFor="email" className="text-gray-300">
-              Correo Electrónico
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-          <div>
-            <Label htmlFor="phone" className="text-gray-300">
-              Teléfono
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-          <div>
-            <Label htmlFor="bio" className="text-gray-300">
-              Biografía
-            </Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={4}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Password Change Card */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Cambiar Contraseña</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="currentPassword" className="text-gray-300">
-              Contraseña Actual
-            </Label>
-            <Input id="currentPassword" type="password" className="bg-gray-800 border-gray-700 text-white" />
-          </div>
-          <div>
-            <Label htmlFor="newPassword" className="text-gray-300">
-              Nueva Contraseña
-            </Label>
-            <Input id="newPassword" type="password" className="bg-gray-800 border-gray-700 text-white" />
-          </div>
-          <div>
-            <Label htmlFor="confirmPassword" className="text-gray-300">
-              Confirmar Nueva Contraseña
-            </Label>
-            <Input id="confirmPassword" type="password" className="bg-gray-800 border-gray-700 text-white" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSaveChanges} className="bg-white text-black hover:bg-gray-200">
-          Guardar Cambios
+    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Mi Perfil</CardTitle>
+        <Button onClick={() => setIsEditing(!isEditing)} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+          {isEditing ? "Cancelar" : "Editar Perfil"}
         </Button>
-      </div>
-    </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Nombre
+          </Label>
+          <Input
+            id="firstName"
+            value={profile.firstName}
+            onChange={handleInputChange}
+            readOnly={!isEditing}
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+        <div>
+          <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Apellido
+          </Label>
+          <Input
+            id="lastName"
+            value={profile.lastName}
+            onChange={handleInputChange}
+            readOnly={!isEditing}
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+        <div>
+          <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Correo Electrónico
+          </Label>
+          <Input
+            id="email"
+            value={profile.email}
+            readOnly
+            className="bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+          />
+        </div>
+        {isEditing && (
+          <Button onClick={handleSave} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+            Guardar Cambios
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   )
 }

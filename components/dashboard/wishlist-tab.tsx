@@ -1,86 +1,83 @@
 "use client"
 
-import { useState } from "react"
-import { Heart, Trash2, Search } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Trash2, ShoppingCart } from 'lucide-react'
 import Image from "next/image"
+import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
+import { formatPrice } from "@/lib/products"
 
-// Mock data for wishlist items
-const mockWishlistItems = [
-  // {
-  //   id: '1',
-  //   name: 'Camiseta "Big Dreams"',
-  //   price: 25000,
-  //   image: '/products/camisetas/big-dreams-tshirt.png',
-  //   status: 'En Stock',
-  // },
-  // {
-  //   id: '2',
-  //   name: 'Hoodie Streetwear',
-  //   price: 65000,
-  //   image: '/api/placeholder/60/60',
-  //   status: 'Agotado',
-  // },
-  // {
-  //   id: '3',
-  //   name: 'Gorra 717 Logo',
-  //   price: 35000,
-  //   image: '/api/placeholder/60/60',
-  //   status: 'Bajo Stock',
-  // },
+interface WishlistItem {
+  id: string
+  name: string
+  price: number
+  image: string
+  link: string
+}
+
+const initialWishlist: WishlistItem[] = [
+  {
+    id: "camiseta-graphic-pain",
+    name: "Graphic Tee 'Pain'",
+    price: 89000,
+    image: "/products/camisetas/graphic-tee-pain.png",
+    link: "/productos/camiseta-graphic-pain",
+  },
+  {
+    id: "denim-jacket",
+    name: "Denim Jacket",
+    price: 150000,
+    image: "/placeholder.svg?height=400&width=400&text=Denim+Jacket",
+    link: "/productos/denim-jacket",
+  },
 ]
 
-export default function WishlistTab() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [wishlist, setWishlist] = useState(mockWishlistItems)
+export function WishlistTab() {
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(initialWishlist)
+  const { toast } = useToast()
 
-  const filteredWishlist = wishlist.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  const handleRemoveFromWishlist = (id: string) => {
+    setWishlistItems(wishlistItems.filter((item) => item.id !== id))
+    toast({
+      title: "Eliminado de la lista de deseos",
+      description: "El artículo ha sido eliminado de tu lista.",
+      variant: "default",
+    })
+  }
 
-  const handleRemoveItem = (id: string) => {
-    setWishlist((prev) => prev.filter((item) => item.id !== id))
+  const handleAddToCart = (item: WishlistItem) => {
+    // In a real app, you'd add this to the actual cart context/state
+    toast({
+      title: "Añadido al carrito",
+      description: `${item.name} ha sido añadido a tu carrito.`,
+      variant: "success",
+    })
+    console.log("Add to cart:", item)
+    // Optionally remove from wishlist after adding to cart
+    handleRemoveFromWishlist(item.id)
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Mi Lista de Deseos</h1>
-        <p className="text-gray-400">Gestiona los productos que te interesan.</p>
-      </div>
-
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <Input
-          type="text"
-          placeholder="Buscar en tu lista de deseos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9 bg-gray-900 border-gray-700 text-white placeholder-gray-400"
-        />
-      </div>
-
-      {/* Wishlist Items */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Productos Guardados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredWishlist.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              <Heart className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-              <p>Tu lista de deseos está vacía.</p>
-              <p>¡Empieza a añadir tus productos favoritos!</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredWishlist.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center space-x-4 bg-gray-800 p-4 rounded-lg border border-gray-700"
-                >
+    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Mi Lista de Deseos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {wishlistItems.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <p className="text-lg font-semibold mb-2">Tu lista de deseos está vacía.</p>
+            <p className="text-sm">Añade productos que te encanten para guardarlos aquí.</p>
+            <Button asChild className="mt-4 bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              <Link href="/productos">Explorar Productos</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {wishlistItems.map((item) => (
+              <Card key={item.id} className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                <CardContent className="p-4 flex items-center gap-4">
                   <Image
                     src={item.image || "/placeholder.svg"}
                     alt={item.name}
@@ -89,34 +86,37 @@ export default function WishlistTab() {
                     className="rounded-md object-cover"
                   />
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white">{item.name}</h3>
-                    <p className="text-gray-300">${item.price.toLocaleString()}</p>
-                    <p
-                      className={`text-sm ${
-                        item.status === "En Stock"
-                          ? "text-green-400"
-                          : item.status === "Bajo Stock"
-                            ? "text-yellow-400"
-                            : "text-red-400"
-                      }`}
-                    >
-                      {item.status}
-                    </p>
+                    <Link href={item.link} className="hover:underline">
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{item.name}</h3>
+                    </Link>
+                    <p className="text-sm font-medium text-[#5D1A1D]">{formatPrice(item.price)}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-400 hover:text-red-500"
-                    onClick={() => handleRemoveItem(item.id)}
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-[#4A1518] hover:bg-[#6B1E22] text-white"
+                      onClick={() => handleAddToCart(item)}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Añadir al Carrito
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => handleRemoveFromWishlist(item.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Eliminar</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

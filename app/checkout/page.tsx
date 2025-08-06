@@ -10,7 +10,7 @@ import EnhancedButton from "@/components/enhanced-button"
 import { createOrderAction } from "@/app/actions" // Importar la Server Action
 import type { ShippingInfo, PaymentInfo } from "@/lib/database"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
@@ -18,6 +18,8 @@ import { useTheme } from "@/lib/theme-context"
 import CheckoutLoader from "@/components/loaders/checkout-loader"
 import MobileCheckoutLoader from "@/components/loaders/mobile/mobile-checkout-loader"
 import { useMobileDetection } from "@/hooks/use-mobile-detection"
+import { Suspense } from "react"
+import { Separator } from "@/components/ui/separator"
 
 export default function CheckoutPage() {
   const { state: cartState, dispatch } = useCart()
@@ -152,87 +154,52 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div
-      className={cn(
-        "min-h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-8 p-4 sm:p-6 lg:p-8",
-        theme === "dark" ? "bg-gray-950 text-gray-50" : "bg-gray-50 text-gray-950",
-      )}
-    >
-      <div className="flex-1 lg:max-w-3xl mx-auto">
-        <Card
-          className={cn(
-            "shadow-lg rounded-modern-lg animate-fade-in-up",
-            theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200",
-          )}
-        >
-          <CardHeader className="pb-4">
-            <CardTitle className={cn("text-2xl font-bold text-brand", theme === "dark" ? "text-brand" : "text-brand")}>
-              Finalizar Compra
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList
-                className={cn("grid w-full grid-cols-2 mb-6", theme === "dark" ? "bg-gray-700" : "bg-gray-100")}
-              >
-                <TabsTrigger
-                  value="shipping"
-                  className={cn(
-                    "data-[state=active]:bg-brand data-[state=active]:text-white",
-                    theme === "dark"
-                      ? "data-[state=active]:bg-brand data-[state=active]:text-white"
-                      : "data-[state=active]:bg-brand data-[state=active]:text-white",
-                  )}
-                >
-                  Envío
-                </TabsTrigger>
-                <TabsTrigger
-                  value="payment"
-                  className={cn(
-                    "data-[state=active]:bg-brand data-[state=active]:text-white",
-                    theme === "dark"
-                      ? "data-[state=active]:bg-brand data-[state=active]:text-white"
-                      : "data-[state=active]:bg-brand data-[state=active]:text-white",
-                  )}
-                  disabled={!shippingData.firstName || !shippingData.email} // Simple check to enable payment tab
-                >
-                  Pago
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="shipping">
-                <ShippingForm
-                  data={shippingData}
-                  onChange={setShippingData}
-                  onBillingSameAsShipping={() => {}} // Placeholder, as billing form is not separate yet
-                />
-              </TabsContent>
-              <TabsContent value="payment">
-                <PaymentForm data={paymentData} onChange={setPaymentData} isLoading={isPlacingOrder} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
+      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Finalizar Compra</h1>
 
-      <div className="lg:w-96 lg:flex-shrink-0">
-        <OrderSummary subtotal={subtotal} shipping={shippingCost} tax={tax} total={total} cartItems={cartState.items} />
-        <EnhancedButton
-          onClick={handlePlaceOrder}
-          className="w-full py-3 text-lg font-semibold mt-8"
-          variant="modern"
-          loading={isPlacingOrder}
-          disabled={isPlacingOrder || cartState.items.length === 0 || activeTab !== "payment"}
-        >
-          {isPlacingOrder ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Procesando...
-            </>
-          ) : (
-            `Pagar ${new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(total)}`
-          )}
-        </EnhancedButton>
-      </div>
+      <Suspense fallback={<CheckoutLoader />}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Información de Envío
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ShippingForm data={shippingData} onChange={setShippingData} />
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Información de Pago
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PaymentForm data={paymentData} onChange={setPaymentData} isLoading={isPlacingOrder} />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-1">
+            <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Resumen del Pedido</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <OrderSummary subtotal={subtotal} shipping={shippingCost} tax={tax} total={total} cartItems={cartState.items} />
+                <Separator className="my-4 bg-gray-200 dark:bg-gray-700" />
+                <div className="flex justify-between items-center text-xl font-bold text-gray-900 dark:text-white">
+                  <span>Total:</span>
+                  <span>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(total)}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </Suspense>
     </div>
   )
 }

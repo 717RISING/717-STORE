@@ -1,204 +1,279 @@
-// lib/database.ts
-// Este archivo simula una base de datos en memoria para el proyecto.
-// En una aplicación real, esto se reemplazaría con una base de datos persistente (PostgreSQL, MongoDB, etc.).
+import { sql } from "@vercel/postgres"
+import { Product, Order, OrderItem, User, ShippingInfo, CartItem } from "./types"
 
-// Interfaces para los tipos de datos
-export interface Product {
-  id: string
-  name: string
-  description: string
-  price: number
-  imageUrl: string
-  category: string
-  sizes: string[]
-  colors?: string[]
-  stock: { [size: string]: number } // Stock por talla
-}
-
-export interface CartItem {
-  productId: string
-  name: string
-  price: number
-  quantity: number
-  imageUrl: string
-  size: string
-  color?: string
-}
-
-export interface ShippingInfo {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  address: string
-  city: string
-  state: string
-  zipCode: string
-  country: string
-  cost: number // Costo de envío
-}
-
-export interface PaymentInfo {
-  method: "card" | "paypal" | "transfer"
-  cardDetails?: {
-    cardNumber: string
-    expiryDate: string
-    cvv: string
-    cardName: string
-  }
-  // Otros detalles de pago si se añaden más métodos
-}
-
-export interface OrderItem {
-  productId: string
-  name: string
-  quantity: number
-  price: number
-  imageUrl: string
-  size?: string
-  color?: string
-}
-
-export interface Order {
-  id: string
-  userId?: string // Opcional, si el usuario está logueado
-  customerName?: string // Nombre del cliente (para invitados o display)
-  customerEmail: string // Email del cliente para confirmaciones
-  items: OrderItem[]
-  shippingInfo: ShippingInfo
-  totalAmount: number
-  orderDate: Date
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
-  paymentStatus: "pending" | "paid" | "failed"
-}
-
-export interface User {
-  id: string
-  email: string
-  passwordHash: string // En un sistema real, esto sería un hash
-  name: string
-  addresses?: ShippingInfo[] // Direcciones guardadas del usuario
-  wishlist?: string[] // Array de IDs de productos en la wishlist
-  isAdmin: boolean
-}
-
-// Definición del usuario administrador
-export const ADMIN_USER: User = {
-  id: "admin-717",
-  email: "717days@gmail.com",
-  passwordHash: "JP7CR1DM7CM_STREETWEAR", // ¡En producción, usa un hash seguro!
-  name: "Administrador 717",
-  isAdmin: true,
-  addresses: [],
-  wishlist: [],
-}
-
-// Simulación de la base de datos en memoria
-interface Database {
-  products: Product[]
-  orders: Order[]
-  users: User[]
-}
-
-export const db: Database = {
-  products: [
-    {
-      id: "camiseta-big-dreams",
-      name: "Camiseta 'Big Dreams'",
-      description: "Camiseta de algodón premium con estampado 'Big Dreams'.",
-      price: 85000,
-      imageUrl: "/products/camisetas/big-dreams-tshirt.png",
-      category: "Camisetas",
-      sizes: ["S", "M", "L", "XL"],
-      colors: ["Negro", "Blanco"],
-      stock: { S: 10, M: 15, L: 12, XL: 8 },
-    },
-    {
-      id: "camiseta-oversized-tee",
-      name: "Oversized Tee 'Street'",
-      description: "Camiseta oversized de estilo urbano, ideal para un look relajado.",
-      price: 95000,
-      imageUrl: "/products/camisetas/oversized-tee.png",
-      category: "Camisetas",
-      sizes: ["M", "L", "XL"],
-      colors: ["Gris", "Negro"],
-      stock: { M: 8, L: 10, XL: 7 },
-    },
-    {
-      id: "camiseta-graphic-blood",
-      name: "Graphic Tee 'Blood'",
-      description: "Camiseta con diseño gráfico audaz y tejido suave.",
-      price: 89000,
-      imageUrl: "/products/camisetas/graphic-tee-blood.png",
-      category: "Camisetas",
-      sizes: ["S", "M", "L"],
-      colors: ["Negro"],
-      stock: { S: 5, M: 9, L: 6 },
-    },
-    {
-      id: "camiseta-graphic-pain",
-      name: "Graphic Tee 'Pain'",
-      description: "Camiseta con estampado 'Pain' para un estilo único.",
-      price: 89000,
-      imageUrl: "/products/camisetas/graphic-tee-pain.png",
-      category: "Camisetas",
-      sizes: ["M", "L", "XL"],
-      colors: ["Blanco"],
-      stock: { M: 7, L: 11, XL: 4 },
-    },
-    // Puedes añadir más productos aquí
-  ],
-  orders: [], // Inicialmente vacía
-  users: [ADMIN_USER], // Solo el admin al inicio
-}
-
-// Funciones de utilidad para la "base de datos"
-export async function getProductById(id: string): Promise<Product | undefined> {
-  return db.products.find((p) => p.id === id)
-}
-
+// --- Product Functions ---
 export async function getAllProducts(): Promise<Product[]> {
-  return db.products
-}
-
-export async function getUserFromDatabase(email: string): Promise<User | undefined> {
-  return db.users.find((user) => user.email === email)
-}
-
-export async function saveUserToDatabase(user: User): Promise<void> {
-  const index = db.users.findIndex((u) => u.id === user.id)
-  if (index !== -1) {
-    db.users[index] = user
-  } else {
-    db.users.push(user)
+  try {
+    const { rows } = await sql`SELECT * FROM products ORDER BY created_at DESC`
+    return rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: parseFloat(row.price),
+      category: row.category,
+      images: row.images || [],
+      stock: row.stock,
+      discountPercentage: row.discount_percentage || 0,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      sizes: row.sizes || [],
+      colors: row.colors || [],
+    }))
+  } catch (error) {
+    console.error("Error fetching all products:", error)
+    return []
   }
 }
 
-export async function getAllUsers(): Promise<User[]> {
-  return db.users
+export async function getProductById(id: string): Promise<Product | null> {
+  try {
+    const { rows } = await sql`SELECT * FROM products WHERE id = ${id}`
+    if (rows.length === 0) return null
+    const row = rows[0]
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: parseFloat(row.price),
+      category: row.category,
+      images: row.images || [],
+      stock: row.stock,
+      discountPercentage: row.discount_percentage || 0,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      sizes: row.sizes || [],
+      colors: row.colors || [],
+    }
+  } catch (error) {
+    console.error(`Error fetching product with ID ${id}:`, error)
+    return null
+  }
 }
 
-// Funciones para órdenes (solo interacción con la DB mock, sin lógica de email aquí)
-export async function saveOrderToDatabase(order: Order): Promise<void> {
-  db.orders.push(order)
-  console.log(`Pedido ${order.id} guardado en la base de datos mock.`)
+// --- Order Functions ---
+export async function createOrder(
+  userId: string,
+  customerEmail: string,
+  items: CartItem[],
+  shippingInfo: ShippingInfo,
+  totalAmount: number
+): Promise<Order | null> {
+  try {
+    const orderResult = await sql`
+      INSERT INTO orders (user_id, customer_email, total_amount, shipping_address, shipping_city, shipping_postal_code, shipping_country, shipping_cost, status)
+      VALUES (
+        ${userId},
+        ${customerEmail},
+        ${totalAmount},
+        ${shippingInfo.address},
+        ${shippingInfo.city},
+        ${shippingInfo.postalCode},
+        ${shippingInfo.country},
+        ${shippingInfo.cost},
+        'pending'
+      )
+      RETURNING *
+    `
+    const order = orderResult.rows[0]
+
+    if (!order) return null
+
+    const orderItemsToInsert = items.map(item => ({
+      orderId: order.id,
+      productId: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      imageUrl: item.images[0] || null,
+      size: item.size || null,
+      color: item.color || null,
+    }))
+
+    for (const item of orderItemsToInsert) {
+      await sql`
+        INSERT INTO order_items (order_id, product_id, name, quantity, price, image_url, size, color)
+        VALUES (
+          ${item.orderId},
+          ${item.productId},
+          ${item.name},
+          ${item.quantity},
+          ${item.price},
+          ${item.imageUrl},
+          ${item.size},
+          ${item.color}
+        )
+      `
+    }
+
+    return {
+      id: order.id,
+      userId: order.user_id,
+      customerEmail: order.customer_email,
+      orderDate: order.order_date,
+      totalAmount: parseFloat(order.total_amount),
+      status: order.status,
+      shippingInfo: {
+        address: order.shipping_address,
+        city: order.shipping_city,
+        postalCode: order.shipping_postal_code,
+        country: order.shipping_country,
+        cost: parseFloat(order.shipping_cost),
+      },
+      items: items.map(item => ({
+        productId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        imageUrl: item.images[0] || null,
+        size: item.size || null,
+        color: item.color || null,
+      })),
+      createdAt: order.created_at,
+      updatedAt: order.updated_at,
+    }
+  } catch (error) {
+    console.error("Error creating order:", error)
+    return null
+  }
 }
 
-export async function getOrderById(orderId: string): Promise<Order | null> {
-  return db.orders.find((order) => order.id === orderId) || null
+export async function getOrderById(id: string): Promise<Order | null> {
+  try {
+    const orderResult = await sql`SELECT * FROM orders WHERE id = ${id}`
+    if (orderResult.rows.length === 0) return null
+    const orderRow = orderResult.rows[0]
+
+    const itemsResult = await sql`SELECT * FROM order_items WHERE order_id = ${id}`
+    const orderItems: OrderItem[] = itemsResult.rows.map(item => ({
+      productId: item.product_id,
+      name: item.name,
+      quantity: item.quantity,
+      price: parseFloat(item.price),
+      imageUrl: item.image_url,
+      size: item.size,
+      color: item.color,
+    }))
+
+    return {
+      id: orderRow.id,
+      userId: orderRow.user_id,
+      customerEmail: orderRow.customer_email,
+      orderDate: orderRow.order_date,
+      totalAmount: parseFloat(orderRow.total_amount),
+      status: orderRow.status,
+      shippingInfo: {
+        address: orderRow.shipping_address,
+        city: orderRow.shipping_city,
+        postalCode: orderRow.shipping_postal_code,
+        country: orderRow.shipping_country,
+        cost: parseFloat(orderRow.shipping_cost),
+      },
+      items: orderItems,
+      createdAt: orderRow.created_at,
+      updatedAt: orderRow.updated_at,
+    }
+  } catch (error) {
+    console.error(`Error fetching order with ID ${id}:`, error)
+    return null
+  }
+}
+
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+  try {
+    const ordersResult = await sql`SELECT * FROM orders WHERE user_id = ${userId} ORDER BY order_date DESC`
+    const orders: Order[] = []
+
+    for (const orderRow of ordersResult.rows) {
+      const itemsResult = await sql`SELECT * FROM order_items WHERE order_id = ${orderRow.id}`
+      const orderItems: OrderItem[] = itemsResult.rows.map(item => ({
+        productId: item.product_id,
+        name: item.name,
+        quantity: item.quantity,
+        price: parseFloat(item.price),
+        imageUrl: item.image_url,
+        size: item.size,
+        color: item.color,
+      }))
+
+      orders.push({
+        id: orderRow.id,
+        userId: orderRow.user_id,
+        customerEmail: orderRow.customer_email,
+        orderDate: orderRow.order_date,
+        totalAmount: parseFloat(orderRow.total_amount),
+        status: orderRow.status,
+        shippingInfo: {
+          address: orderRow.shipping_address,
+          city: orderRow.shipping_city,
+          postalCode: orderRow.shipping_postal_code,
+          country: orderRow.shipping_country,
+          cost: parseFloat(orderRow.shipping_cost),
+        },
+        items: orderItems,
+        createdAt: orderRow.created_at,
+        updatedAt: orderRow.updated_at,
+      })
+    }
+    return orders
+  } catch (error) {
+    console.error(`Error fetching orders for user ID ${userId}:`, error)
+    return []
+  }
+}
+
+export async function updateOrderStatus(orderId: string, newStatus: string): Promise<boolean> {
+  try {
+    const result = await sql`
+      UPDATE orders
+      SET status = ${newStatus}, updated_at = NOW()
+      WHERE id = ${orderId}
+    `
+    return result.rowCount > 0
+  } catch (error) {
+    console.error(`Error updating order status for ID ${orderId}:`, error)
+    return false
+  }
 }
 
 export async function getAllOrders(): Promise<Order[]> {
-  return db.orders
-}
+  try {
+    const ordersResult = await sql`SELECT * FROM orders ORDER BY order_date DESC`
+    const orders: Order[] = []
 
-export async function updateProductStock(productId: string, size: string, quantity: number): Promise<boolean> {
-  const product = db.products.find((p) => p.id === productId)
-  if (product && product.stock[size] !== undefined) {
-    product.stock[size] -= quantity
-    if (product.stock[size] < 0) product.stock[size] = 0 // Evitar stock negativo
-    console.log(`Stock de ${product.name} (${size}) actualizado a ${product.stock[size]}`)
-    return true
+    for (const orderRow of ordersResult.rows) {
+      const itemsResult = await sql`SELECT * FROM order_items WHERE order_id = ${orderRow.id}`
+      const orderItems: OrderItem[] = itemsResult.rows.map(item => ({
+        productId: item.product_id,
+        name: item.name,
+        quantity: item.quantity,
+        price: parseFloat(item.price),
+        imageUrl: item.image_url,
+        size: item.size,
+        color: item.color,
+      }))
+
+      orders.push({
+        id: orderRow.id,
+        userId: orderRow.user_id,
+        customerEmail: orderRow.customer_email,
+        orderDate: orderRow.order_date,
+        totalAmount: parseFloat(orderRow.total_amount),
+        status: orderRow.status,
+        shippingInfo: {
+          address: orderRow.shipping_address,
+          city: orderRow.shipping_city,
+          postalCode: orderRow.shipping_postal_code,
+          country: orderRow.shipping_country,
+          cost: parseFloat(orderRow.shipping_cost),
+        },
+        items: orderItems,
+        createdAt: orderRow.created_at,
+        updatedAt: orderRow.updated_at,
+      })
+    }
+    return orders
+  } catch (error) {
+    console.error("Error fetching all orders:", error)
+    return []
   }
-  return false
 }

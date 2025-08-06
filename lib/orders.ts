@@ -1,79 +1,161 @@
 // lib/orders.ts
-// Este archivo contendrá las funciones para interactuar con la "base de datos" de pedidos.
-// La lógica de envío de correos se ha movido a las Server Actions.
+// This file defines the structure for orders and provides mock data.
 
-import { db, type Order, type OrderItem, type ShippingInfo, updateProductStock } from "./database"
-
-// Función para generar un ID único para el pedido
-function generateOrderId(): string {
-  return `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+export interface OrderItem {
+  productId: string
+  name: string
+  quantity: number
+  price: number
+  size: string
+  image: string
 }
 
-// Función para guardar un nuevo pedido en la "base de datos"
-// Esta función es interna y no envía correos directamente.
-export async function _saveOrderToDatabase(
-  items: OrderItem[],
-  shippingInfo: ShippingInfo,
-  totalAmount: number,
-  customerEmail: string,
-  customerName?: string,
-): Promise<Order> {
-  const newOrder: Order = {
-    id: generateOrderId(),
-    customerEmail: customerEmail,
-    customerName: customerName,
-    items: items,
-    shippingInfo: shippingInfo,
-    totalAmount: totalAmount,
-    orderDate: new Date(),
-    status: "processing", // Estado inicial después de un pago exitoso
-    paymentStatus: "paid", // Asumimos que el pago ya se procesó antes de llamar a esta función
+export interface Order {
+  id: string
+  userId: string // ID del usuario que realizó el pedido
+  customerName: string
+  customerEmail: string
+  orderDate: string // ISO string
+  totalAmount: number
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+  paymentStatus: "paid" | "pending" | "refunded"
+  shippingAddress: {
+    street: string
+    city: string
+    zip: string
+    country: string
   }
+  items: OrderItem[]
+  channel?: string // e.g., "Web", "Mobile App", "In-store"
+}
 
-  db.orders.push(newOrder)
-  console.log(`Pedido ${newOrder.id} guardado en la base de datos mock.`)
+// Mock data for orders (can be empty initially or pre-populated)
+const orders: Order[] = [
+  {
+    id: "ORD001",
+    userId: "user_1",
+    customerName: "Juan Pérez",
+    customerEmail: "juan.perez@example.com",
+    orderDate: new Date("2023-10-26T10:00:00Z").toISOString(),
+    totalAmount: 170000,
+    status: "delivered",
+    paymentStatus: "paid",
+    shippingAddress: {
+      street: "Calle Falsa 123",
+      city: "Bogotá",
+      zip: "110111",
+      country: "Colombia",
+    },
+    items: [
+      {
+        productId: "camiseta-big-dreams",
+        name: "Camiseta 'Big Dreams'",
+        quantity: 1,
+        price: 85000,
+        size: "M",
+        image: "/products/camisetas/big-dreams-tshirt.png",
+      },
+      {
+        productId: "camiseta-oversized-tee",
+        name: "Oversized Tee 'Street'",
+        quantity: 1,
+        price: 95000,
+        size: "L",
+        image: "/products/camisetas/oversized-tee.png",
+      },
+    ],
+    channel: "Web",
+  },
+  {
+    id: "ORD002",
+    userId: "user_2",
+    customerName: "María García",
+    customerEmail: "maria.garcia@example.com",
+    orderDate: new Date("2023-10-20T14:30:00Z").toISOString(),
+    totalAmount: 89000,
+    status: "shipped",
+    paymentStatus: "paid",
+    shippingAddress: {
+      street: "Avenida Siempre Viva 742",
+      city: "Medellín",
+      zip: "050010",
+      country: "Colombia",
+    },
+    items: [
+      {
+        productId: "camiseta-graphic-blood",
+        name: "Graphic Tee 'Blood'",
+        quantity: 1,
+        price: 89000,
+        size: "S",
+        image: "/products/camisetas/graphic-tee-blood.png",
+      },
+    ],
+    channel: "Mobile App",
+  },
+  {
+    id: "ORD003",
+    userId: "user_1",
+    customerName: "Juan Pérez",
+    customerEmail: "juan.perez@example.com",
+    orderDate: new Date("2023-11-01T09:00:00Z").toISOString(),
+    totalAmount: 110000,
+    status: "pending",
+    paymentStatus: "pending",
+    shippingAddress: {
+      street: "Calle Falsa 123",
+      city: "Bogotá",
+      zip: "110111",
+      country: "Colombia",
+    },
+    items: [
+      {
+        productId: "cargo-pants",
+        name: "Cargo Pants",
+        quantity: 1,
+        price: 110000,
+        size: "32",
+        image: "/placeholder.svg?height=400&width=400&text=Cargo+Pants",
+      },
+    ],
+    channel: "Web",
+  },
+]
 
-  // Actualizar stock de productos
-  for (const item of items) {
-    if (item.size) {
-      await updateProductStock(item.productId, item.size, item.quantity)
+// Simulate fetching orders from a database
+export async function getOrders(): Promise<Order[]> {
+  return new Promise((resolve) => setTimeout(() => resolve(orders), 500))
+}
+
+export async function getOrderById(id: string): Promise<Order | undefined> {
+  return new Promise((resolve) => setTimeout(() => resolve(orders.find((o) => o.id === id)), 300))
+}
+
+export async function addOrder(newOrder: Order): Promise<Order> {
+  return new Promise((resolve) => {
+    orders.push(newOrder)
+    console.log("Order added to mock DB:", newOrder)
+    setTimeout(() => resolve(newOrder), 300)
+  })
+}
+
+export async function updateOrderStatus(id: string, newStatus: Order["status"]): Promise<Order | undefined> {
+  return new Promise((resolve) => {
+    const orderIndex = orders.findIndex((o) => o.id === id)
+    if (orderIndex > -1) {
+      orders[orderIndex].status = newStatus
+      console.log(`Order ${id} status updated to ${newStatus}`)
+      resolve(orders[orderIndex])
+    } else {
+      resolve(undefined)
     }
-  }
-
-  return newOrder
+  })
 }
 
-// Función para obtener un pedido por su ID
-export async function getOrderById(orderId: string): Promise<Order | null> {
-  return db.orders.find((order) => order.id === orderId) || null
-}
-
-// Función para obtener todos los pedidos (para el panel de administración)
-export async function getAllOrders(): Promise<Order[]> {
-  return db.orders
-}
-
-// Función para actualizar el estado de un pedido
-export async function updateOrderStatus(orderId: string, newStatus: Order["status"]): Promise<boolean> {
-  const orderIndex = db.orders.findIndex((order) => order.id === orderId)
-  if (orderIndex !== -1) {
-    db.orders[orderIndex].status = newStatus
-    console.log(`Estado del pedido ${orderId} actualizado a ${newStatus}.`)
-    return true
-  }
-  return false
-}
-
-// Función para actualizar el estado de pago de un pedido
-export async function updateOrderPaymentStatus(
-  orderId: string,
-  newPaymentStatus: Order["paymentStatus"],
-): Promise<boolean> {
-  const orderIndex = db.orders.findIndex((order) => order.id === orderId)
-  if (orderIndex !== -1) {
-    db.orders[orderIndex].paymentStatus = newPaymentStatus
-    console.log(`Estado de pago del pedido ${orderId} actualizado a ${newPaymentStatus}.`)
-    return true
-  }
-  return false
+// This function is specifically for internal use by the database mock, not for direct external calls.
+export async function _saveOrderToDatabase(order: Order): Promise<Order> {
+  return new Promise((resolve) => {
+    orders.push(order);
+    resolve(order);
+  });
 }

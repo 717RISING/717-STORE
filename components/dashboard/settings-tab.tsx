@@ -1,15 +1,17 @@
 "use client"
 
+import type React from "react"
 import { useState } from "react"
-import { Bell, Shield, Globe, Moon, Sun, Monitor, Mail, Smartphone } from "lucide-react"
+import { Bell, Shield, Globe, Moon, Sun, Monitor, Mail, Smartphone } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/lib/theme-context" // Named import for useTheme
 
 export default function SettingsTab() {
   const [settings, setSettings] = useState({
@@ -31,8 +33,9 @@ export default function SettingsTab() {
   const [currency, setCurrency] = useState("USD")
   const [shippingCost, setShippingCost] = useState("15.00")
   const [freeShippingThreshold, setFreeShippingThreshold] = useState("100.00")
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const { toast } = useToast()
+  const { theme, setTheme } = useTheme() // Use named import
 
   const handleSettingChange = (key: string, value: boolean | string) => {
     setSettings((prev) => ({
@@ -51,7 +54,6 @@ export default function SettingsTab() {
       currency,
       shippingCost,
       freeShippingThreshold,
-      notificationsEnabled,
       maintenanceMode,
     })
     toast.success("Configuración guardada correctamente.")
@@ -68,13 +70,144 @@ export default function SettingsTab() {
     }
   }
 
+  const handlePasswordChange = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (settings.newPassword !== settings.confirmNewPassword) {
+      toast({
+        title: "Error de Contraseña",
+        description: "Las nuevas contraseñas no coinciden.",
+        variant: "destructive",
+      })
+      return
+    }
+    // Simulate password change API call
+    console.log("Changing password...")
+    toast({
+      title: "Contraseña Actualizada",
+      description: "Tu contraseña ha sido cambiada exitosamente.",
+      variant: "success",
+    })
+    setSettings((prev) => ({
+      ...prev,
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    }))
+  }
+
+  const handleNotificationsToggle = (checked: boolean) => {
+    setSettings((prev) => ({
+      ...prev,
+      notificationsEnabled: checked,
+    }))
+    toast({
+      title: "Notificaciones",
+      description: checked ? "Notificaciones activadas." : "Notificaciones desactivadas.",
+      variant: "default",
+    })
+  }
+
+  const handleThemeToggle = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light")
+    toast({
+      title: "Tema Cambiado",
+      description: `El tema ahora es ${checked ? "oscuro" : "claro"}.`,
+      variant: "default",
+    })
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Configuración de la Tienda</h1>
         <p className="text-gray-400">Gestiona los ajustes generales de tu tienda.</p>
       </div>
+
+      {/* Account Actions */}
+      <h2 className="text-2xl font-bold text-white">Configuración de la Cuenta</h2>
+
+      <Card className="bg-gray-800 text-white border-gray-700">
+        <CardHeader>
+          <CardTitle>Información Personal</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="first-name" className="text-gray-300">
+              Nombre
+            </Label>
+            <Input id="first-name" defaultValue="Juan" className="bg-gray-700 border-gray-600 text-white" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="last-name" className="text-gray-300">
+              Apellido
+            </Label>
+            <Input id="last-name" defaultValue="Pérez" className="bg-gray-700 border-gray-600 text-white" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="email" className="text-gray-300">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              defaultValue="juan.perez@example.com"
+              className="bg-gray-700 border-gray-600 text-white"
+            />
+          </div>
+          <Button className="bg-[#5D1A1D] hover:bg-[#4a1518] text-white">Guardar Cambios</Button>
+        </CardContent>
+      </Card>
+
+      {/* Security */}
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Seguridad de la Cuenta</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div>
+              <Label htmlFor="current-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Contraseña Actual
+              </Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={settings.currentPassword}
+                onChange={(e) => setSettings((prev) => ({ ...prev, currentPassword: e.target.value }))}
+                className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Nueva Contraseña
+              </Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={settings.newPassword}
+                onChange={(e) => setSettings((prev) => ({ ...prev, newPassword: e.target.value }))}
+                className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirm-new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Confirmar Nueva Contraseña
+              </Label>
+              <Input
+                id="confirm-new-password"
+                type="password"
+                value={settings.confirmNewPassword}
+                onChange={(e) => setSettings((prev) => ({ ...prev, confirmNewPassword: e.target.value }))}
+                className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+            </div>
+            <Button type="submit" className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+              Cambiar Contraseña
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* General Settings */}
       <Card className="bg-gray-900 border-gray-800">
@@ -183,129 +316,32 @@ export default function SettingsTab() {
       </Card>
 
       {/* Notifications */}
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Bell className="w-5 h-5" />
-            Notificaciones
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Preferencias</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-gray-400" />
-              <div>
-                <Label className="text-white">Notificaciones por Email</Label>
-                <p className="text-gray-400 text-sm">Recibe actualizaciones importantes por correo</p>
-              </div>
-            </div>
+            <Label htmlFor="notifications" className="text-lg text-gray-700 dark:text-gray-300">
+              Notificaciones por Correo Electrónico
+            </Label>
             <Switch
-              checked={settings.emailNotifications}
-              onCheckedChange={(checked) => handleSettingChange("emailNotifications", checked)}
+              id="notifications"
+              checked={settings.notificationsEnabled}
+              onCheckedChange={handleNotificationsToggle}
+              className="data-[state=checked]:bg-[#4A1518] data-[state=unchecked]:bg-gray-300"
             />
           </div>
-
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Smartphone className="w-5 h-5 text-gray-400" />
-              <div>
-                <Label className="text-white">Notificaciones SMS</Label>
-                <p className="text-gray-400 text-sm">Recibe mensajes de texto para pedidos urgentes</p>
-              </div>
-            </div>
+            <Label htmlFor="theme-toggle" className="text-lg text-gray-700 dark:text-gray-300">
+              Modo Oscuro
+            </Label>
             <Switch
-              checked={settings.smsNotifications}
-              onCheckedChange={(checked) => handleSettingChange("smsNotifications", checked)}
+              id="theme-toggle"
+              checked={theme === "dark"}
+              onCheckedChange={handleThemeToggle}
+              className="data-[state=checked]:bg-[#4A1518] data-[state=unchecked]:bg-gray-300"
             />
-          </div>
-
-          <div className="pl-8 space-y-4 border-l-2 border-gray-800">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-white">Actualizaciones de Pedidos</Label>
-                <p className="text-gray-400 text-sm">Estado de envío y entrega</p>
-              </div>
-              <Switch
-                checked={settings.orderUpdates}
-                onCheckedChange={(checked) => handleSettingChange("orderUpdates", checked)}
-                disabled={!settings.emailNotifications}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-white">Emails Promocionales</Label>
-                <p className="text-gray-400 text-sm">Ofertas especiales y descuentos</p>
-              </div>
-              <Switch
-                checked={settings.promotionalEmails}
-                onCheckedChange={(checked) => handleSettingChange("promotionalEmails", checked)}
-                disabled={!settings.emailNotifications}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-white">Nuevos Productos</Label>
-                <p className="text-gray-400 text-sm">Notificaciones de lanzamientos</p>
-              </div>
-              <Switch
-                checked={settings.newProducts}
-                onCheckedChange={(checked) => handleSettingChange("newProducts", checked)}
-                disabled={!settings.emailNotifications}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-white">Alertas de Precio</Label>
-                <p className="text-gray-400 text-sm">Cuando baje el precio de productos en tu lista</p>
-              </div>
-              <Switch
-                checked={settings.priceAlerts}
-                onCheckedChange={(checked) => handleSettingChange("priceAlerts", checked)}
-                disabled={!settings.emailNotifications}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Security */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Seguridad
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-white">Autenticación de Dos Factores</Label>
-              <p className="text-gray-400 text-sm">Agrega una capa extra de seguridad a tu cuenta</p>
-            </div>
-            <Switch
-              checked={settings.twoFactorAuth}
-              onCheckedChange={(checked) => handleSettingChange("twoFactorAuth", checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-white">Alertas de Inicio de Sesión</Label>
-              <p className="text-gray-400 text-sm">Notificaciones cuando alguien acceda a tu cuenta</p>
-            </div>
-            <Switch
-              checked={settings.loginAlerts}
-              onCheckedChange={(checked) => handleSettingChange("loginAlerts", checked)}
-            />
-          </div>
-
-          <div className="pt-4 border-t border-gray-800">
-            <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-800 bg-transparent">
-              Cambiar Contraseña
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -392,17 +428,6 @@ export default function SettingsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="notificationsEnabled" className="text-gray-300">
-              Habilitar Notificaciones
-            </Label>
-            <Switch
-              id="notificationsEnabled"
-              checked={notificationsEnabled}
-              onCheckedChange={setNotificationsEnabled}
-              className="data-[state=checked]:bg-[#5D1A1D]"
-            />
-          </div>
-          <div className="flex items-center justify-between">
             <Label htmlFor="maintenanceMode" className="text-gray-300">
               Modo Mantenimiento
             </Label>
@@ -415,38 +440,6 @@ export default function SettingsTab() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Account Actions */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Acciones de Cuenta</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-800 bg-transparent">
-              Descargar Mis Datos
-            </Button>
-            <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-800 bg-transparent">
-              Exportar Historial de Pedidos
-            </Button>
-          </div>
-
-          <div className="pt-4 border-t border-gray-800">
-            <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-900/20 bg-transparent">
-              Eliminar Cuenta
-            </Button>
-            <p className="text-gray-400 text-sm mt-2">
-              Esta acción es permanente y no se puede deshacer. Todos tus datos serán eliminados.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSaveChanges} className="bg-white text-black hover:bg-gray-200">
-          Guardar Cambios
-        </Button>
-      </div>
     </div>
   )
 }

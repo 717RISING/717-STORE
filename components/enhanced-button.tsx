@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Loader2 } from "lucide-react"
-import React from "react"
+import { useState } from "react"
+import { Loader2 } from 'lucide-react'
 
 interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean
@@ -11,29 +11,49 @@ interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   children: React.ReactNode
 }
 
-const EnhancedButton = React.forwardRef<HTMLButtonElement, EnhancedButtonProps>(
-  ({ loading, loadingText, children, className, disabled, ...props }, ref) => {
-    return (
-      <Button
-        ref={ref}
-        className={cn(
-          "relative", // Ensure relative positioning for loader
-          className,
-        )}
-        disabled={disabled || loading}
-        {...props}
-      >
-        {loading && (
-          <span className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {loadingText && <span className="ml-2">{loadingText}</span>}
-          </span>
-        )}
-        <span className={cn({ "opacity-0": loading })}>{children}</span>
-      </Button>
-    )
-  },
-)
-EnhancedButton.displayName = "EnhancedButton"
+export default function EnhancedButton({
+  loading = false,
+  loadingText = "Cargando...",
+  children,
+  className,
+  disabled,
+  ...props
+}: EnhancedButtonProps) {
+  const [isInternalLoading, setIsInternalLoading] = useState(false)
 
-export default EnhancedButton
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (props.onClick) {
+      setIsInternalLoading(true)
+      try {
+        await props.onClick(e)
+      } finally {
+        setIsInternalLoading(false)
+      }
+    }
+  }
+
+  const isLoading = loading || isInternalLoading
+
+  return (
+    <Button
+      className={cn(
+        "relative transition-all duration-200 ease-in-out",
+        isLoading && "cursor-not-allowed opacity-80",
+        className
+      )}
+      disabled={disabled || isLoading}
+      onClick={handleClick}
+      {...props}
+    >
+      {isLoading && (
+        <span className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          {loadingText}
+        </span>
+      )}
+      <span className={cn("transition-opacity duration-200", isLoading && "opacity-0")}>
+        {children}
+      </span>
+    </Button>
+  )
+}

@@ -1,235 +1,158 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "sonner"
-import type { ShippingInfo } from "@/lib/database"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useToast } from "@/hooks/use-toast"
 
-interface ShippingFormProps {
-  onShippingInfoChange: (info: ShippingInfo) => void
-  initialShippingInfo?: ShippingInfo
-}
-
-export default function ShippingForm({ onShippingInfoChange, initialShippingInfo }: ShippingFormProps) {
-  const [firstName, setFirstName] = useState(initialShippingInfo?.firstName || "")
-  const [lastName, setLastName] = useState(initialShippingInfo?.lastName || "")
-  const [email, setEmail] = useState(initialShippingInfo?.email || "")
-  const [phone, setPhone] = useState(initialShippingInfo?.phone || "")
-  const [address, setAddress] = useState(initialShippingInfo?.address || "")
-  const [city, setCity] = useState(initialShippingInfo?.city || "")
-  const [state, setState] = useState(initialShippingInfo?.state || "")
-  const [zipCode, setZipCode] = useState(initialShippingInfo?.zipCode || "")
-  const [country, setCountry] = useState(initialShippingInfo?.country || "Colombia") // Default country
-  const [cost, setCost] = useState(initialShippingInfo?.cost || 0) // Default shipping cost
-  const [billingChecked, setBillingChecked] = useState(true)
+export default function ShippingForm() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    address: "",
+    city: "",
+    zip: "",
+    country: "Colombia", // Default country
+  })
+  const [saveInfo, setSaveInfo] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
-    onShippingInfoChange({
-      firstName,
-      lastName,
-      email,
-      phone,
-      address,
-      city,
-      state,
-      zipCode,
-      country,
-      cost,
-    })
-  }, [firstName, lastName, email, phone, address, city, state, zipCode, country, cost, onShippingInfoChange])
+    // Populate hidden inputs for server action
+    const nameInput = document.getElementById("hidden-name") as HTMLInputElement
+    const emailInput = document.getElementById("hidden-email") as HTMLInputElement
+    const addressInput = document.getElementById("hidden-address") as HTMLInputElement
+    const cityInput = document.getElementById("hidden-city") as HTMLInputElement
+    const zipInput = document.getElementById("hidden-zip") as HTMLInputElement
+    const countryInput = document.getElementById("hidden-country") as HTMLInputElement
 
-  useEffect(() => {
-    setCountry("Colombia") // Default country
-  }, [])
+    if (nameInput) nameInput.value = formData.name
+    if (emailInput) emailInput.value = formData.email
+    if (addressInput) addressInput.value = formData.address
+    if (cityInput) cityInput.value = formData.city
+    if (zipInput) zipInput.value = formData.zip
+    if (countryInput) countryInput.value = formData.country
+  }, [formData])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Basic validation
-    if (!firstName || !lastName || !email || !phone || !address || !city || !state || !zipCode) {
-      toast.error("Por favor, completa todos los campos de envío.")
-      return
-    }
-    if (!validateEmail(email)) {
-      toast.error("Por favor, introduce un email válido.")
-      return
-    }
-    // If validation passes, the parent component will handle the next step
-    toast.success("Información de envío guardada.")
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(String(email).toLowerCase())
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, country: value }))
   }
 
-  const colombianStates = [
-    "Amazonas",
-    "Antioquia",
-    "Arauca",
-    "Atlántico",
-    "Bolívar",
-    "Boyacá",
-    "Caldas",
-    "Caquetá",
-    "Casanare",
-    "Cauca",
-    "Cesar",
-    "Chocó",
-    "Córdoba",
-    "Cundinamarca",
-    "Guainía",
-    "Guaviare",
-    "Huila",
-    "La Guajira",
-    "Magdalena",
-    "Meta",
-    "Nariño",
-    "Norte de Santander",
-    "Putumayo",
-    "Quindío",
-    "Risaralda",
-    "San Andrés y Providencia",
-    "Santander",
-    "Sucre",
-    "Tolima",
-    "Valle del Cauca",
-    "Vaupés",
-    "Vichada",
-  ]
+  const handleSaveInfoChange = (checked: boolean) => {
+    setSaveInfo(checked)
+    if (checked) {
+      toast({
+        title: "Información Guardada",
+        description: "Tu información de envío se guardará para futuras compras.",
+      })
+    }
+  }
 
   return (
-    <Card className="shadow-lg bg-gray-800 border-gray-700 text-white">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-semibold text-[#5D1A1D]">Información de Envío</CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">Nombre</Label>
-            <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Apellido</Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="address">Dirección</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">Ciudad</Label>
-            <Input
-              id="city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="state">Departamento</Label>
-            <Select value={state} onValueChange={(value) => setState(value)} required>
-              <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white focus-ring">
-                <SelectValue placeholder="Selecciona un departamento" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 text-white border-gray-700">
-                {colombianStates.map((stateOption) => (
-                  <SelectItem key={stateOption} value={stateOption} className="hover:bg-gray-700">
-                    {stateOption}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="zipCode">Código Postal</Label>
-            <Input
-              id="zipCode"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-              required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus-ring"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="country">País</Label>
-            <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger id="country" className="w-full bg-gray-700 border-gray-600 text-white focus-ring">
-                <SelectValue placeholder="Selecciona un país" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 text-white border-gray-700">
-                <SelectItem value="Colombia">Colombia</SelectItem>
-                <SelectItem value="Mexico">México</SelectItem>
-                <SelectItem value="Spain">España</SelectItem>
-                <SelectItem value="USA">Estados Unidos</SelectItem>
-                {/* Add more countries as needed */}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="md:col-span-2 flex items-center space-x-2 mt-4">
-            <Checkbox
-              id="billingSameAsShipping"
-              checked={billingChecked}
-              onCheckedChange={(checked) => setBillingChecked(checked as boolean)}
-              className="border-[#5D1A1D] data-[state=checked]:bg-[#5D1A1D] data-[state=checked]:text-white"
-            />
-            <Label htmlFor="billingSameAsShipping" className="text-gray-300">
-              La dirección de facturación es la misma que la de envío
-            </Label>
-          </div>
-          <div className="md:col-span-2 mt-6">
-            <Button type="submit" className="w-full bg-[#5D1A1D] hover:bg-[#4a1518] text-white py-2">
-              Continuar al Pago
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Nombre Completo
+          </Label>
+          <Input
+            id="name"
+            type="text"
+            placeholder="Tu nombre"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+        <div>
+          <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Correo Electrónico
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="tu@ejemplo.com"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Dirección
+        </Label>
+        <Input
+          id="address"
+          type="text"
+          placeholder="Calle, número, apartamento, etc."
+          value={formData.address}
+          onChange={handleInputChange}
+          required
+          className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <Label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Ciudad
+          </Label>
+          <Input
+            id="city"
+            type="text"
+            placeholder="Ciudad"
+            value={formData.city}
+            onChange={handleInputChange}
+            required
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+        <div>
+          <Label htmlFor="zip" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Código Postal
+          </Label>
+          <Input
+            id="zip"
+            type="text"
+            placeholder="XXXXX"
+            value={formData.zip}
+            onChange={handleInputChange}
+            required
+            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
+        </div>
+        <div>
+          <Label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            País
+          </Label>
+          <Select value={formData.country} onValueChange={handleSelectChange}>
+            <SelectTrigger id="country" className="w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+              <SelectValue placeholder="Selecciona un país" />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-gray-800 border-gray-700 text-gray-900 dark:text-white">
+              <SelectItem value="Colombia">Colombia</SelectItem>
+              <SelectItem value="Mexico">México</SelectItem>
+              <SelectItem value="Spain">España</SelectItem>
+              <SelectItem value="USA">Estados Unidos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox id="save-info" checked={saveInfo} onCheckedChange={(checked) => handleSaveInfoChange(!!checked)} />
+        <Label htmlFor="save-info" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Guardar esta información para futuras compras
+        </Label>
+      </div>
+    </div>
   )
 }

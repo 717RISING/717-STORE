@@ -1,508 +1,215 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
-import { Plus, Edit, Trash2, CreditCard, Shield, ShoppingCartIcon as Paypal, Banknote } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { toast } from "sonner"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { PlusCircle, Edit, Trash2, CreditCard } from 'lucide-react'
 
-// Mock payment methods data
-const mockPaymentMethods = [
+interface PaymentMethod {
+  id: string
+  type: "credit-card" | "paypal"
+  last4?: string
+  expiry?: string
+  email?: string
+  isDefault: boolean
+}
+
+const initialPaymentMethods: PaymentMethod[] = [
   {
-    id: "1",
-    type: "visa",
-    lastFour: "4242",
-    expiryMonth: "12",
-    expiryYear: "2025",
-    holderName: "Juan Pérez",
+    id: "card-1",
+    type: "credit-card",
+    last4: "4242",
+    expiry: "12/25",
     isDefault: true,
   },
   {
-    id: "2",
-    type: "mastercard",
-    lastFour: "8888",
-    expiryMonth: "06",
-    expiryYear: "2026",
-    holderName: "Juan Pérez",
+    id: "paypal-1",
+    type: "paypal",
+    email: "user@example.com",
     isDefault: false,
   },
 ]
 
-export default function PaymentTab() {
-  const [paymentMethods, setPaymentMethods] = useState(mockPaymentMethods)
+export function PaymentTab() {
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(initialPaymentMethods)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingMethod, setEditingMethod] = useState<any>(null)
-  const [paymentMethod, setPaymentMethod] = useState("card")
-  const [cardName, setCardName] = useState("")
-  const [cardNumber, setCardNumber] = useState("")
-  const [expiryDate, setExpiryDate] = useState("")
-  const [cvv, setCvv] = useState("")
-  const [paypalEmail, setPaypalEmail] = useState("")
-  const [bankName, setBankName] = useState("")
-  const [accountNumber, setAccountNumber] = useState("")
+  const [currentMethod, setCurrentMethod] = useState<PaymentMethod | null>(null)
+  const [form, setForm] = useState({
+    type: "credit-card" as "credit-card" | "paypal",
+    last4: "",
+    expiry: "",
+    email: "",
+    isDefault: false,
+  })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value, type, checked } = e.target
+    setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [id]: type === "checkbox" ? checked : value,
     }))
   }
 
-  const handleAddPaymentMethod = () => {
-    // Aquí iría la lógica para añadir el método de pago a la base de datos
-    console.log("Añadiendo método de pago:", {
-      paymentMethod,
-      cardName,
-      cardNumber,
-      expiryDate,
-      cvv,
-      paypalEmail,
-      bankName,
-      accountNumber,
-    })
-    toast.success("Método de pago añadido correctamente.")
-    // Limpiar campos después de añadir
-    setCardName("")
-    setCardNumber("")
-    setExpiryDate("")
-    setCvv("")
-    setPaypalEmail("")
-    setBankName("")
-    setAccountNumber("")
+  const handleSelectChange = (value: "credit-card" | "paypal") => {
+    setForm((prev) => ({ ...prev, type: value }))
   }
 
-  const handleEditPaymentMethod = (method: any) => {
-    setEditingMethod(method)
-    setFormData({
-      cardNumber: `****-****-****-${method.lastFour}`,
-      expiryMonth: method.expiryMonth,
-      expiryYear: method.expiryYear,
-      cvv: "",
-      holderName: method.holderName,
-    })
+  const handleSaveMethod = () => {
+    if (currentMethod) {
+      setPaymentMethods(
+        paymentMethods.map((method) =>
+          method.id === currentMethod.id ? { ...method, ...form, isDefault: form.isDefault || method.isDefault } : method
+        )
+      )
+    } else {
+      setPaymentMethods([
+        ...paymentMethods,
+        { id: String(Date.now()), ...form, isDefault: form.isDefault || paymentMethods.length === 0 },
+      ])
+    }
+    setIsDialogOpen(false)
+    resetForm()
+  }
+
+  const handleDeleteMethod = (id: string) => {
+    setPaymentMethods(paymentMethods.filter((method) => method.id !== id))
+  }
+
+  const openDialogForEdit = (method: PaymentMethod) => {
+    setCurrentMethod(method)
+    setForm({ ...method, last4: method.last4 || "", expiry: method.expiry || "", email: method.email || "" })
     setIsDialogOpen(true)
   }
 
-  const handleSavePaymentMethod = () => {
-    const cardType = getCardType(formData.cardNumber)
-    const lastFour = formData.cardNumber.slice(-4)
-
-    if (editingMethod) {
-      setPaymentMethods((prev) =>
-        prev.map((method) =>
-          method.id === editingMethod.id
-            ? {
-                ...method,
-                type: cardType,
-                lastFour,
-                expiryMonth: formData.expiryMonth,
-                expiryYear: formData.expiryYear,
-                holderName: formData.holderName,
-              }
-            : method,
-        ),
-      )
-      toast.success("Método de pago actualizado")
-    } else {
-      const newMethod = {
-        id: Date.now().toString(),
-        type: cardType,
-        lastFour,
-        expiryMonth: formData.expiryMonth,
-        expiryYear: formData.expiryYear,
-        holderName: formData.holderName,
-        isDefault: paymentMethods.length === 0,
-      }
-      setPaymentMethods((prev) => [...prev, newMethod])
-      toast.success("Método de pago agregado correctamente")
-    }
-    setIsDialogOpen(false)
+  const openDialogForAdd = () => {
+    setCurrentMethod(null)
+    resetForm()
+    setIsDialogOpen(true)
   }
 
-  const handleDeletePaymentMethod = (id: string) => {
-    setPaymentMethods((prev) => prev.filter((method) => method.id !== id))
-    toast.success("Método de pago eliminado")
+  const resetForm = () => {
+    setForm({
+      type: "credit-card",
+      last4: "",
+      expiry: "",
+      email: "",
+      isDefault: false,
+    })
   }
-
-  const handleSetDefault = (id: string) => {
-    setPaymentMethods((prev) =>
-      prev.map((method) => ({
-        ...method,
-        isDefault: method.id === id,
-      })),
-    )
-    toast.success("Método de pago predeterminado actualizado")
-  }
-
-  const getCardType = (cardNumber: string) => {
-    const number = cardNumber.replace(/\D/g, "")
-    if (number.startsWith("4")) return "visa"
-    if (number.startsWith("5")) return "mastercard"
-    if (number.startsWith("3")) return "amex"
-    return "unknown"
-  }
-
-  const getCardIcon = (type: string) => {
-    const iconClass = "w-8 h-5"
-    switch (type) {
-      case "visa":
-        return (
-          <div
-            className={`${iconClass} bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold`}
-          >
-            VISA
-          </div>
-        )
-      case "mastercard":
-        return (
-          <div
-            className={`${iconClass} bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold`}
-          >
-            MC
-          </div>
-        )
-      case "amex":
-        return (
-          <div
-            className={`${iconClass} bg-green-600 rounded flex items-center justify-center text-white text-xs font-bold`}
-          >
-            AMEX
-          </div>
-        )
-      default:
-        return <CreditCard className="w-5 h-5" />
-    }
-  }
-
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
-    const matches = v.match(/\d{4,16}/g)
-    const match = (matches && matches[0]) || ""
-    const parts = []
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4))
-    }
-
-    if (parts.length) {
-      return parts.join("-")
-    } else {
-      return v
-    }
-  }
-
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCardNumber(e.target.value)
-    setFormData((prev) => ({
-      ...prev,
-      cardNumber: formatted,
-    }))
-  }
-
-  const [formData, setFormData] = useState({
-    cardNumber: "",
-    expiryMonth: "",
-    expiryYear: "",
-    cvv: "",
-    holderName: "",
-  })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Métodos de Pago</h1>
-          <p className="text-gray-400">Gestiona tus tarjetas y métodos de pago</p>
-        </div>
+    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Métodos de Pago</CardTitle>
+        <Button onClick={openDialogForAdd} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Añadir Método
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {paymentMethods.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400">No tienes métodos de pago guardados.</p>
+        ) : (
+          <div className="grid gap-4">
+            {paymentMethods.map((method) => (
+              <Card key={method.id} className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                <CardContent className="p-4 flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <CreditCard className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                        {method.type === "credit-card" ? `Tarjeta **** ${method.last4}` : `PayPal (${method.email})`}
+                        {method.isDefault && <Badge className="ml-2 bg-[#5D1A1D] text-white">Principal</Badge>}
+                      </h3>
+                      {method.type === "credit-card" && (
+                        <p className="text-gray-700 dark:text-gray-300">Expira: {method.expiry}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => openDialogForEdit(method)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteMethod(method.id)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleAddPaymentMethod} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar Tarjeta
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-800 text-white">
+          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 border-gray-700">
             <DialogHeader>
-              <DialogTitle>{editingMethod ? "Editar" : "Agregar"} Método de Pago</DialogTitle>
+              <DialogTitle className="text-gray-900 dark:text-white">
+                {currentMethod ? "Editar Método de Pago" : "Añadir Nuevo Método de Pago"}
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={setPaymentMethod}
-                className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-6"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="card" id="card" className="text-[#5D1A1D]" />
-                  <Label htmlFor="card" className="flex items-center space-x-2 text-gray-300">
-                    <CreditCard className="w-5 h-5" />
-                    <span>Tarjeta de Crédito/Débito</span>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="paypal" id="paypal" className="text-[#5D1A1D]" />
-                  <Label htmlFor="paypal" className="flex items-center space-x-2 text-gray-300">
-                    <Paypal className="w-5 h-5" />
-                    <span>PayPal</span>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="transfer" id="transfer" className="text-[#5D1A1D]" />
-                  <Label htmlFor="transfer" className="flex items-center space-x-2 text-gray-300">
-                    <Banknote className="w-5 h-5" />
-                    <span>Transferencia Bancaria</span>
-                  </Label>
-                </div>
-              </RadioGroup>
-
-              {paymentMethod === "card" && (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="cardName" className="text-gray-300">
-                      Nombre en la Tarjeta
-                    </Label>
-                    <Input
-                      id="cardName"
-                      value={formData.holderName}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, holderName: e.target.value }))}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cardNumber" className="text-gray-300">
-                      Número de Tarjeta
-                    </Label>
-                    <Input
-                      id="cardNumber"
-                      name="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={handleCardNumberChange}
-                      placeholder="1234-5678-9012-3456"
-                      maxLength={19}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="expiryMonth" className="text-gray-300">
-                      Mes
-                    </Label>
-                    <select
-                      id="expiryMonth"
-                      name="expiryMonth"
-                      value={formData.expiryMonth}
-                      onChange={handleInputChange}
-                      className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
-                    >
-                      <option value="">Mes</option>
-                      {Array.from({ length: 12 }, (_, i) => (
-                        <option key={i + 1} value={(i + 1).toString().padStart(2, "0")}>
-                          {(i + 1).toString().padStart(2, "0")}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Label htmlFor="expiryYear" className="text-gray-300">
-                      Año
-                    </Label>
-                    <select
-                      id="expiryYear"
-                      name="expiryYear"
-                      value={formData.expiryYear}
-                      onChange={handleInputChange}
-                      className="w-full mt-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
-                    >
-                      <option value="">Año</option>
-                      {Array.from({ length: 10 }, (_, i) => (
-                        <option key={i} value={(new Date().getFullYear() + i).toString()}>
-                          {new Date().getFullYear() + i}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Label htmlFor="cvv" className="text-gray-300">
-                      CVV
-                    </Label>
-                    <Input
-                      id="cvv"
-                      name="cvv"
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      placeholder="123"
-                      maxLength={4}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === "paypal" && (
-                <div>
-                  <Label htmlFor="paypalEmail" className="text-gray-300">
-                    Correo Electrónico de PayPal
-                  </Label>
-                  <Input
-                    id="paypalEmail"
-                    type="email"
-                    value={paypalEmail}
-                    onChange={(e) => setPaypalEmail(e.target.value)}
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
-                </div>
-              )}
-
-              {paymentMethod === "transfer" && (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="bankName" className="text-gray-300">
-                      Nombre del Banco
-                    </Label>
-                    <Input
-                      id="bankName"
-                      value={bankName}
-                      onChange={(e) => setBankName(e.target.value)}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="accountNumber" className="text-gray-300">
-                      Número de Cuenta
-                    </Label>
-                    <Input
-                      id="accountNumber"
-                      value={accountNumber}
-                      onChange={(e) => setAccountNumber(e.target.value)}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 p-3 bg-gray-800 rounded-lg">
-                <Shield className="w-5 h-5 text-green-400" />
-                <p className="text-sm text-gray-300">Tu información está protegida con encriptación SSL de 256 bits</p>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right text-gray-700 dark:text-gray-300">
+                  Tipo
+                </Label>
+                <Select value={form.type} onValueChange={handleSelectChange}>
+                  <SelectTrigger className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-700 text-gray-900 dark:text-white">
+                    <SelectItem value="credit-card">Tarjeta de Crédito</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-
-              <div className="flex gap-4 pt-4">
-                <Button onClick={handleSavePaymentMethod} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-                  {editingMethod ? "Actualizar" : "Agregar"} Tarjeta
-                </Button>
-                <Button
-                  onClick={() => setIsDialogOpen(false)}
-                  variant="outline"
-                  className="border-gray-600 text-white hover:bg-gray-800"
-                >
-                  Cancelar
-                </Button>
+              {form.type === "credit-card" && (
+                <>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="last4" className="text-right text-gray-700 dark:text-gray-300">
+                      Últimos 4 dígitos
+                    </Label>
+                    <Input id="last4" value={form.last4} onChange={handleInputChange} className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" maxLength={4} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="expiry" className="text-right text-gray-700 dark:text-gray-300">
+                      Vencimiento (MM/AA)
+                    </Label>
+                    <Input id="expiry" value={form.expiry} onChange={handleInputChange} className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" placeholder="MM/AA" maxLength={5} />
+                  </div>
+                </>
+              )}
+              {form.type === "paypal" && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right text-gray-700 dark:text-gray-300">
+                    Email de PayPal
+                  </Label>
+                  <Input id="email" value={form.email} onChange={handleInputChange} className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white" type="email" />
+                </div>
+              )}
+              <div className="flex items-center space-x-2 col-span-4 justify-end">
+                <input
+                  type="checkbox"
+                  id="isDefault"
+                  checked={form.isDefault}
+                  onChange={handleInputChange}
+                  className="form-checkbox h-4 w-4 text-[#4A1518] rounded"
+                />
+                <Label htmlFor="isDefault" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Establecer como método principal
+                </Label>
               </div>
             </div>
+            <DialogFooter>
+              <Button onClick={handleSaveMethod} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+                {currentMethod ? "Guardar Cambios" : "Añadir Método"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-
-      {/* Payment Methods List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {paymentMethods.map((method) => (
-          <Card key={method.id} className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {getCardIcon(method.type)}
-                  <div>
-                    <CardTitle className="text-white">•••• •••• •••• {method.lastFour}</CardTitle>
-                    <p className="text-gray-400 text-sm">
-                      Expira {method.expiryMonth}/{method.expiryYear}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {method.isDefault && (
-                    <Badge variant="outline" className="border-green-600 text-green-400">
-                      Predeterminada
-                    </Badge>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditPaymentMethod(method)}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeletePaymentMethod(method.id)}
-                    className="text-gray-400 hover:text-red-400"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="font-semibold">{method.holderName}</p>
-                <p className="text-gray-400 text-sm capitalize">
-                  {method.type} terminada en {method.lastFour}
-                </p>
-              </div>
-              {!method.isDefault && (
-                <Button
-                  onClick={() => handleSetDefault(method.id)}
-                  variant="outline"
-                  className="mt-4 border-gray-600 text-white hover:bg-gray-800"
-                >
-                  Establecer como Predeterminada
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {paymentMethods.length === 0 && (
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="text-center py-12">
-            <CreditCard className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <h3 className="text-xl font-semibold mb-2">No tienes métodos de pago guardados</h3>
-            <p className="text-gray-400 mb-6">Agrega una tarjeta para facilitar tus compras</p>
-            <Button onClick={handleAddPaymentMethod} className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22]">
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar Primera Tarjeta
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Security Notice */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <Shield className="w-6 h-6 text-green-400 mt-1" />
-            <div>
-              <h3 className="font-semibold mb-2">Seguridad de Pagos</h3>
-              <p className="text-gray-400 text-sm mb-2">
-                Todos tus métodos de pago están protegidos con encriptación de nivel bancario. Nunca almacenamos
-                información completa de tarjetas en nuestros servidores.
-              </p>
-              <ul className="text-gray-400 text-sm space-y-1">
-                <li>• Encriptación SSL de 256 bits</li>
-                <li>• Cumplimiento PCI DSS</li>
-                <li>• Monitoreo de fraude 24/7</li>
-                <li>• Verificación de identidad</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

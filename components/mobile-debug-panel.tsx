@@ -1,94 +1,91 @@
 "use client"
 
-import { useState } from "react"
-import { X, Bug, Info, Wifi, BatteryCharging, Cpu, MemoryStick } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { useMobileDetection } from "@/hooks/use-mobile-detection"
+import { cn } from "@/lib/utils"
+import { Settings, X, Smartphone, Tablet, Monitor } from 'lucide-react'
 
-export default function MobileDebugPanel() {
-  const [isOpen, setIsOpen] = useState(false)
-  const isMobile = useMobileDetection()
+interface MobileDebugPanelProps {
+  className?: string
+}
+
+export function MobileDebugPanel({ className }: MobileDebugPanelProps) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const { isMobile, isTablet, isDesktop } = useMobileDetection()
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      setDimensions({ width: window.innerWidth, height: window.innerHeight })
+    }
+
+    if (typeof window !== "undefined") {
+      updateDimensions() // Set initial dimensions
+      window.addEventListener("resize", updateDimensions)
+      return () => window.removeEventListener("resize", updateDimensions)
+    }
+  }, [])
 
   if (!isMobile) {
     return null // Only show on mobile devices
   }
 
+  const getDeviceIcon = () => {
+    if (isMobile) return <Smartphone className="h-5 w-5 text-blue-400" />
+    if (isTablet) return <Tablet className="h-5 w-5 text-green-400" />
+    if (isDesktop) return <Monitor className="h-5 w-5 text-purple-400" />
+    return <Settings className="h-5 w-5 text-gray-400" />
+  }
+
+  const getDeviceType = () => {
+    if (isMobile) return "Mobile"
+    if (isTablet) return "Tablet"
+    if (isDesktop) return "Desktop"
+    return "Unknown"
+  }
+
   return (
-    <>
+    <div className={cn("fixed bottom-4 right-4 z-50", className)}>
       <Button
-        variant="outline"
-        size="icon"
-        className="fixed bottom-4 left-4 z-[1000] rounded-full bg-gray-800 text-white shadow-lg hover:bg-gray-700"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsVisible(!isVisible)}
+        className="rounded-full w-12 h-12 flex items-center justify-center shadow-lg bg-[#5D1A1D] hover:bg-[#6B1E22] text-white"
+        aria-label="Toggle Debug Panel"
       >
-        <Bug className="h-6 w-6" />
+        {isVisible ? <X className="h-6 w-6" /> : <Settings className="h-6 w-6" />}
       </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <Card className="w-full max-w-md bg-gray-900 text-white shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-xl font-bold">
-                <Bug className="mr-2 inline-block h-5 w-5" />
-                Panel de Depuración Móvil
-              </CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                <X className="h-5 w-5 text-gray-400 hover:text-white" />
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <Info className="h-4 w-4 text-blue-400" />
-                <p>
-                  **Dispositivo:**{" "}
-                  <span className="font-semibold">{navigator.userAgentData?.platform || navigator.platform}</span>
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Wifi className="h-4 w-4 text-green-400" />
-                <p>
-                  **Conexión:** <span className="font-semibold">{navigator.onLine ? "Online" : "Offline"}</span>
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <BatteryCharging className="h-4 w-4 text-yellow-400" />
-                <p>
-                  **Batería:**{" "}
-                  <span className="font-semibold">
-                    {/* @ts-ignore */}
-                    {window.navigator.getBattery ? "Cargando..." : "No disponible"}
-                  </span>
-                </p>
-              </div>
-              <Separator className="bg-gray-700" />
-              <div className="flex items-center space-x-2">
-                <Cpu className="h-4 w-4 text-purple-400" />
-                <p>
-                  **CPU Cores:**{" "}
-                  <span className="font-semibold">{navigator.hardwareConcurrency || "No disponible"}</span>
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <MemoryStick className="h-4 w-4 text-orange-400" />
-                <p>
-                  **Memoria:**{" "}
-                  <span className="font-semibold">
-                    {/* @ts-ignore */}
-                    {navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "No disponible"}
-                  </span>
-                </p>
-              </div>
-              <Separator className="bg-gray-700" />
-              <p className="text-gray-400">
-                **Dimensiones de la Ventana:** {window.innerWidth}px x {window.innerHeight}px
-              </p>
-              <p className="text-gray-400">**Pixel Ratio:** {window.devicePixelRatio}</p>
-            </CardContent>
-          </Card>
-        </div>
+      {isVisible && (
+        <Card className="absolute bottom-16 right-0 w-64 bg-white dark:bg-gray-900 shadow-xl rounded-lg">
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              {getDeviceIcon()} Mobile Debug
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 pt-0 text-sm">
+            <div className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700">
+              <span>Width:</span>
+              <span className="font-semibold">{dimensions.width}px</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700">
+              <span>Height:</span>
+              <span className="font-semibold">{dimensions.height}px</span>
+            </div>
+            <div className="flex justify-between py-1">
+              <span>Device:</span>
+              <span className="font-semibold">{getDeviceType()}</span>
+            </div>
+            {/* Add more debug options as needed */}
+            <div className="flex items-center justify-between pt-2">
+              <Label htmlFor="dark-mode-toggle">Modo Oscuro</Label>
+              <Switch id="dark-mode-toggle" /* Add dark mode logic here */ />
+            </div>
+          </CardContent>
+        </Card>
       )}
-    </>
+    </div>
   )
 }

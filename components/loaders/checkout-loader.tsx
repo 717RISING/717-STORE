@@ -1,75 +1,61 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+"use client"
 
-export default function CheckoutLoader() {
+import { useState, useEffect } from "react"
+import { ShoppingCart, CreditCard, Truck, CheckCircle } from 'lucide-react'
+
+interface CheckoutLoaderProps {
+  message?: string
+}
+
+export function CheckoutLoader({ message = "Preparando tu pedido..." }: CheckoutLoaderProps) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const steps = ["Verificando carrito...", "Procesando envío...", "Confirmando pago...", "¡Pedido completado!"]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev + 1) % steps.length)
+    }, 1500)
+    return () => clearInterval(interval)
+  }, [steps.length])
+
+  const getIcon = (step: number) => {
+    switch (step) {
+      case 0:
+        return <ShoppingCart className="w-12 h-12 text-white animate-pulse" />
+      case 1:
+        return <Truck className="w-12 h-12 text-white animate-pulse" />
+      case 2:
+        return <CreditCard className="w-12 h-12 text-white animate-pulse" />
+      case 3:
+        return <CheckCircle className="w-12 h-12 text-white animate-bounce" />
+      default:
+        return <ShoppingCart className="w-12 h-12 text-white animate-pulse" />
+    }
+  }
+
   return (
-    <div className="flex min-h-[calc(100vh-200px)] items-center justify-center bg-black p-4 text-white">
-      <div className="grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
-        {/* Shipping Form Loader */}
-        <Card className="bg-gray-900 border-gray-800 animate-pulse">
-          <CardHeader>
-            <CardTitle className="h-6 w-48 rounded-md bg-gray-700"></CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="h-10 rounded-md bg-gray-700"></div>
-              <div className="h-10 rounded-md bg-gray-700"></div>
-            </div>
-            <div className="h-10 rounded-md bg-gray-700"></div>
-            <div className="h-10 rounded-md bg-gray-700"></div>
-            <div className="h-10 rounded-md bg-gray-700"></div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="h-10 rounded-md bg-gray-700"></div>
-              <div className="h-10 rounded-md bg-gray-700"></div>
-              <div className="h-10 rounded-md bg-gray-700"></div>
-            </div>
-            <div className="h-10 rounded-md bg-gray-700"></div>
-          </CardContent>
-        </Card>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
+      <div className="relative mb-8">
+        <div className="w-32 h-32 bg-gradient-to-br from-[#4A1518] to-[#6B1E22] rounded-full flex items-center justify-center shadow-lg">
+          {getIcon(currentStep)}
+        </div>
+        <div className="absolute inset-0 border-4 border-[#4A1518] rounded-full animate-ping opacity-40" />
+      </div>
 
-        {/* Order Summary Loader */}
-        <Card className="bg-gray-900 border-gray-800 animate-pulse">
-          <CardHeader>
-            <CardTitle className="h-6 w-40 rounded-md bg-gray-700"></CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-12 w-12 rounded-md bg-gray-700"></div>
-                    <div className="space-y-1">
-                      <div className="h-4 w-32 rounded-md bg-gray-700"></div>
-                      <div className="h-3 w-24 rounded-md bg-gray-700"></div>
-                    </div>
-                  </div>
-                  <div className="h-4 w-16 rounded-md bg-gray-700"></div>
-                </div>
-              ))}
-            </div>
+      <div className="text-center max-w-md">
+        <p className="text-2xl font-semibold mb-2">{steps[currentStep]}</p>
+        <p className="text-gray-400 text-base">{message}</p>
+      </div>
 
-            <Separator className="bg-gray-700" />
-
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <div className="h-4 w-20 rounded-md bg-gray-700"></div>
-                <div className="h-4 w-16 rounded-md bg-gray-700"></div>
-              </div>
-              <div className="flex justify-between">
-                <div className="h-4 w-24 rounded-md bg-gray-700"></div>
-                <div className="h-4 w-16 rounded-md bg-gray-700"></div>
-              </div>
-              <div className="flex justify-between">
-                <div className="h-4 w-28 rounded-md bg-gray-700"></div>
-                <div className="h-4 w-16 rounded-md bg-gray-700"></div>
-              </div>
-              <div className="flex justify-between border-t border-gray-700 pt-2 mt-2">
-                <div className="h-5 w-24 rounded-md bg-gray-700"></div>
-                <div className="h-5 w-20 rounded-md bg-gray-700"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex space-x-3 mt-8">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className={`w-4 h-4 rounded-full ${
+              i === currentStep ? "bg-[#6B1E22]" : "bg-gray-700"
+            } transition-colors duration-300`}
+          />
+        ))}
       </div>
     </div>
   )

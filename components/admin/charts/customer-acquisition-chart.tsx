@@ -1,38 +1,47 @@
 "use client"
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export default function CustomerAcquisitionChart() {
-  const data = [
-    { name: "Ene", nuevos: 0 },
-    { name: "Feb", nuevos: 0 },
-    { name: "Mar", nuevos: 0 },
-    { name: "Abr", nuevos: 0 },
-    { name: "May", nuevos: 0 },
-    { name: "Jun", nuevos: 0 },
-  ]
+interface CustomerAcquisitionChartProps {
+  data: { name: string; newCustomers: number; totalCustomers: number }[]
+}
 
+export function CustomerAcquisitionChart({ data }: CustomerAcquisitionChartProps) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={data}
-        margin={{
-          top: 20,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-        <XAxis dataKey="name" stroke="#999" />
-        <YAxis stroke="#999" />
-        <Tooltip
-          contentStyle={{ backgroundColor: "#333", border: "none", borderRadius: "8px" }}
-          itemStyle={{ color: "#fff" }}
-        />
-        <Legend wrapperStyle={{ color: "#fff" }} />
-        <Bar dataKey="nuevos" fill="#82ca9d" />
-      </BarChart>
-    </ResponsiveContainer>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Adquisición de Clientes</CardTitle>
+        <CardDescription>Nuevos clientes y total de clientes por mes</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={{
+            newCustomers: {
+              label: "Nuevos Clientes",
+              color: "hsl(var(--chart-1))",
+            },
+            totalCustomers: {
+              label: "Total Clientes",
+              color: "hsl(var(--chart-2))",
+            },
+          }}
+          className="h-[300px]"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend />
+              <Bar dataKey="newCustomers" fill="var(--color-newCustomers)" name="Nuevos Clientes" />
+              <Bar dataKey="totalCustomers" fill="var(--color-totalCustomers)" name="Total Clientes" />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   )
 }

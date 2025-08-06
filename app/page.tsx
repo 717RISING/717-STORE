@@ -1,23 +1,24 @@
 "use client"
 import HeroSlider from "@/components/hero-slider"
-import { getAllProducts } from "@/lib/database"
+import ProductGrid from "@/components/product-grid"
+import { getAllProducts, getFeaturedProducts } from "@/lib/database"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { User, ArrowRight, Truck, Shield, Headphones, Star, Mail } from "lucide-react"
+import { User, ArrowRight, Truck, Shield, Headphones, Star, Mail } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import CartSidebar from "@/components/cart-sidebar"
 import MobileMenu from "@/components/mobile-menu"
 import { useToast } from "@/hooks/use-toast"
+import AdaptiveLoader from "@/components/loaders/adaptive-loader"
+import { Suspense } from "react"
+import ProductLoader from "@/components/loaders/product-loader"
 
 export default async function HomePage() {
   const allProducts = await getAllProducts()
-  const featuredProducts = allProducts.filter(
-    (product) => product.id === "camiseta-big-dreams" || product.id === "camiseta-oversized-tee",
-  ) // Example featured products
+  const featuredProducts = await getFeaturedProducts()
   const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [email, setEmail] = useState("")
@@ -64,7 +65,7 @@ export default async function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="flex flex-col min-h-screen bg-black text-white">
       {/* Navigation */}
       <header className="px-4 py-6 bg-transparent border-b border-gray-800">
         <nav className="max-w-7xl mx-auto">
@@ -189,78 +190,14 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge className="bg-red-600/20 text-red-400 border-red-600/30 rounded-modern mb-4">
-              PRODUCTOS DESTACADOS
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-glow">Nuevos Diseños Exclusivos</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Descubre nuestra colección de camisetas con diseños únicos que combinan arte urbano, espiritualidad y
-              expresión personal. Cada pieza cuenta una historia.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product, index) => (
-              <Card
-                key={product.id}
-                className="bg-gray-900 border-gray-800 overflow-hidden group card-modern rounded-modern-lg hover-lift-modern animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="relative aspect-square rounded-t-modern-lg overflow-hidden">
-                  <Image
-                    src={product.images[0] || "/placeholder.svg"}
-                    alt={product.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-t-modern-lg"
-                  />
-                  {product.isNew && (
-                    <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 animate-pulse-glow rounded-modern text-white border-0">
-                      NUEVO
-                    </Badge>
-                  )}
-
-                  {/* Overlay con efecto glassmorphism */}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-modern-lg backdrop-blur-sm">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-t-modern-lg" />
-                  </div>
-                </div>
-
-                <CardContent className="p-6 space-y-3">
-                  <h3 className="font-semibold text-lg mb-2 group-hover:text-[#5D1A1D] transition-colors duration-300 text-glow">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-3 line-clamp-2 group-hover:text-gray-300 transition-colors duration-300">
-                    {product.description.substring(0, 60)}...
-                  </p>
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="text-xl font-bold group-hover:scale-110 transition-transform duration-300 text-white">
-                      ${product.price}
-                    </span>
-                    <Link href={`/productos/${product.id}`}>
-                      <Button className="bg-[#5D1A1D] text-white hover:bg-[#6B1E22] rounded-modern-lg hover-glow-modern transition-all duration-300">
-                        Ver Detalles
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/productos">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 rounded-modern-lg hover-lift-modern px-8 py-3"
-              >
-                Ver Todos los Productos
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
+      <section className="py-12 md:py-20 bg-gray-100 dark:bg-gray-900">
+        <div className="container mx-auto px-4 md:px-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">
+            Productos Destacados
+          </h2>
+          <Suspense fallback={<ProductLoader />}>
+            <ProductGrid products={featuredProducts} />
+          </Suspense>
         </div>
       </section>
 

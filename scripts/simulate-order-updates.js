@@ -1,48 +1,30 @@
-// scripts/simulate-order-updates.js
-// Este script simula actualizaciones de estado de pedidos en un entorno de desarrollo.
-// No está diseñado para producción.
+// This script simulates real-time order updates.
+// In a real application, this would be handled by a backend service
+// pushing updates to a database or a message queue.
 
-const { getAllOrders, updateOrderStatus, updateOrderPaymentStatus } = require("../lib/orders") // Asegúrate de que estas funciones estén exportadas
+// This is a client-side simulation for demonstration purposes.
+// It's not meant for production use.
 
-async function simulateOrderUpdates() {
-  console.log("Iniciando simulación de actualizaciones de pedidos...")
+const ORDER_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"]
 
-  const orders = await getAllOrders()
-
-  if (orders.length === 0) {
-    console.log("No hay pedidos para simular actualizaciones.")
-    return
-  }
-
-  for (const order of orders) {
-    // Simular que algunos pedidos pasan a "shipped" después de un tiempo
-    if (order.status === "processing" && Math.random() > 0.5) {
-      await updateOrderStatus(order.id, "shipped")
-      console.log(`Pedido ${order.id} actualizado a 'Enviado'.`)
-    }
-
-    // Simular que algunos pedidos "shipped" pasan a "delivered"
-    if (order.status === "shipped" && Math.random() > 0.7) {
-      await updateOrderStatus(order.id, "delivered")
-      console.log(`Pedido ${order.id} actualizado a 'Entregado'.`)
-    }
-
-    // Simular un fallo de pago para un pedido pendiente (raro)
-    if (order.paymentStatus === "pending" && Math.random() < 0.1) {
-      await updateOrderPaymentStatus(order.id, "failed")
-      await updateOrderStatus(order.id, "cancelled") // Cancelar si el pago falla
-      console.log(`Pedido ${order.id} (pago pendiente) ha fallado y ha sido cancelado.`)
-    }
-  }
-
-  console.log("Simulación de actualizaciones de pedidos finalizada.")
+function getRandomStatus() {
+  return ORDER_STATUSES[Math.floor(Math.random() * ORDER_STATUSES.length)]
 }
 
-// Ejecutar la simulación cada 30 segundos en desarrollo
-// if (process.env.NODE_ENV === 'development') {
-//   setInterval(simulateOrderUpdates, 30000);
-//   console.log('Simulación de actualizaciones de pedidos programada para ejecutarse cada 30 segundos.');
-// }
+function simulateOrderUpdate(orderId) {
+  const newStatus = getRandomStatus()
+  console.log(`Simulating update for order ${orderId}: new status is ${newStatus}`)
+  // In a real app, you'd update a database here
+  // For now, we just log it.
+}
 
-// Para ejecutar una vez manualmente:
-simulateOrderUpdates()
+// Simulate updates for a few mock orders every 10 seconds
+const mockOrderIds = ["ORD-001", "ORD-002", "ORD-003", "ORD-004"]
+
+setInterval(() => {
+  mockOrderIds.forEach((orderId) => {
+    simulateOrderUpdate(orderId)
+  })
+}, 10000)
+
+console.log("Order update simulation started...")
