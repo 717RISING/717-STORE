@@ -1,106 +1,157 @@
 import { createClient } from '@supabase/supabase-js'
-import { Product, User, Order, ShippingAddress } from './types'
+import { Product, User, Order, ShippingAddress, OrderItem } from './types'
+import { mockProducts, mockUsers, mockOrders } from './mock-data' // Import mock data from new file
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export async function getProducts(): Promise<Product[]> {
-  const { data, error } = await supabase.from('products').select('*')
-  if (error) {
-    console.error('Error fetching products:', error)
-    return []
-  }
-  return data as Product[]
+// Simulate database delays
+const simulateDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// --- Product Functions ---
+export async function getAllProducts(): Promise<Product[]> {
+  await simulateDelay(500) // Simulate network delay
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('products').select('*');
+  // if (error) throw error;
+  // return data as Product[];
+  return mockProducts
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  const { data, error } = await supabase.from('products').select('*').eq('id', id).single()
-  if (error) {
-    console.error('Error fetching product by ID:', error)
-    return null
-  }
-  return data as Product
+export async function getProductById(id: string): Promise<Product | undefined> {
+  await simulateDelay(300)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
+  // if (error) throw error;
+  // return data as Product;
+  return mockProducts.find((product) => product.id === id)
 }
 
-export async function getUsers(): Promise<User[]> {
-  const { data, error } = await supabase.from('users').select('*')
-  if (error) {
-    console.error('Error fetching users:', error)
-    return []
-  }
-  return data as User[]
+export async function getFeaturedProducts(): Promise<Product[]> {
+  await simulateDelay(400)
+  // In a real app, you'd fetch from Supabase with a filter for featured products
+  return mockProducts.filter((product) => ['1', '2', '5', '8'].includes(product.id))
 }
 
-export async function getUserById(id: string): Promise<User | null> {
-  const { data, error } = await supabase.from('users').select('*').eq('id', id).single()
-  if (error) {
-    console.error('Error fetching user by ID:', error)
-    return null
-  }
-  return data as User
+// --- User Functions ---
+export async function getAllUsers(): Promise<User[]> {
+  await simulateDelay(500)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('users').select('*');
+  // if (error) throw error;
+  // return data as User[];
+  return mockUsers
 }
 
-export async function getOrders(): Promise<Order[]> {
-  const { data, error } = await supabase.from('orders').select('*')
-  if (error) {
-    console.error('Error fetching orders:', error)
-    return []
-  }
-  return data as Order[]
+export async function getUserById(id: string): Promise<User | undefined> {
+  await simulateDelay(300)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
+  // if (error) throw error;
+  // return data as User;
+  return mockUsers.find((user) => user.id === id)
 }
 
-export async function getOrderById(id: string): Promise<Order | null> {
-  const { data, error } = await supabase.from('orders').select('*').eq('id', id).single()
-  if (error) {
-    console.error('Error fetching order by ID:', error)
-    return null
-  }
-  return data as Order
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  await simulateDelay(300)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
+  // if (error) throw error;
+  // return data as User;
+  return mockUsers.find((user) => user.email === email)
 }
 
-export async function addOrder(order: Omit<Order, 'id' | 'created_at'>): Promise<Order | null> {
-  const { data, error } = await supabase.from('orders').insert(order).select().single()
-  if (error) {
-    console.error('Error adding order:', error)
-    return null
+export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'lastLogin' | 'orderCount' | 'totalSpent' | 'isActive'>): Promise<User> {
+  await simulateDelay(500)
+  const newUser: User = {
+    id: `user${mockUsers.length + 1}`,
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    orderCount: 0,
+    totalSpent: 0,
+    isActive: true,
+    ...user,
   }
-  return data as Order
+  mockUsers.push(newUser)
+  return newUser
 }
 
-export async function updateOrder(id: string, updates: Partial<Order>): Promise<Order | null> {
-  const { data, error } = await supabase.from('orders').update(updates).eq('id', id).select().single()
-  if (error) {
-    console.error('Error updating order:', error)
-    return null
+export async function updateUser(updatedUser: User): Promise<User> {
+  await simulateDelay(500)
+  const index = mockUsers.findIndex((user) => user.id === updatedUser.id)
+  if (index !== -1) {
+    mockUsers[index] = updatedUser
+    return updatedUser
   }
-  return data as Order
+  throw new Error('User not found')
 }
 
-export async function deleteOrder(id: string): Promise<boolean> {
-  const { error } = await supabase.from('orders').delete().eq('id', id)
-  if (error) {
-    console.error('Error deleting order:', error)
-    return false
-  }
-  return true
+// --- Order Functions ---
+export async function getAllOrders(): Promise<Order[]> {
+  await simulateDelay(500)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('orders').select('*');
+  // if (error) throw error;
+  // return data as Order[];
+  return mockOrders
 }
 
-export async function addShippingAddress(address: Omit<ShippingAddress, 'id'>): Promise<ShippingAddress | null> {
-  const { data, error } = await supabase.from('shipping_addresses').insert(address).select().single()
-  if (error) {
-    console.error('Error adding shipping address:', error)
-    return null
+export async function getOrderById(id: string): Promise<Order | undefined> {
+  await simulateDelay(300)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+  // if (error) throw error;
+  // return data as Order;
+  return mockOrders.find((order) => order.id === id)
+}
+
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+  await simulateDelay(300)
+  // In a real app, you'd fetch from Supabase:
+  // const { data, error } = await supabase.from('orders').select('*').eq('userId', userId);
+  // if (error) throw error;
+  // return data as Order[];
+  return mockOrders.filter((order) => order.userId === userId)
+}
+
+export async function createOrder(order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<Order> {
+  await simulateDelay(500)
+  const newOrder: Order = {
+    id: `ORD${(mockOrders.length + 1).toString().padStart(3, '0')}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ...order,
   }
-  return data as ShippingAddress
+  mockOrders.push(newOrder)
+  return newOrder
+}
+
+export async function updateOrderStatus(orderId: string, newStatus: Order['status']): Promise<Order> {
+  await simulateDelay(500)
+  const order = mockOrders.find((o) => o.id === orderId)
+  if (order) {
+    order.status = newStatus
+    order.updatedAt = new Date().toISOString()
+    return order
+  }
+  throw new Error('Order not found')
+}
+
+// --- Shipping Address Functions ---
+export async function addShippingAddress(address: Omit<ShippingAddress, 'id'>): Promise<ShippingAddress> {
+  await simulateDelay(300)
+  const newAddress: ShippingAddress = {
+    id: `addr${Math.random().toString(36).substr(2, 9)}`,
+    ...address,
+  }
+  // In a real app, you'd insert into Supabase
+  return newAddress
 }
 
 export async function getShippingAddressesByUserId(userId: string): Promise<ShippingAddress[]> {
-  const { data, error } = await supabase.from('shipping_addresses').select('*').eq('user_id', userId)
-  if (error) {
-    console.error('Error fetching shipping addresses:', error)
-    return []
-  }
-  return data as ShippingAddress[]
+  await simulateDelay(300)
+  // In a real app, you'd fetch from Supabase
+  return mockUsers.find(u => u.id === userId)?.shippingAddresses || []
 }

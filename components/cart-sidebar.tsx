@@ -1,17 +1,17 @@
 'use client'
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { ShoppingCart, X } from 'lucide-react'
-import Image from "next/image"
-import { useCart } from "@/lib/cart-context"
-import { Input } from "@/components/ui/input"
-import Link from "next/link"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { useCart } from '@/lib/cart-context'
+import Image from 'next/image'
+import { MinusCircle, PlusCircle, Trash2, ShoppingCart } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function CartSidebar() {
-  const { cartItems, cartTotal, removeFromCart, updateCartItemQuantity, cartItemCount } = useCart()
+  const { cartItems, cartTotal, removeFromCart, updateQuantity, cartItemCount } = useCart()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -42,7 +42,7 @@ export default function CartSidebar() {
           ) : (
             <div className="space-y-6">
               {cartItems.map((item) => (
-                <div key={`${item.product.id}-${item.size || ''}-${item.color || ''}`} className="flex items-center gap-4">
+                <div key={`${item.product.id}-${item.selectedSize || ''}-${item.selectedColor || ''}`} className="flex items-center gap-4">
                   <Image
                     src={item.product.imageUrl || "/placeholder.svg?height=80&width=80&text=Product"}
                     alt={item.product.name}
@@ -53,33 +53,30 @@ export default function CartSidebar() {
                   <div className="flex-1 grid gap-1">
                     <h3 className="font-medium">{item.product.name}</h3>
                     <p className="text-sm text-gray-500">
-                      ${item.product.price.toFixed(2)}
-                      {item.size && ` | Talla: ${item.size}`}
-                      {item.color && ` | Color: ${item.color}`}
+                      {item.selectedSize && `Talla: ${item.selectedSize}`}
+                      {item.selectedColor && ` | Color: ${item.selectedColor}`}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold">${item.product.price.toFixed(2)}</p>
+                    <div className="flex items-center gap-2 mt-1">
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8"
-                        onClick={() => updateCartItemQuantity(item.product.id, item.quantity - 1, item.size, item.color)}
+                        className="h-7 w-7"
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.selectedSize, item.selectedColor)}
+                        disabled={item.quantity <= 1}
                       >
-                        -
+                        <MinusCircle className="h-4 w-4" />
+                        <span className="sr-only">Disminuir cantidad</span>
                       </Button>
-                      <Input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateCartItemQuantity(item.product.id, parseInt(e.target.value), item.size, item.color)}
-                        className="w-16 text-center"
-                        min={1}
-                      />
+                      <span className="text-sm font-medium">{item.quantity}</span>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8"
-                        onClick={() => updateCartItemQuantity(item.product.id, item.quantity + 1, item.size, item.color)}
+                        className="h-7 w-7"
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.selectedSize, item.selectedColor)}
                       >
-                        +
+                        <PlusCircle className="h-4 w-4" />
+                        <span className="sr-only">Aumentar cantidad</span>
                       </Button>
                     </div>
                   </div>
@@ -88,10 +85,10 @@ export default function CartSidebar() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                      onClick={() => removeFromCart(item.product.id, item.selectedSize, item.selectedColor)}
                       aria-label="Eliminar producto del carrito"
                     >
-                      <X className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -100,7 +97,7 @@ export default function CartSidebar() {
           )}
         </ScrollArea>
         <Separator />
-        <SheetFooter className="py-4">
+        <SheetFooter className="mt-auto pt-4 border-t">
           <div className="flex justify-between items-center w-full mb-4">
             <span className="text-lg font-semibold">Total:</span>
             <span className="text-lg font-bold">${cartTotal.toFixed(2)}</span>
@@ -109,6 +106,9 @@ export default function CartSidebar() {
             <Link href="/checkout" onClick={() => setIsOpen(false)}>
               Proceder al Pago
             </Link>
+          </Button>
+          <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
+            Continuar Comprando
           </Button>
         </SheetFooter>
       </SheetContent>

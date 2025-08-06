@@ -1,29 +1,28 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts'
 
 const data = [
-  { name: "Ene", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Abr", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Ago", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Dic", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: 'Ene', total: 4000 },
+  { name: 'Feb', total: 3000 },
+  { name: 'Mar', total: 2000 },
+  { name: 'Abr', total: 2780 },
+  { name: 'May', total: 1890 },
+  { name: 'Jun', total: 2390 },
+  { name: 'Jul', total: 3490 },
+  { name: 'Ago', total: 4500 },
+  { name: 'Sep', total: 3800 },
+  { name: 'Oct', total: 4200 },
+  { name: 'Nov', total: 5000 },
+  { name: 'Dic', total: 5500 },
 ]
 
 export function SalesChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ventas Anuales</CardTitle>
-        <CardDescription>Ventas totales por mes.</CardDescription>
+        <CardTitle>Ventas Mensuales</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
@@ -42,7 +41,9 @@ export function SalesChart() {
               axisLine={false}
               tickFormatter={(value) => `$${value}`}
             />
-            <Bar dataKey="total" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+            <Tooltip cursor={{ fill: 'transparent' }} />
+            <Legend />
+            <Bar dataKey="total" fill="#4A1518" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

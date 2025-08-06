@@ -5,18 +5,28 @@
 
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { ChatMessage } from './types'; // Ensure ChatMessage type is imported
+import { ChatMessage, ChatSession } from './types'; // Ensure ChatMessage and ChatSession types are imported
+import { v4 as uuidv4 } from 'uuid'
 
 interface ChatMessage {
   id: string
   text: string
-  sender: 'user' | 'bot'
+  sender: 'user' | 'bot' | 'agent'
   timestamp: Date
+}
+
+interface ChatSession {
+  id: string
+  userId: string
+  messages: ChatMessage[]
+  status: 'open' | 'closed'
+  createdAt: Date
+  updatedAt: Date
 }
 
 export class ChatService {
   private static instance: ChatService
-  private messages: ChatMessage[] = []
+  private sessions: ChatSession[] = []
 
   private constructor() {}
 
@@ -27,74 +37,129 @@ export class ChatService {
     return ChatService.instance
   }
 
-  async sendMessage(text: string): Promise<ChatMessage> {
+  async sendMessage(sessionId: string, text: string): Promise<ChatMessage | undefined> {
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       text,
       sender: 'user',
       timestamp: new Date()
     }
 
-    this.messages.push(userMessage)
+    const session = await this.getSession(sessionId)
+    if (session) {
+      session.messages.push(userMessage)
+      session.updatedAt = new Date()
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-    const botResponse: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      text: await this.generateBotResponse(text),
-      sender: 'bot',
-      timestamp: new Date()
+      const botResponse: ChatMessage = {
+        id: uuidv4(),
+        text: await this.generateBotResponse(text),
+        sender: 'bot',
+        timestamp: new Date()
+      }
+
+      session.messages.push(botResponse)
+      return botResponse
     }
 
-    this.messages.push(botResponse)
-    return botResponse
+    return undefined
   }
 
   private async generateBotResponse(userInput: string): Promise<string> {
     try {
       const { text } = await generateText({
         model: openai("gpt-4o"), // Using GPT-4o model
-        prompt: `El usuario dice: "${userInput}". Responde como un asistente de soporte amigable para una tienda de streetwear llamada "717 Store". Sé conciso y útil.`,
+        prompt: `You are a helpful assistant for a clothing store called 717 Store. Answer questions about products, shipping, returns, and general store information. Keep your answers concise and helpful.
+        
+        User: ${userInput}`,
       })
       return text
     } catch (error) {
       console.error("Error generating text with AI SDK:", error)
-      return 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto. ¿Hay algo más en lo que pueda ayudarte?'
+      return 'Lo siento, no pude generar una respuesta en este momento. Por favor, inténtalo de nuevo más tarde.'
     }
   }
 
-  getMessages(): ChatMessage[] {
-    return [...this.messages]
+  async getSession(sessionId: string): Promise<ChatSession | undefined> {
+    return this.sessions.find(s => s.id === sessionId)
   }
 
-  clearMessages(): void {
-    this.messages = []
+  async createSession(userId: string): Promise<ChatSession> {
+    const sessionId = uuidv4()
+    const newSession: ChatSession = {
+      id: sessionId,
+      userId,
+      messages: [{ id: uuidv4(), sender: 'agent', text: 'Hola, ¿en qué puedo ayudarte hoy?', timestamp: new Date() }],
+      status: 'open',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    this.sessions.push(newSession)
+    return newSession
+  }
+
+  getSessions(): ChatSession[] {
+    return [...this.sessions]
+  }
+
+  clearSessions(): void {
+    this.sessions = []
   }
 }
 
-// Dummy function to simulate AI response
-export async function generateChatResponse(userMessage: string): Promise<string> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+// Mock database for chat sessions
+const mockChatSessions: ChatSession[] = []
 
-  const lowerCaseMessage = userMessage.toLowerCase();
+export async function getChatSession(sessionId: string): Promise<ChatSession | undefined> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const session = mockChatSessions.find(s => s.id === sessionId)
+      resolve(session)
+    }, 200)
+  })
+}
 
-  if (lowerCaseMessage.includes('hola') || lowerCaseMessage.includes('saludo')) {
-    return "¡Hola! ¿En qué puedo ayudarte hoy?";
-  } else if (lowerCaseMessage.includes('envío') || lowerCaseMessage.includes('entrega')) {
-    return "El tiempo de envío nacional es de 3-7 días hábiles. Para envíos internacionales, puede tardar entre 7-20 días hábiles. Recibirás un número de seguimiento una vez que tu pedido sea enviado.";
-  } else if (lowerCaseMessage.includes('devolución') || lowerCaseMessage.includes('cambio')) {
-    return "Puedes solicitar una devolución o cambio dentro de los 30 días posteriores a la entrega, siempre que el artículo esté sin usar y con sus etiquetas originales. Visita nuestra sección de 'Envíos y Devoluciones' para más detalles.";
-  } else if (lowerCaseMessage.includes('producto') || lowerCaseMessage.includes('stock')) {
-    return "Puedes explorar todos nuestros productos en la sección 'Productos'. Si buscas algo específico, usa la barra de búsqueda. La disponibilidad de stock se muestra en la página de cada producto.";
-  } else if (lowerCaseMessage.includes('contacto') || lowerCaseMessage.includes('hablar con alguien')) {
-    return "Puedes contactarnos directamente a través de nuestro formulario en la página de 'Contacto', o enviarnos un correo a info@717store.com. También puedes llamarnos al +57 1 234 5678.";
-  } else if (lowerCaseMessage.includes('gracias')) {
-    return "¡De nada! Estoy aquí para ayudarte.";
-  } else {
-    return "Lo siento, no estoy seguro de cómo responder a eso. ¿Podrías reformular tu pregunta o intentar con algo más específico?";
-  }
+export async function createChatSession(sessionId: string, userId: string): Promise<ChatSession> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const newSession: ChatSession = {
+        id: sessionId,
+        userId,
+        messages: [{ id: uuidv4(), sender: 'agent', text: 'Hola, ¿en qué puedo ayudarte hoy?', timestamp: new Date() }],
+        status: 'open',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      mockChatSessions.push(newSession)
+      resolve(newSession)
+    }, 300)
+  })
+}
+
+export async function sendMessage(sessionId: string, message: ChatMessage): Promise<ChatMessage | undefined> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const session = mockChatSessions.find(s => s.id === sessionId)
+      if (session) {
+        session.messages.push(message)
+        session.updatedAt = new Date()
+
+        // Simulate agent response
+        const agentResponse: ChatMessage = {
+          id: uuidv4(),
+          sender: 'agent',
+          text: `Recibí tu mensaje: "${message.text}". Un agente te responderá pronto.`,
+          timestamp: new Date(),
+        }
+        session.messages.push(agentResponse)
+        resolve(agentResponse)
+      } else {
+        resolve(undefined)
+      }
+    }, 500)
+  })
 }
 
 export function getQuickReplies(message: string): string[] {
@@ -185,18 +250,4 @@ export function getQuickReplies(message: string): string[] {
     "Ofertas especiales",
     "Estado de pedido",
   ]
-}
-
-export async function getChatResponse(prompt: string): Promise<string> {
-  try {
-    const { text } = await generateText({
-      model: openai('gpt-4o'),
-      prompt: prompt,
-      system: 'Eres un asistente de soporte al cliente para 717 Store, una tienda de streetwear. Responde de manera amigable y útil, enfocándote en la información de la tienda. Si te preguntan algo fuera de tu conocimiento, redirige al usuario a contactar directamente a info@717store.com.',
-    })
-    return text
-  } catch (error) {
-    console.error('Error getting chat response from AI:', error)
-    return 'Lo siento, no pude procesar tu solicitud en este momento. Por favor, intenta de nuevo más tarde o contáctanos directamente en info@717store.com.'
-  }
 }

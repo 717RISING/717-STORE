@@ -1,30 +1,15 @@
-import { cn } from "@/lib/utils"
-import { Loader2 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-interface MobileBrandLoaderProps {
-  className?: string
-  size?: "sm" | "md" | "lg"
-}
-
-export function MobileBrandLoader({ className, size = "md" }: MobileBrandLoaderProps) {
-  const loaderSizeClass = {
-    sm: "h-10 w-10",
-    md: "h-14 w-14",
-    lg: "h-18 w-18",
-  }[size]
-
-  const textSizeClass = {
-    sm: "text-xl",
-    md: "text-3xl",
-    lg: "text-4xl",
-  }[size]
-
+export function MobileBrandLoader() {
   return (
-    <div className={cn("flex flex-col items-center justify-center", className)}>
-      <Loader2 className={cn("animate-spin text-[#4A1518] dark:text-[#FFD700]", loaderSizeClass)} />
-      <p className={cn("mt-4 font-bold text-[#4A1518] dark:text-[#FFD700] brand-font", textSizeClass)}>
-        717 STORE
-      </p>
+    <div className="grid grid-cols-2 gap-4 p-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="flex flex-col items-center p-4">
+          <Skeleton className="w-24 h-24 rounded-full mb-4" />
+          <Skeleton className="w-3/4 h-4" />
+        </Card>
+      ))}
     </div>
   )
 }

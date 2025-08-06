@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { AdaptiveLoader } from '@/components/loaders/adaptive-loader' // Changed to named import
+import { Loader2 } from 'lucide-react'
 
-export function AdminSettingsTab() {
+export function SettingsTab() { // Changed to named export SettingsTab
   const [storeName, setStoreName] = useState('717 Store')
   const [contactEmail, setContactEmail] = useState('info@717store.com')
   const [storeAddress, setStoreAddress] = useState("Calle Ficticia 123, Ciudad Ejemplo")
@@ -69,8 +69,14 @@ export function AdminSettingsTab() {
               <Input id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} />
             </div>
             <Button type="submit" disabled={isSaving}>
-              <AdaptiveLoader isVisible={isSaving} size="sm" className="mr-2" />
-              {isSaving ? 'Guardando...' : 'Guardar Configuración'}
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                'Guardar Configuración'
+              )}
             </Button>
           </form>
         </CardContent>
@@ -91,8 +97,14 @@ export function AdminSettingsTab() {
             />
           </div>
           <Button onClick={handleSaveSettings} disabled={isSaving}>
-            <AdaptiveLoader isVisible={isSaving} size="sm" className="mr-2" />
-            {isSaving ? 'Guardando...' : 'Guardar Modo Mantenimiento'}
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              'Guardar Modo Mantenimiento'
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -123,8 +135,14 @@ export function AdminSettingsTab() {
               />
             </div>
             <Button type="submit" disabled={isSaving}>
-              <AdaptiveLoader isVisible={isSaving} size="sm" className="mr-2" />
-              {isSaving ? 'Guardando...' : 'Guardar Políticas'}
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                'Guardar Políticas'
+              )}
             </Button>
           </form>
         </CardContent>

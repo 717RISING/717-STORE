@@ -2,137 +2,107 @@
 
 import { useState, useEffect } from 'react'
 import { Product } from '@/lib/types'
-import { getProducts } from '@/lib/products' // Assuming getProducts fetches products
+import { getProductById } from '@/lib/database'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { HeartCrack, ShoppingCart, Loader2 } from 'lucide-react'
+import { Loader2, Heart, ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCart } from '@/lib/cart-context' // Assuming useCart hook exists
-import { toast } from "sonner"
-
-interface WishlistItem {
-  productId: string
-  addedAt: string
-}
+import { useCart } from '@/lib/cart-context'
+import { toast } from 'sonner'
 
 export function WishlistTab() {
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [productsInWishlist, setProductsInWishlist] = useState<Product[]>([])
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { addToCart } = useCart()
 
-  // Simulate fetching wishlist items from a backend/local storage
+  // Mock wishlist items (replace with actual user wishlist fetching)
+  const mockWishlistProductIds = ['1', '3', '7']
+
   useEffect(() => {
     const fetchWishlist = async () => {
-      setLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 800)) // Simulate API call
-      const storedWishlist = localStorage.getItem('userWishlist')
-      if (storedWishlist) {
-        setWishlistItems(JSON.parse(storedWishlist))
+      setIsLoading(true)
+      const fetchedItems: Product[] = []
+      for (const id of mockWishlistProductIds) {
+        const product = await getProductById(id)
+        if (product) {
+          fetchedItems.push(product)
+        }
       }
-      setLoading(false)
+      setWishlistItems(fetchedItems)
+      setIsLoading(false)
     }
     fetchWishlist()
   }, [])
 
-  // Fetch product details for items in wishlist
-  useEffect(() => {
-    const fetchProductsDetails = async () => {
-      if (wishlistItems.length === 0) {
-        setProductsInWishlist([])
-        return
-      }
-      try {
-        const allProducts = await getProducts() // Fetch all products
-        const detailedProducts = wishlistItems
-          .map(item => allProducts.find(p => p.id === item.productId))
-          .filter((p): p is Product => p !== undefined) // Filter out undefined products
-        setProductsInWishlist(detailedProducts)
-      } catch (error) {
-        toast.error("No se pudieron cargar los detalles de los productos de la lista de deseos.")
-        console.error("Failed to fetch wishlist product details:", error)
-      }
-    }
-    fetchProductsDetails()
-  }, [wishlistItems])
-
   const handleRemoveFromWishlist = (productId: string) => {
-    const updatedWishlist = wishlistItems.filter(item => item.productId !== productId)
-    setWishlistItems(updatedWishlist)
-    localStorage.setItem('userWishlist', JSON.stringify(updatedWishlist))
-    toast.info("Producto eliminado de la lista de deseos.")
+    setWishlistItems(prevItems => prevItems.filter(item => item.id !== productId))
+    toast.info('Producto eliminado de tu lista de deseos.')
+    // In a real app, update backend wishlist
   }
 
   const handleAddToCartFromWishlist = (product: Product) => {
-    addToCart({
-      productId: product.id,
-      name: product.name,
-      imageUrl: product.imageUrl,
-      price: product.price,
-      quantity: 1,
-      size: product.sizes[0] || 'N/A', // Default to first available size
-      color: product.colors[0] || 'N/A', // Default to first available color
-    })
-    handleRemoveFromWishlist(product.id) // Remove from wishlist after adding to cart
-    toast.success(`${product.name} ha sido añadido a tu carrito.`)
+    addToCart(product, 1, product.sizes?.[0], product.colors?.[0]) // Add with default size/color
+    handleRemoveFromWishlist(product.id) // Optionally remove from wishlist after adding to cart
+    toast.success(`${product.name} añadido al carrito.`)
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Mi Lista de Deseos</CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center items-center h-40">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Cargando tu lista de deseos...</span>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Mi Lista de Deseos</h2>
-      {productsInWishlist.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-          <HeartCrack className="h-16 w-16 mb-4" />
-          <p className="text-lg mb-4">Tu lista de deseos está vacía.</p>
-          <p className="mb-6">Añade productos que te gusten para guardarlos aquí.</p>
-          <Button asChild>
-            <Link href="/productos">Explorar Productos</Link>
-          </Button>
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {productsInWishlist.map(product => (
-            <Card key={product.id}>
-              <CardContent className="p-4 flex flex-col items-center text-center">
-                <Link href={`/productos/${product.id}`} className="block mb-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Mi Lista de Deseos</CardTitle>
+        <CardDescription>Aquí puedes ver los productos que has guardado para más tarde.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {wishlistItems.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">Tu lista de deseos está vacía.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {wishlistItems.map((product) => (
+              <Card key={product.id} className="flex flex-col">
+                <Link href={`/productos/${product.id}`} className="relative block h-48 w-full overflow-hidden rounded-t-md">
                   <Image
-                    src={product.imageUrl || "/placeholder.svg?height=200&width=200&text=Product"}
+                    src={product.imageUrl || "/placeholder.svg"}
                     alt={product.name}
-                    width={200}
-                    height={200}
-                    className="rounded-md object-cover aspect-square"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover"
                   />
                 </Link>
-                <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                <p className="text-gray-600 mb-2">${product.price.toFixed(2)}</p>
-                <div className="flex gap-2 mt-auto">
-                  <Button size="sm" onClick={() => handleAddToCartFromWishlist(product)}>
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Añadir al Carrito
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleRemoveFromWishlist(product.id)}>
-                    Eliminar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+                <CardContent className="flex-1 p-4 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold">{product.name}</h3>
+                    <p className="text-muted-foreground text-sm">${product.price.toFixed(2)}</p>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => handleAddToCartFromWishlist(product)}
+                      className="flex-1"
+                      disabled={product.stock === 0}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      {product.stock === 0 ? 'Agotado' : 'Añadir al Carrito'}
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => handleRemoveFromWishlist(product.id)}>
+                      <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                      <span className="sr-only">Eliminar de la lista de deseos</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

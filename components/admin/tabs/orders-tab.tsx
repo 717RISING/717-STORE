@@ -1,168 +1,156 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from 'lucide-react'
-import { useState, useEffect } from "react"
-import { Order } from "@/lib/orders" // Assuming Order type is defined here
-import { getOrders, updateOrder } from "@/lib/database" // Assuming getOrders and updateOrder functions are defined here
-import { LoadingSpinner } from "@/components/loading-spinner"
-import { toast } from "sonner"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useState, useEffect } from 'react'
+import { Order } from '@/lib/types'
+import { getAllOrders, updateOrderStatus } from '@/lib/database'
+import { Search, Loader2 } from 'lucide-react'
+import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 export function OrdersTab() {
   const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [isLoading, setIsLoading] = useState(true)
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
+      setIsLoading(true)
       try {
-        setLoading(true)
-        const data = await getOrders()
-        if (data) {
-          setOrders(data)
-        } else {
-          setError("Failed to fetch orders.")
-        }
-      } catch (err) {
-        setError("An unexpected error occurred while fetching orders.")
-        console.error(err)
+        const data = await getAllOrders()
+        setOrders(data)
+      } catch (error) {
+        console.error('Error fetching orders:', error)
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
     fetchOrders()
   }, [])
 
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+    setUpdatingOrderId(orderId)
     try {
-      const updated = await updateOrder(orderId, { status: newStatus })
-      if (updated) {
+      const updatedOrder = await updateOrderStatus(orderId, newStatus)
+      if (updatedOrder) {
         setOrders(prevOrders =>
-          prevOrders.map(order => (order.id === orderId ? { ...order, status: newStatus } : order))
+          prevOrders.map(order => (order.id === orderId ? updatedOrder : order))
         )
-        toast.success(`Estado del pedido ${orderId} actualizado a ${newStatus}`)
+        toast.success(`Estado del pedido ${orderId} actualizado a ${newStatus}.`)
       } else {
-        toast.error(`Error al actualizar el estado del pedido ${orderId}`)
+        toast.error(`Error al actualizar el pedido ${orderId}.`)
       }
-    } catch (err) {
-      console.error("Error updating order status:", err)
-      toast.error("Ocurrió un error inesperado al actualizar el pedido.")
+    } catch (error) {
+      console.error('Error updating order status:', error)
+      toast.error(`Error al actualizar el pedido ${orderId}.`)
+    } finally {
+      setUpdatingOrderId(null)
     }
   }
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "Pendiente":
-        return "secondary"
-      case "Procesando":
-        return "default"
-      case "Enviado":
-        return "outline"
-      case "Entregado":
-        return "success" // Assuming a 'success' variant exists or can be styled
-      case "Cancelado":
-        return "destructive"
-      default:
-        return "secondary"
-    }
-  }
+  const filteredOrders = orders.filter(order =>
+    (order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     order.shippingAddress.fullName.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterStatus === 'all' || order.status === filterStatus)
+  )
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pedidos</CardTitle>
-          <CardDescription>Gestiona los pedidos de tus clientes.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center items-center h-64">
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pedidos</CardTitle>
-          <CardDescription>Gestiona los pedidos de tus clientes.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-red-500">{error}</p>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Cargando pedidos...</span>
+      </div>
     )
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pedidos</CardTitle>
-        <CardDescription>Gestiona los pedidos de tus clientes.</CardDescription>
+        <CardTitle>Gestión de Pedidos</CardTitle>
+        <div className="flex flex-col md:flex-row gap-4 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Buscar pedidos por ID o nombre de cliente..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrar por estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="Pendiente">Pendiente</SelectItem>
+              <SelectItem value="Procesando">Procesando</SelectItem>
+              <SelectItem value="Enviado">Enviado</SelectItem>
+              <SelectItem value="Entregado">Entregado</SelectItem>
+              <SelectItem value="Cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
-        {orders.length === 0 ? (
-          <p className="text-gray-500">No hay pedidos para mostrar.</p>
-        ) : (
-          <Table>
-            <TableHeader>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID Pedido</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.length === 0 ? (
               <TableRow>
-                <TableHead>Pedido #</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>
-                  <span className="sr-only">Acciones</span>
-                </TableHead>
+                <TableCell colSpan={6} className="text-center py-4">
+                  No se encontraron pedidos.
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
+            ) : (
+              filteredOrders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.shippingAddress?.name || "N/A"}</TableCell>
-                  <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{order.shippingAddress.fullName}</TableCell>
+                  <TableCell>{format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm')}</TableCell>
                   <TableCell>${order.total.toFixed(2)}</TableCell>
                   <TableCell>
-                    <Badge variant={getStatusBadgeVariant(order.status)}>{order.status}</Badge>
+                    <Select
+                      value={order.status}
+                      onValueChange={(value: Order['status']) => handleStatusChange(order.id, value)}
+                      disabled={updatingOrderId === order.id}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pendiente">Pendiente</SelectItem>
+                        <SelectItem value="Procesando">Procesando</SelectItem>
+                        <SelectItem value="Enviado">Enviado</SelectItem>
+                        <SelectItem value="Entregado">Entregado</SelectItem>
+                        <SelectItem value="Cancelado">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {updatingOrderId === order.id && <Loader2 className="h-4 w-4 animate-spin ml-2 inline-block" />}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(order.id, "Procesando")}>
-                          Marcar como Procesando
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(order.id, "Enviado")}>
-                          Marcar como Enviado
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(order.id, "Entregado")}>
-                          Marcar como Entregado
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(order.id, "Cancelado")}>
-                          Cancelar Pedido
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button variant="outline" size="sm">Ver Detalles</Button>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              ))
+            )}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   )

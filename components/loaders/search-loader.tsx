@@ -1,15 +1,18 @@
-import { cn } from "@/lib/utils"
-import { Loader2 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-interface SearchLoaderProps {
-  className?: string
-}
-
-export function SearchLoader({ className }: SearchLoaderProps) {
+export function SearchLoader() {
   return (
-    <div className={cn("flex items-center justify-center h-full w-full", className)}>
-      <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      <span className="ml-2 text-gray-600 dark:text-gray-300">Buscando productos...</span>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className="p-4">
+            <Skeleton className="w-full h-32 rounded-md mb-4" />
+            <Skeleton className="w-3/4 h-5 mb-2" />
+            <Skeleton className="w-1/2 h-4" />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

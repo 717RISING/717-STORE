@@ -1,5 +1,5 @@
 import { Product } from './types'; // Ensure Product type is imported
-import { mockProducts } from '@/scripts/setup-database' // Assuming mockProducts is exported from setup-database.js
+import { mockProducts } from './mock-data' // Import mock data
 
 // Dummy data for products
 const dummyProducts: Product[] = [
@@ -126,57 +126,47 @@ const dummyProducts: Product[] = [
 ];
 
 export async function getProducts(): Promise<Product[]> {
-  // In a real application, you would fetch this from a database (e.g., Supabase)
-  // For now, we'll use mock data.
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(mockProducts as Product[])
-    }, 500) // Simulate network delay
-  })
+  // Simulate API call or database fetch
+  return new Promise(resolve => setTimeout(() => resolve(mockProducts), 500))
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const product = mockProducts.find(p => p.id === id)
-      resolve(product ? (product as Product) : null)
-    }, 300) // Simulate network delay
-  })
+export async function getProductById(id: string): Promise<Product | undefined> {
+  // Simulate API call or database fetch
+  return new Promise(resolve => setTimeout(() => resolve(mockProducts.find(p => p.id === id)), 300))
 }
 
 export async function addProduct(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const newProduct: Product = {
-    id: `prod-${Date.now()}`,
-    ...product,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  dummyProducts.push(newProduct);
-  return newProduct;
+  // Simulate adding a product to the database
+  return new Promise(resolve => {
+    const newProduct: Product = {
+      id: String(mockProducts.length + 1),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...product,
+    }
+    mockProducts.push(newProduct)
+    resolve(newProduct)
+  })
 }
 
 export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined> {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = dummyProducts.findIndex(product => product.id === id);
-  if (index !== -1) {
-    dummyProducts[index] = {
-      ...dummyProducts[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    return dummyProducts[index];
-  }
-  return undefined;
+  // Simulate updating a product in the database
+  return new Promise(resolve => {
+    const index = mockProducts.findIndex(p => p.id === id)
+    if (index > -1) {
+      mockProducts[index] = { ...mockProducts[index], ...updates, updatedAt: new Date().toISOString() }
+      resolve(mockProducts[index])
+    } else {
+      resolve(undefined)
+    }
+  })
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const initialLength = dummyProducts.length;
-  const filteredProducts = dummyProducts.filter(product => product.id !== id);
-  dummyProducts.splice(0, dummyProducts.length, ...filteredProducts); // Update the original array
-  return dummyProducts.length < initialLength;
+  // Simulate deleting a product from the database
+  return new Promise(resolve => {
+    const initialLength = mockProducts.length
+    mockProducts.splice(mockProducts.findIndex(p => p.id === id), 1)
+    resolve(mockProducts.length < initialLength)
+  })
 }

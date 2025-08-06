@@ -13,26 +13,22 @@ interface ProductDetailProps {
   product: Product
 }
 
-export function ProductDetail({ product }: ProductDetailProps) {
-  const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0] || '')
-  const [selectedColor, setSelectedColor] = useState<string>(product.colors[0] || '')
+export default function ProductDetail({ product }: ProductDetailProps) { // Changed to default export
+  const [selectedSize, setSelectedSize] = useState<string>(product.sizes?.[0] || '')
+  const [selectedColor, setSelectedColor] = useState<string>(product.colors?.[0] || '')
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
 
   const handleAddToCart = () => {
-    if (!selectedSize || !selectedColor) {
-      toast.error("Por favor, selecciona una talla y un color.")
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      toast.error("Por favor, selecciona una talla.")
       return
     }
-    addToCart({
-      productId: product.id,
-      name: product.name,
-      imageUrl: product.imageUrl,
-      price: product.price,
-      quantity,
-      size: selectedSize,
-      color: selectedColor,
-    })
+    if (product.colors && product.colors.length > 0 && !selectedColor) {
+      toast.error("Por favor, selecciona un color.")
+      return
+    }
+    addToCart(product, quantity, selectedSize, selectedColor)
     toast.success(`${quantity} x ${product.name} añadido al carrito!`)
   }
 
@@ -55,7 +51,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-0.5 text-yellow-500">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-5 w-5 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-300'}`} />
+              <Star key={i} className={`h-5 w-5 ${i < Math.floor(product.rating || 0) ? 'fill-current' : 'text-gray-300'}`} />
             ))}
           </div>
           <span className="text-gray-600 dark:text-gray-400 text-sm">({product.reviews} reseñas)</span>
@@ -68,42 +64,47 @@ export function ProductDetail({ product }: ProductDetailProps) {
         </p>
 
         {/* Size and Color Selection */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Talla
-            </label>
-            <Select value={selectedSize} onValueChange={setSelectedSize}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona una talla" />
-              </SelectTrigger>
-              <SelectContent>
-                {product.sizes.map((size) => (
-                  <SelectItem key={size} value={size}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {(product.sizes && product.sizes.length > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Talla
+              </label>
+              <Select value={selectedSize} onValueChange={setSelectedSize}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona una talla" />
+                </SelectTrigger>
+                <SelectContent>
+                  {product.sizes.map((size) => (
+                    <SelectItem key={size} value={size}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {(product.colors && product.colors.length > 0) && (
+              <div>
+                <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Color
+                </label>
+                <Select value={selectedColor} onValueChange={setSelectedColor}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona un color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {product.colors.map((color) => (
+                      <SelectItem key={color} value={color}>
+                        {color}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
-          <div>
-            <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Color
-            </label>
-            <Select value={selectedColor} onValueChange={setSelectedColor}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona un color" />
-              </SelectTrigger>
-              <SelectContent>
-                {product.colors.map((color) => (
-                  <SelectItem key={color} value={color}>
-                    {color}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
+
 
         {/* Quantity and Add to Cart */}
         <div className="flex items-center gap-4">

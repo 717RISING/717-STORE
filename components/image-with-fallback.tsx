@@ -1,26 +1,24 @@
 'use client'
 
-import Image from "next/image"
-import { useState } from "react"
-import { cn } from "@/lib/utils"
+import Image from 'next/image'
+import React, { useState } from 'react'
 
 interface ImageWithFallbackProps extends React.ComponentProps<typeof Image> {
   fallbackSrc?: string;
 }
 
-export function ImageWithFallback({ src, fallbackSrc = "/placeholder.svg", alt, className, ...props }: ImageWithFallbackProps) {
+export function ImageWithFallback({ src, fallbackSrc = "/placeholder.svg", alt, ...props }: ImageWithFallbackProps) {
   const [imgSrc, setImgSrc] = useState(src)
 
   return (
     <Image
-      src={imgSrc || "/placeholder.svg"}
+      src={imgSrc || fallbackSrc}
       alt={alt}
       onError={() => {
         if (imgSrc !== fallbackSrc) {
           setImgSrc(fallbackSrc)
         }
       }}
-      className={cn("object-cover", className)}
       {...props}
     />
   )

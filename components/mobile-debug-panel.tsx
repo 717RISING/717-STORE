@@ -1,69 +1,61 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { X, Bug } from 'lucide-react'
 import { useMobileDetection } from '@/hooks/use-mobile-detection'
+import { AnimatePresence, motion } from 'framer-motion'
 
-export function MobileDebugPanel() {
+export function MobileDebugPanel() { // Changed to named export
   const [isOpen, setIsOpen] = useState(false)
-  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
-  const [orientation, setOrientation] = useState('')
-  const isMobileDevice = useMobileDetection()
+  const isMobile = useMobileDetection()
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight })
-      setOrientation(window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait')
-    }
-
-    if (typeof window !== 'undefined') {
-      handleResize() // Set initial size
-      window.addEventListener('resize', handleResize)
-      return () => window.removeEventListener('resize', handleResize)
-    }
-  }, [])
-
-  if (!isMobileDevice) {
+  if (!isMobile) {
     return null // Only show on mobile devices
   }
 
   return (
     <div className="fixed bottom-4 left-4 z-50">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: -50, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -50, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="mb-2"
+          >
+            <Card className="w-64">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b">
+                <CardTitle className="text-lg">Debug Móvil</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Cerrar panel de depuración">
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="p-4 text-sm space-y-2">
+                <p><strong>Dispositivo:</strong> Móvil</p>
+                <p><strong>Ancho de Pantalla:</strong> {typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px</p>
+                <p><strong>Alto de Pantalla:</strong> {typeof window !== 'undefined' ? window.innerHeight : 'N/A'}px</p>
+                <p><strong>User Agent:</strong> {typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}</p>
+                <Button asChild variant="outline" className="w-full mt-2">
+                  <a href="/test-responsive">Ir a Test Responsivo</a>
+                </Button>
+                <Button asChild variant="outline" className="w-full mt-2">
+                  <a href="/device-test">Ir a Test de Dispositivos</a>
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <Button
-        size="icon"
-        className="rounded-full shadow-lg"
+        className="rounded-full w-14 h-14 shadow-lg"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Toggle debug panel"
+        aria-label={isOpen ? "Cerrar panel de depuración" : "Abrir panel de depuración"}
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Bug className="h-5 w-5" />}
+        <Bug className="w-6 h-6" />
       </Button>
-
-      {isOpen && (
-        <Card className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
-          <CardHeader className="p-3 border-b dark:border-gray-700">
-            <CardTitle className="text-md">Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 text-sm space-y-1">
-            <p>
-              <strong>Device:</strong> {isMobileDevice ? 'Mobile' : 'Desktop'}
-            </p>
-            <p>
-              <strong>Width:</strong> {windowSize.width}px
-            </p>
-            <p>
-              <strong>Height:</strong> {windowSize.height}px
-            </p>
-            <p>
-              <strong>Orientation:</strong> {orientation}
-            </p>
-            <p>
-              <strong>User Agent:</strong> {typeof window !== 'undefined' ? navigator.userAgent.substring(0, 50) + '...' : 'N/A'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

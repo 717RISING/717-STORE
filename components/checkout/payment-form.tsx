@@ -1,83 +1,102 @@
 'use client'
 
-import { useState } from "react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Card, CardContent } from "@/components/ui/card"
-import { CreditCard, Banknote } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { PaymentDetails } from '@/lib/types'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
 interface PaymentFormProps {
-  onSubmit: (data: any) => void;
-  initialData?: any;
+  onSubmit: (data: PaymentDetails) => void;
+  initialData?: PaymentDetails;
 }
 
 export function PaymentForm({ onSubmit, initialData }: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || "credit-card")
-  const [cardNumber, setCardNumber] = useState(initialData?.cardNumber || "")
-  const [cardName, setCardName] = useState(initialData?.cardName || "")
-  const [expiryDate, setExpiryDate] = useState(initialData?.expiryDate || "")
-  const [cvv, setCvv] = useState(initialData?.cvv || "")
+  const [cardNumber, setCardNumber] = useState(initialData?.cardNumber || '')
+  const [cardName, setCardName] = useState(initialData?.cardName || '')
+  const [expiryDate, setExpiryDate] = useState(initialData?.expiryDate || '')
+  const [cvv, setCvv] = useState(initialData?.cvv || '')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ paymentMethod, cardNumber, cardName, expiryDate, cvv })
+    setIsLoading(true)
+
+    // Basic validation
+    if (!cardNumber || !cardName || !expiryDate || !cvv) {
+      toast.error('Por favor, completa todos los campos de pago.')
+      setIsLoading(false)
+      return
+    }
+
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    onSubmit({ cardNumber, cardName, expiryDate, cvv })
+    setIsLoading(false)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Label
-          htmlFor="credit-card"
-          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-        >
-          <RadioGroupItem id="credit-card" value="credit-card" className="sr-only" />
-          <CreditCard className="mb-3 h-6 w-6" />
-          Tarjeta de Crédito/Débito
-        </Label>
-        <Label
-          htmlFor="paypal"
-          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-        >
-          <RadioGroupItem id="paypal" value="paypal" className="sr-only" />
-          <Banknote className="mb-3 h-6 w-6" />
-          PayPal
-        </Label>
-      </RadioGroup>
-
-      {paymentMethod === "credit-card" && (
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-              <Input id="cardNumber" type="text" placeholder="XXXX XXXX XXXX XXXX" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
-              <Input id="cardName" type="text" placeholder="Nombre Apellido" value={cardName} onChange={(e) => setCardName(e.target.value)} required />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Fecha de Vencimiento</Label>
-                <Input id="expiryDate" type="text" placeholder="MM/AA" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input id="cvv" type="text" placeholder="XXX" value={cvv} onChange={(e) => setCvv(e.target.value)} required />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {paymentMethod === "paypal" && (
-        <div className="text-center text-gray-600 dark:text-gray-400">
-          Serás redirigido a PayPal para completar tu compra.
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-2">
+        <Label htmlFor="cardNumber">Número de Tarjeta</Label>
+        <Input
+          id="cardNumber"
+          type="text"
+          placeholder="XXXX XXXX XXXX XXXX"
+          value={cardNumber}
+          onChange={(e) => setCardNumber(e.target.value)}
+          required
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
+        <Input
+          id="cardName"
+          type="text"
+          placeholder="Nombre Completo"
+          value={cardName}
+          onChange={(e) => setCardName(e.target.value)}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="expiryDate">Fecha de Vencimiento (MM/AA)</Label>
+          <Input
+            id="expiryDate"
+            type="text"
+            placeholder="MM/AA"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            required
+          />
         </div>
-      )}
-
-      <Button type="submit" className="w-full">Continuar con el Pago</Button>
+        <div className="grid gap-2">
+          <Label htmlFor="cvv">CVV</Label>
+          <Input
+            id="cvv"
+            type="text"
+            placeholder="XXX"
+            value={cvv}
+            onChange={(e) => setCvv(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Procesando Pago...
+          </>
+        ) : (
+          "Confirmar Pago"
+        )}
+      </Button>
     </form>
   )
 }

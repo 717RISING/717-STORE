@@ -1,14 +1,16 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { LoadingSpinner } from './loading-spinner'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface PageLoaderProps {
   isLoading: boolean;
+  children: React.ReactNode;
 }
 
-export function PageLoader({ isLoading }: PageLoaderProps) {
+export function PageLoader({ isLoading, children }: PageLoaderProps) {
   const [showLoader, setShowLoader] = useState(isLoading)
 
   useEffect(() => {
@@ -21,18 +23,23 @@ export function PageLoader({ isLoading }: PageLoaderProps) {
   }, [isLoading])
 
   return (
-    <AnimatePresence>
-      {showLoader && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm"
-        >
-          <LoadingSpinner size="lg" />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <>
+      <AnimatePresence>
+        {showLoader && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          >
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className={cn(showLoader && "pointer-events-none opacity-50")}>
+        {children}
+      </div>
+    </>
   )
 }

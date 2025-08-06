@@ -1,98 +1,96 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { User } from './users' // Assuming User type is defined here
-import { SessionProvider, useSession, signOut } from 'next-auth/react'
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import { User, AuthState, AuthContextType, ServerActionResponse } from './types'
+import { validateUserSession, handleLogout } from '@/app/actions' // Import server actions
 import { toast } from 'sonner'
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  logout: () => void;
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const authOptions = {
-  // This would be your actual NextAuth.js configuration
-  // For demonstration, we'll use a mock session
-  providers: [], // e.g., GoogleProvider, CredentialsProvider
-  pages: {
-    signIn: '/login',
-  },
-  callbacks: {
-    async jwt({ token, user }: { token: any, user: any }) {
-      if (user) {
-        token.id = user.id
-        token.name = user.name
-        token.email = user.email
-        // Add any other user properties you want in the token
-      }
-      return token
-    },
-    async session({ session, token }: { session: any, token: any }) {
-      if (token) {
-        session.user = {
-          id: token.id,
-          name: token.name,
-          email: token.email,
-          // Map other token properties to session.user
-        }
-      }
-      return session
-    },
-  },
-  secret: process.env.AUTH0_SECRET, // Use a strong secret in production
-}
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
+  })
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      <InnerAuthProvider>{children}</InnerAuthProvider>
-    </SessionProvider>
-  )
-}
-
-function InnerAuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
-  const [user, setUser] = useState<User | null>(null)
-  const loading = status === 'loading'
-  const isAuthenticated = status === 'authenticated'
+  const checkSession = useCallback(async () => {
+    setAuthState(prev => ({ ...prev, isLoading: true }))
+    try {
+      const response: ServerActionResponse<User> = await validateUserSession()
+      if (response.success && response.data) {
+        setAuthState({
+          user: response.data,
+          isAuthenticated: true,
+          isLoading: false,
+        })
+      } else {
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        })
+      }
+    } catch (error) {
+      console.error('Error checking session:', error)
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      })
+    }
+  }, [])
 
   useEffect(() => {
-    if (session?.user) {
-      // Map NextAuth session user to your User type
-      setUser({
-        id: session.user.id as string,
-        name: session.user.name || 'Usuario',
-        email: session.user.email || '',
-        // Add other properties if available in session.user
-        orderCount: 0, // Default or fetch from DB
-        totalSpent: 0, // Default or fetch from DB
-        isActive: true, // Default or fetch from DB
-        phone: '', // Default or fetch from DB
-      })
-    } else {
-      setUser(null)
-    }
-  }, [session])
+    checkSession()
+  }, [checkSession])
 
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login' })
+  const login = useCallback((user: User) => {
+    setAuthState({
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+    })
+    toast.success(`Bienvenido, ${user.name || user.email}!`)
+  }, [])
+
+  const logout = useCallback(async () => {
+    setAuthState(prev => ({ ...prev, isLoading: true }))
+    try {
+      const response = await handleLogout()
+      if (response.success) {
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        })
+        toast.info('Sesión cerrada exitosamente.')
+      } else {
+        toast.error(response.message || 'Error al cerrar sesión.')
+        setAuthState(prev => ({ ...prev, isLoading: false })) // Keep current state if logout fails
+      }
+    } catch (error) {
+      console.error('Error during logout:', error)
+      toast.error('Error inesperado al cerrar sesión.')
+      setAuthState(prev => ({ ...prev, isLoading: false }))
+    }
+  }, [])
+
+  const value = {
+    user: authState.user,
+    isAuthenticated: authState.isAuthenticated,
+    isLoading: authState.isLoading,
+    login,
+    logout,
   }
 
-  return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, logout: handleLogout }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }

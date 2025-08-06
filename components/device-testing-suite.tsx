@@ -12,7 +12,7 @@ import { MobileDebugPanel } from './mobile-debug-panel' // Changed to named impo
 export function DeviceTestingSuite() {
   const [device, setDevice] = useState('desktop')
   const [orientation, setOrientation] = useState('portrait')
-  const { isMobile } = useMobileDetection()
+  const isMobileHook = useMobileDetection()
 
   const getFrameClasses = () => {
     let classes = "border-4 border-gray-300 dark:border-gray-700 rounded-xl overflow-hidden shadow-xl transition-all duration-300 ease-in-out mx-auto"
@@ -71,7 +71,7 @@ export function DeviceTestingSuite() {
           className="w-full h-full border-none"
           title="Device Test Frame"
         />
-        {isMobile && <MobileDebugPanel />}
+        {isMobileHook && <MobileDebugPanel />}
       </div>
 
       <p className="mt-8 text-gray-600 dark:text-gray-400 text-center">

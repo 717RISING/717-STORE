@@ -6,25 +6,33 @@ import { AuthProvider } from '@/lib/auth-context'
 import { Toaster } from '@/components/ui/sonner'
 import Navigation from '@/components/navigation' // Changed to default import
 import Footer from '@/components/footer' // Changed to default import
-import { ChatWidget } from '@/components/live-chat/chat-widget'
+import { EnhancedChatWidget } from '@/components/live-chat/enhanced-chat-widget'
+import { MobileDebugPanel } from '@/components/mobile-debug-panel'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { ReactNode } from 'react'
 
 interface ClientLayoutProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function ClientLayout({ children }: ClientLayoutProps) {
+  const pathname = usePathname()
+  const isAdminRoute = pathname.startsWith('/admin')
+
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <AuthProvider>
         <CartProvider>
-          <div className="flex flex-col min-h-screen">
-            <Navigation />
-            <main className="flex-1">
+          <div className={cn("flex flex-col min-h-screen", isAdminRoute ? "bg-gray-100 dark:bg-gray-900" : "bg-background")}>
+            {!isAdminRoute && <Navigation />}
+            <main className={cn("flex-1", !isAdminRoute && "pt-16")}> {/* Add padding-top for fixed header */}
               {children}
             </main>
-            <Footer />
-            <ChatWidget />
-            <Toaster richColors position="bottom-right" />
+            {!isAdminRoute && <Footer />}
+            <Toaster richColors position="top-right" />
+            {!isAdminRoute && <EnhancedChatWidget />}
+            {/* <MobileDebugPanel /> */} {/* Uncomment to enable mobile debug panel */}
           </div>
         </CartProvider>
       </AuthProvider>

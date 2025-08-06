@@ -1,6 +1,6 @@
 "use client"
 import HeroSlider from "@/components/hero-slider"
-import ProductGrid from "@/components/product-grid"
+import ProductGrid from "@/components/product-grid" // Changed to default import
 import { getAllProducts, getFeaturedProducts } from "@/lib/database"
 import { useState, useEffect } from "react"
 import Image from "next/image"
@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import CartSidebar from "@/components/cart-sidebar"
-import MobileMenu from "@/components/mobile-menu"
+import { MobileMenu } from "@/components/mobile-menu" // Changed to named import
 import { useToast } from "@/hooks/use-toast"
-import AdaptiveLoader from "@/components/loaders/adaptive-loader"
+import { AdaptiveLoader } from "@/components/loaders/adaptive-loader" // Changed to named import
 import { Suspense } from "react"
-import ProductLoader from "@/components/loaders/product-loader"
-import MobileProductLoader from "@/components/loaders/mobile/mobile-product-loader"
+import { ProductLoader } from "@/components/loaders/product-loader" // Changed to named import
+import { MobileProductLoader } from "@/components/loaders/mobile/mobile-product-loader" // Changed to named import
 import { useMobileDetection } from '@/hooks/use-mobile-detection' // Client component hook
 import { getProducts } from "@/lib/products"; // Fetch products on the server
 import { Separator } from "@/components/ui/separator"
@@ -30,15 +30,25 @@ export const metadata = {
   description: 'Descubre la última colección de streetwear, camisetas, sudaderas, pantalones y accesorios en 717 Store. Estilo auténtico y calidad premium.',
 }
 
-export default async function HomePage() {
-  const featuredProducts = await getFeaturedProducts()
-  const products = await getProducts()
-  const { isMobile } = useMobileDetection()
+export default function HomePage() { // Changed to client component to use hooks
+  const [products, setProducts] = useState<Product[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const isMobile = useMobileDetection()
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
 
   useEffect(() => {
+    const fetchProductsData = async () => {
+      setLoading(true);
+      const allProducts = await getProducts();
+      setProducts(allProducts);
+      setFeaturedProducts(allProducts.slice(0, 6));
+      setLoading(false);
+    };
+
+    fetchProductsData();
+
     const userAuth = localStorage.getItem("userAuth")
     const userInfo = localStorage.getItem("userInfo")
 
@@ -47,8 +57,6 @@ export default async function HomePage() {
       const user = JSON.parse(userInfo)
       setUserName(user.name)
     }
-
-    setLoading(false)
   }, [])
 
   const heroImages = [
@@ -106,7 +114,7 @@ export default async function HomePage() {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <MobileMenu />
+              <MobileMenu isOpen={false} onClose={() => {}} /> {/* Pass dummy props as it's controlled by Navigation */}
             </div>
           </div>
         </nav>
@@ -115,7 +123,7 @@ export default async function HomePage() {
       {/* Hero Section con Slider */}
       <section className="relative h-[70vh] overflow-hidden">
         <Suspense fallback={<BrandLoader className="h-[400px]" />}>
-          <HeroSlider images={heroImages} />
+          <HeroSlider />
         </Suspense>
 
         {/* Overlay con contenido */}
@@ -231,37 +239,31 @@ export default async function HomePage() {
       <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
         <div className="container px-4 md:px-6">
           <div className="grid gap-8 md:grid-cols-3 text-center">
-            <AnimatedCard delay={0.1} from="bottom">
+            <AnimatedCard delay={0.1}>
               <CardHeader className="flex flex-row items-center space-x-4">
                 <Truck className="h-8 w-8 text-primary" />
                 <CardTitle>Envío Rápido</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Recibe tus pedidos en tiempo récord con nuestras opciones de envío express.
-                </p>
+                Recibe tus pedidos en tiempo récord con nuestras opciones de envío express.
               </CardContent>
             </AnimatedCard>
-            <AnimatedCard delay={0.2} from="bottom">
+            <AnimatedCard delay={0.2}>
               <CardHeader className="flex flex-row items-center space-x-4">
                 <RefreshCw className="h-8 w-8 text-primary" />
                 <CardTitle>Devoluciones Fáciles</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Proceso de devolución sin complicaciones en 30 días.
-                </p>
+                Proceso de devolución sin complicaciones en 30 días.
               </CardContent>
             </AnimatedCard>
-            <AnimatedCard delay={0.3} from="bottom">
+            <AnimatedCard delay={0.3}>
               <CardHeader className="flex flex-row items-center space-x-4">
                 <ShieldCheck className="h-8 w-8 text-primary" />
                 <CardTitle>Pago Seguro</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Tus transacciones están protegidas con la última tecnología de encriptación.
-                </p>
+                Tus transacciones están protegidas con la última tecnología de encriptación.
               </CardContent>
             </AnimatedCard>
           </div>

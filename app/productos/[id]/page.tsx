@@ -1,6 +1,6 @@
-import { ProductDetail } from "@/components/product-detail"
-import { getProductById } from "@/lib/products"
-import { notFound } from "next/navigation"
+import { getProductById } from '@/lib/database'
+import ProductDetail from '@/components/product-detail'
+import { notFound } from 'next/navigation'
 
 interface ProductPageProps {
   params: {

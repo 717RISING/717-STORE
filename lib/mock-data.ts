@@ -1,7 +1,9 @@
-// This script simulates setting up a database with initial data.
-// In a real application, this would involve database migrations and seeding.
+// lib/mock-data.ts
+// This file contains mock data for products, users, and orders.
 
-const mockProducts = [
+import { Product, User, Order } from './types';
+
+export const mockProducts: Product[] = [
   {
     id: "1",
     name: "Camiseta 'Big Dreams'",
@@ -124,7 +126,7 @@ const mockProducts = [
   },
 ];
 
-const mockUsers = [
+export const mockUsers: User[] = [
   {
     id: "user1",
     name: "Juan Perez",
@@ -146,7 +148,7 @@ const mockUsers = [
         address2: 'Apto 101',
         city: 'Bogotá',
         state: 'Cundinamarca',
-        zip: '110111',
+        zipCode: '110111',
         country: 'Colombia',
         isDefault: true,
       },
@@ -156,7 +158,7 @@ const mockUsers = [
     id: "admin1",
     name: "Admin User",
     email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@717store.com",
-    passwordHash: "adminhashedpassword", // In a real app, this would be a strong hash
+    passwordHash: "adminpassword", // In a real app, this would be a strong hash
     createdAt: new Date("2022-05-01T08:00:00Z").toISOString(),
     lastLogin: new Date("2024-07-26T09:00:00Z").toISOString(),
     orderCount: 10,
@@ -168,7 +170,7 @@ const mockUsers = [
   },
 ];
 
-const mockOrders = [
+export const mockOrders: Order[] = [
   {
     id: "ORD001",
     userId: "user1",
@@ -232,5 +234,3 @@ const mockOrders = [
     paymentMethod: "PSE",
   },
 ];
-
-console.log("Mock data initialized.");

@@ -1,91 +1,71 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import InteractiveProductCard from "./interactive-product-card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from 'react'
+import { InteractiveProductCard } from './interactive-product-card' // Changed to named import
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import { Search, Filter } from 'lucide-react'
-import { getAllProducts } from "@/lib/database"
-import { Product } from '@/lib/products'
-import { useDebounce } from "@/hooks/use-debounce"
+import { getAllProducts } from '@/lib/database'
+import { Product } from '@/lib/types'
+import { useDebounce } from '@/hooks/use-debounce'
+import { Loader2 } from 'lucide-react'
 
 interface ProductGridProps {
-  products: Product[]
+  products: Product[]; // Changed from initialProducts to products
 }
 
-export default function ProductGrid({ products }: ProductGridProps) {
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState("name")
-  const [filterCategory, setFilterCategory] = useState("all")
+export default function ProductGrid({ products: initialProducts }: ProductGridProps) { // Changed to default export and renamed prop
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState('name')
+  const [filterCategory, setFilterCategory] = useState('all')
   const [isLoading, setIsLoading] = useState(false)
-  const debouncedSearchTerm = useDebounce(searchTerm, 300) // Debounce search input
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   useEffect(() => {
-    filterAndSortProducts()
-  }, [products, debouncedSearchTerm, sortBy, filterCategory])
+    const fetchAndFilterProducts = async () => {
+      setIsLoading(true)
+      let currentProducts = initialProducts
 
-  const loadProducts = async () => {
-    setIsLoading(true)
-    try {
-      const fetchedProducts = await getAllProducts()
-      setFilteredProducts(fetchedProducts)
-    } catch (error) {
-      console.error("Error loading products:", error)
-    } finally {
+      // If search term is debounced, re-fetch or re-filter
+      if (debouncedSearchTerm) {
+        // In a real app, you might call an API with the search term
+        // For now, we'll filter the initial products
+        currentProducts = initialProducts.filter(product =>
+          product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          product.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        )
+      }
+
+      // Filter by category
+      if (filterCategory !== 'all') {
+        currentProducts = currentProducts.filter(product => product.category === filterCategory)
+      }
+
+      // Sort products
+      currentProducts.sort((a, b) => {
+        switch (sortBy) {
+          case 'price-low':
+            return a.price - b.price
+          case 'price-high':
+            return b.price - a.price
+          case 'name':
+            return a.name.localeCompare(b.name)
+          default:
+            return 0
+        }
+      })
+
+      setFilteredProducts(currentProducts)
       setIsLoading(false)
     }
-  }
 
-  const filterAndSortProducts = () => {
-    let filtered = [...products]
+    fetchAndFilterProducts()
+  }, [initialProducts, debouncedSearchTerm, sortBy, filterCategory])
 
-    // Filter by search term
-    if (debouncedSearchTerm) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-    }
-
-    // Filter by category
-    if (filterCategory !== "all") {
-      filtered = filtered.filter(product => product.category === filterCategory)
-    }
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "name":
-          return a.name.localeCompare(b.name)
-        default:
-          return 0
-      }
-    })
-
-    setFilteredProducts(filtered)
-  }
-
-  const categories = [...new Set(products.map(p => p.category))]
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="bg-gray-200 h-64 rounded-lg mb-4"></div>
-            <div className="bg-gray-200 h-4 rounded mb-2"></div>
-            <div className="bg-gray-200 h-4 rounded w-2/3"></div>
-          </div>
-        ))}
-      </div>
-    )
-  }
+  const categories = [...new Set(initialProducts.map(p => p.category))]
 
   return (
     <div className="space-y-6">
@@ -132,11 +112,21 @@ export default function ProductGrid({ products }: ProductGridProps) {
 
       {/* Results count */}
       <div className="text-sm text-gray-600">
-        Mostrando {filteredProducts.length} de {products.length} productos
+        Mostrando {filteredProducts.length} de {initialProducts.length} productos
       </div>
 
       {/* Product Grid */}
-      {filteredProducts.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 h-64 rounded-lg mb-4"></div>
+              <div className="bg-gray-200 h-4 rounded mb-2"></div>
+              <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No se encontraron productos</p>
           {searchTerm && (

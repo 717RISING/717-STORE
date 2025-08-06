@@ -1,47 +1,74 @@
-import { SizeCalculator } from "@/components/size-calculator"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { SizeCalculator } from '@/components/size-calculator'
 
 export default function SizeGuidePage() {
+  const sizeGuides = [
+    {
+      productType: 'Camisetas',
+      measurements: [
+        { size: 'S', chest: '90-95 cm', waist: '75-80 cm', hips: '90-95 cm' },
+        { size: 'M', chest: '96-101 cm', waist: '81-86 cm', hips: '96-101 cm' },
+        { size: 'L', chest: '102-107 cm', waist: '87-92 cm', hips: '102-107 cm' },
+        { size: 'XL', chest: '108-113 cm', waist: '93-98 cm', hips: '108-113 cm' },
+      ],
+    },
+    {
+      productType: 'Pantalones',
+      measurements: [
+        { size: '28', waist: '71 cm', hips: '89 cm', length: '100 cm' },
+        { size: '30', waist: '76 cm', hips: '94 cm', length: '102 cm' },
+        { size: '32', waist: '81 cm', hips: '99 cm', length: '104 cm' },
+        { size: '34', waist: '86 cm', hips: '104 cm', length: '106 cm' },
+      ],
+    },
+    {
+      productType: 'Sudaderas',
+      measurements: [
+        { size: 'S', chest: '95-100 cm', length: '65 cm' },
+        { size: 'M', chest: '101-106 cm', length: '68 cm' },
+        { size: 'L', chest: '107-112 cm', length: '71 cm' },
+        { size: 'XL', chest: '113-118 cm', length: '74 cm' },
+      ],
+    },
+  ]
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">Guía de Tallas</h1>
+      <h1 className="text-4xl font-bold text-center mb-8 md:mb-12">Guía de Tallas</h1>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Cómo Medirte</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
-            <p>
-              Para asegurarte de elegir la talla correcta, te recomendamos que te midas y compares tus medidas
-              con nuestra tabla de tallas.
-            </p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>
-                <strong>Pecho:</strong> Mide alrededor de la parte más ancha de tu pecho, justo debajo de las axilas.
-              </li>
-              <li>
-                <strong>Cintura:</strong> Mide alrededor de la parte más estrecha de tu cintura, generalmente
-                justo por encima del ombligo.
-              </li>
-              <li>
-                <strong>Cadera:</strong> Mide alrededor de la parte más ancha de tus caderas, manteniendo la cinta
-                horizontal.
-              </li>
-              <li>
-                <strong>Largo de Manga:</strong> Mide desde el centro de la parte posterior de tu cuello,
-                a lo largo del hombro y hasta la muñeca.
-              </li>
-              <li>
-                <strong>Entrepierna:</strong> Mide desde la parte superior de tu muslo interior hasta el tobillo.
-              </li>
-            </ul>
-            <p>
-              Si tus medidas están entre dos tallas, te recomendamos elegir la talla más grande para un ajuste
-              más cómodo, o la más pequeña para un ajuste más ceñido.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="space-y-12">
+        {sizeGuides.map((guide, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <CardTitle>Tallas de {guide.productType}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Talla</TableHead>
+                    {guide.measurements[0].chest && <TableHead>Pecho</TableHead>}
+                    {guide.measurements[0].waist && <TableHead>Cintura</TableHead>}
+                    {guide.measurements[0].hips && <TableHead>Caderas</TableHead>}
+                    {guide.measurements[0].length && <TableHead>Largo</TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {guide.measurements.map((measurement, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium">{measurement.size}</TableCell>
+                      {measurement.chest && <TableCell>{measurement.chest}</TableCell>}
+                      {measurement.waist && <TableCell>{measurement.waist}</TableCell>}
+                      {measurement.hips && <TableCell>{measurement.hips}</TableCell>}
+                      {measurement.length && <TableCell>{measurement.length}</TableCell>}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ))}
 
         <Card>
           <CardHeader>
@@ -51,59 +78,14 @@ export default function SizeGuidePage() {
             <SizeCalculator />
           </CardContent>
         </Card>
-      </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Tabla de Tallas General</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-800">
-                  <th className="py-2 px-4 border-b">Talla</th>
-                  <th className="py-2 px-4 border-b">Pecho (cm)</th>
-                  <th className="py-2 px-4 border-b">Cintura (cm)</th>
-                  <th className="py-2 px-4 border-b">Cadera (cm)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="py-2 px-4">XS</td>
-                  <td className="py-2 px-4">80-85</td>
-                  <td className="py-2 px-4">65-70</td>
-                  <td className="py-2 px-4">85-90</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4">S</td>
-                  <td className="py-2 px-4">86-91</td>
-                  <td className="py-2 px-4">71-76</td>
-                  <td className="py-2 px-4">91-96</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4">M</td>
-                  <td className="py-2 px-4">92-97</td>
-                  <td className="py-2 px-4">77-82</td>
-                  <td className="py-2 px-4">97-102</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4">L</td>
-                  <td className="py-2 px-4">98-103</td>
-                  <td className="py-2 px-4">83-88</td>
-                  <td className="py-2 px-4">103-108</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4">XL</td>
-                  <td className="py-2 px-4">104-109</td>
-                  <td className="py-2 px-4">89-94</td>
-                  <td className="py-2 px-4">109-114</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="text-center text-muted-foreground">
+          <p>
+            Si tienes dudas sobre tu talla, no dudes en contactarnos.
+            ¡Estamos aquí para ayudarte a encontrar el ajuste perfecto!
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

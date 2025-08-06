@@ -1,15 +1,28 @@
-import { cn } from "@/lib/utils"
-import { Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
-interface FormLoaderProps {
-  className?: string
-}
-
-export function FormLoader({ className }: FormLoaderProps) {
+export function FormLoader() {
   return (
-    <div className={cn("flex items-center justify-center w-full py-4", className)}>
-      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-      <span className="ml-2 text-gray-600 dark:text-gray-300">Procesando...</span>
-    </div>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <Skeleton className="h-6 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-1/2" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <Skeleton className="h-10 w-full mt-4" />
+      </CardContent>
+    </Card>
   )
 }

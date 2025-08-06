@@ -196,11 +196,11 @@ export function ProductsTab() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="sizes" className="text-right">Tallas (separadas por coma)</Label>
-              <Input id="sizes" name="sizes" defaultValue={currentProduct?.sizes.join(', ') || ''} className="col-span-3" placeholder="S, M, L, XL" required />
+              <Input id="sizes" name="sizes" defaultValue={currentProduct?.sizes?.join(', ') || ''} className="col-span-3" placeholder="S, M, L, XL" required />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="colors" className="text-right">Colores (separadas por coma)</Label>
-              <Input id="colors" name="colors" defaultValue={currentProduct?.colors.join(', ') || ''} className="col-span-3" placeholder="Negro, Blanco, Gris" required />
+              <Input id="colors" name="colors" defaultValue={currentProduct?.colors?.join(', ') || ''} className="col-span-3" placeholder="Negro, Blanco, Gris" required />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="stock" className="text-right">Stock</Label>

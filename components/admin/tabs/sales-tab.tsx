@@ -11,6 +11,9 @@ import { es } from 'date-fns/locale'
 import { AdaptiveLoader } from '@/components/loaders/adaptive-loader' // Changed to named import
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button' // Assuming Button component exists
+import { SalesByRegionChart } from '../charts/sales-by-region-chart' // Import charts
+import { SalesByProductChart } from '../charts/sales-by-product-chart'
+import { SalesByChannelChart } from '../charts/sales-by-channel-chart'
 
 export function SalesTab() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -35,15 +38,15 @@ export function SalesTab() {
 
   const getStatusBadgeVariant = (status: Order['status']) => {
     switch (status) {
-      case 'pending':
+      case 'Pendiente':
         return 'secondary'
-      case 'processing':
+      case 'Procesando':
         return 'default'
-      case 'shipped':
+      case 'Enviado':
         return 'outline'
-      case 'delivered':
+      case 'Entregado':
         return 'success' // Assuming a success variant exists or can be styled
-      case 'cancelled':
+      case 'Cancelado':
         return 'destructive'
       default:
         return 'secondary'
@@ -52,29 +55,29 @@ export function SalesTab() {
 
   const formatStatus = (status: Order['status']) => {
     switch (status) {
-      case 'pending':
+      case 'Pendiente':
         return 'Pendiente'
-      case 'processing':
+      case 'Procesando':
         return 'Procesando'
-      case 'shipped':
+      case 'Enviado':
         return 'Enviado'
-      case 'delivered':
+      case 'Entregado':
         return 'Completado'
-      case 'cancelled':
+      case 'Cancelado':
         return 'Cancelado'
       default:
         return status
     }
   }
 
-  // Dummy data for recent sales
-  const recentSales = [
-    { id: 'ORD001', customer: 'Juan Pérez', amount: 120.50, date: '2023-10-26', status: 'Completado' },
-    { id: 'ORD002', customer: 'María García', amount: 75.00, date: '2023-10-25', status: 'Pendiente' },
-    { id: 'ORD003', customer: 'Carlos Ruiz', amount: 200.00, date: '2023-10-24', status: 'Completado' },
-    { id: 'ORD004', customer: 'Ana López', amount: 45.99, date: '2023-10-24', status: 'Enviado' },
-    { id: 'ORD005', customer: 'Pedro Gómez', amount: 150.25, date: '2023-10-23', status: 'Completado' },
-  ]
+  // Dummy data for recent sales (using actual mockOrders for consistency)
+  const recentSales = orders.slice(0, 5).map(order => ({
+    id: order.id,
+    customer: order.shippingAddress.fullName,
+    amount: order.total,
+    date: format(new Date(order.createdAt), 'yyyy-MM-dd'),
+    status: formatStatus(order.status),
+  }))
 
   return (
     <div className="space-y-6">
@@ -159,7 +162,7 @@ export function SalesTab() {
           <CardTitle>Ventas por Región</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Assuming SalesByRegionChart component exists */}
+          <SalesByRegionChart />
         </CardContent>
       </Card>
 
@@ -168,7 +171,7 @@ export function SalesTab() {
           <CardTitle>Ventas por Producto</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Assuming SalesByProductChart component exists */}
+          <SalesByProductChart />
         </CardContent>
       </Card>
 
@@ -177,7 +180,7 @@ export function SalesTab() {
           <CardTitle>Ventas por Canal</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Assuming SalesByChannelChart component exists */}
+          <SalesByChannelChart />
         </CardContent>
       </Card>
     </div>

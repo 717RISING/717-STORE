@@ -1,28 +1,25 @@
-import { Message } from "ai"
-import { cn } from "@/lib/utils"
+import { ChatMessage } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 interface ChatMessageProps {
-  message: Message;
+  message: ChatMessage;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
-  const isUser = message.role === "user"
+export function ChatMessageComponent({ message }: ChatMessageProps) {
+  const isUser = message.sender === 'user'
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3",
-        isUser ? "justify-end" : "justify-start"
-      )}
-    >
-      <div
-        className={cn(
-          "rounded-lg p-3 max-w-[70%]",
-          isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-50"
-        )}
-      >
-        <p className="text-sm">{message.content}</p>
+    <div className={cn(
+      "flex",
+      isUser ? "justify-end" : "justify-start"
+    )}>
+      <div className={cn(
+        "max-w-[70%] p-3 rounded-lg",
+        isUser ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+      )}>
+        <p>{message.text}</p>
+        <span className="block text-xs mt-1 opacity-75">
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
       </div>
     </div>
   )

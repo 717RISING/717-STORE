@@ -1,6 +1,3 @@
-// lib/types.ts
-// This file defines common types used across the application.
-
 export interface Product {
   id: string;
   name: string;
@@ -17,14 +14,27 @@ export interface Product {
   updatedAt?: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  passwordHash: string; // Hashed password
+  isAdmin: boolean;
+  createdAt?: string;
+  lastLogin?: string;
+  orderCount?: number;
+  totalSpent?: number;
+  isActive?: boolean;
+  phone?: string;
+  role?: 'user' | 'admin';
+  shippingAddresses?: ShippingAddress[]; // Added for mock data consistency
+}
+
 export interface CartItem {
-  productId: string;
-  name: string;
-  imageUrl: string;
-  price: number;
+  product: Product;
   quantity: number;
-  size: string;
-  color: string;
+  selectedSize?: string;
+  selectedColor?: string;
 }
 
 export interface OrderItem {
@@ -32,22 +42,22 @@ export interface OrderItem {
   name: string;
   quantity: number;
   price: number;
+  imageUrl: string; // Added for order item display
   size?: string;
   color?: string;
 }
 
-// Renamed from Address to ShippingAddress to match error report
 export interface ShippingAddress {
-  id: string;
-  userId: string;
-  name: string;
+  id?: string; // Optional for new addresses
+  userId?: string; // Optional for new addresses
+  fullName: string;
   address1: string;
   address2?: string;
   city: string;
   state: string;
-  zip: string;
+  zipCode: string;
   country: string;
-  isDefault: boolean;
+  isDefault?: boolean; // Optional for new addresses
 }
 
 export interface PaymentDetails {
@@ -60,44 +70,15 @@ export interface PaymentDetails {
 export interface Order {
   id: string;
   userId: string;
-  items: OrderItem[];
-  total: number;
-  status: "Pendiente" | "Procesando" | "Enviado" | "Entregado" | "Cancelado";
-  shippingAddress: ShippingAddress; // Use ShippingAddress here
-  paymentMethod: string;
   createdAt: string;
   updatedAt: string;
+  status: 'Pendiente' | 'Procesando' | 'Enviado' | 'Entregado' | 'Cancelado';
+  total: number;
+  shippingAddress: ShippingAddress;
+  paymentMethod: string;
+  items: OrderItem[];
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  passwordHash: string; // Hashed password
-  createdAt: string;
-  lastLogin: string;
-  orderCount: number;
-  totalSpent: number;
-  isActive: boolean;
-  phone?: string;
-  role?: 'user' | 'admin';
-}
-
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-export interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (user: User) => void;
-  logout: () => void;
-}
-
-// Generic server action response type
 export type ServerActionResponse<T = undefined> = {
   success: boolean;
   message?: string;
@@ -132,4 +113,18 @@ export interface SizeGuide {
     hips: string;
     length?: string;
   }[];
+}
+
+export interface AuthState { // Exported AuthState
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+export interface AuthContextType { // Exported AuthContextType
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (user: User) => void;
+  logout: () => Promise<void>;
 }

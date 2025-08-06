@@ -1,25 +1,61 @@
-export function calculateSize(chest: number, waist: number, hip: number, unit: "cm" | "in"): string {
-  let c = chest
-  let w = waist
-  let h = hip
+interface SizeGuideEntry {
+  size: string;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  length?: number;
+}
 
-  if (unit === "in") {
-    c = chest * 2.54
-    w = waist * 2.54
-    h = hip * 2.54
+const sizeGuides: { [key: string]: SizeGuideEntry[] } = {
+  camiseta: [
+    { size: 'S', chest: 95, waist: 80, hips: 95 },
+    { size: 'M', chest: 101, waist: 86, hips: 101 },
+    { size: 'L', chest: 107, waist: 92, hips: 107 },
+    { size: 'XL', chest: 113, waist: 98, hips: 113 },
+  ],
+  pantalon: [
+    { size: '28', waist: 71, hips: 89 },
+    { size: '30', waist: 76, hips: 94 },
+    { size: '32', waist: 81, hips: 99 },
+    { size: '34', waist: 86, hips: 104 },
+  ],
+  sudadera: [
+    { size: 'S', chest: 100 },
+    { size: 'M', chest: 106 },
+    { size: 'L', chest: 112 },
+    { size: 'XL', chest: 118 },
+  ],
+}
+
+export function calculateRecommendedSize(
+  chest: number,
+  waist: number,
+  hips: number,
+  productType: string
+): string | null {
+  const guide = sizeGuides[productType]
+  if (!guide) {
+    return null // No size guide for this product type
   }
 
-  if (c >= 80 && c <= 85 && w >= 65 && w <= 70 && h >= 85 && h <= 90) {
-    return "XS"
-  } else if (c >= 86 && c <= 91 && w >= 71 && w <= 76 && h >= 91 && h <= 96) {
-    return "S"
-  } else if (c >= 92 && c <= 97 && w >= 77 && w <= 82 && h >= 97 && h <= 102) {
-    return "M"
-  } else if (c >= 98 && c <= 103 && w >= 83 && w <= 88 && h >= 103 && h <= 108) {
-    return "L"
-  } else if (c >= 104 && c <= 109 && w >= 89 && w <= 94 && h >= 109 && h <= 114) {
-    return "XL"
-  } else {
-    return "No se encontró una talla exacta. Por favor, revisa tus medidas o consulta la tabla de tallas."
+  // Find the smallest size that fits all provided measurements
+  for (const entry of guide) {
+    let fits = true
+    if (entry.chest && chest && chest > entry.chest) {
+      fits = false
+    }
+    if (entry.waist && waist && waist > entry.waist) {
+      fits = false
+    }
+    if (entry.hips && hips && hips > entry.hips) {
+      fits = false
+    }
+
+    if (fits) {
+      return entry.size
+    }
   }
+
+  // If no size fits, recommend the largest or indicate no fit
+  return guide[guide.length - 1]?.size || null // Recommend largest if no smaller fits
 }

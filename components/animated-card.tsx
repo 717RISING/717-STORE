@@ -1,51 +1,27 @@
 'use client'
 
-import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import React from 'react'
 
-interface AnimatedCardProps extends React.ComponentProps<typeof Card> {
-  delay?: number;
-  duration?: number;
-  from?: "left" | "right" | "top" | "bottom" | "opacity";
+interface AnimatedCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  delay?: number; // in ms
 }
 
-export function AnimatedCard({
-  children,
-  delay = 0,
-  duration = 0.5,
-  from = "bottom",
-  className,
-  ...props
-}: AnimatedCardProps) {
-  const variants = {
-    hidden: {
-      opacity: 0,
-      x: from === "left" ? -50 : from === "right" ? 50 : 0,
-      y: from === "top" ? -50 : from === "bottom" ? 50 : 0,
-    },
-    visible: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      transition: {
-        delay,
-        duration,
-        ease: "easeOut",
-      },
-    },
-  }
-
+export function AnimatedCard({ children, className, delay = 0, ...props }: AnimatedCardProps) {
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={variants}
-      className={cn("h-full", className)}
+    <Card
+      className={cn(
+        "opacity-0 translate-y-4 animate-fade-in-up",
+        className
+      )}
+      style={{ animationDelay: `${delay}ms` }}
+      {...props}
     >
-      <Card className="h-full" {...props}>
+      <CardContent className="p-6">
         {children}
-      </Card>
-    </motion.div>
+      </CardContent>
+    </Card>
   )
 }

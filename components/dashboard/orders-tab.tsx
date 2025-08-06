@@ -1,132 +1,93 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from 'lucide-react'
-import { useState, useEffect } from "react"
-import { Order } from "@/lib/orders" // Assuming Order type is defined here
-import { getOrders } from "@/lib/database" // Assuming getOrders function is defined here
-import { LoadingSpinner } from "@/components/loading-spinner"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useState, useEffect } from 'react'
+import { Order } from '@/lib/types'
+import { getOrdersByUserId } from '@/lib/database'
+import { useAuth } from '@/lib/auth-context'
+import { format } from 'date-fns'
+import { Loader2 } from 'lucide-react'
 
 export function OrdersTab() {
+  const { user } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchOrders = async () => {
-      try {
-        setLoading(true)
-        const data = await getOrders()
-        if (data) {
-          setOrders(data)
-        } else {
-          setError("Failed to fetch orders.")
+      if (user?.id) {
+        setIsLoading(true)
+        try {
+          const userOrders = await getOrdersByUserId(user.id)
+          setOrders(userOrders)
+        } catch (error) {
+          console.error('Error fetching user orders:', error)
+        } finally {
+          setIsLoading(false)
         }
-      } catch (err) {
-        setError("An unexpected error occurred while fetching orders.")
-        console.error(err)
-      } finally {
-        setLoading(false)
+      } else {
+        setIsLoading(false)
       }
     }
     fetchOrders()
-  }, [])
+  }, [user])
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "Pendiente":
-        return "secondary"
-      case "Procesando":
-        return "default"
-      case "Enviado":
-        return "outline"
-      case "Entregado":
-        return "success" // Assuming a 'success' variant exists or can be styled
-      case "Cancelado":
-        return "destructive"
-      default:
-        return "secondary"
-    }
-  }
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Mis Pedidos</CardTitle>
-          <CardDescription>Revisa el estado y el historial de tus pedidos.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center items-center h-64">
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Mis Pedidos</CardTitle>
-          <CardDescription>Revisa el estado y el historial de tus pedidos.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-red-500">{error}</p>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Cargando tus pedidos...</span>
+      </div>
     )
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Mis Pedidos</CardTitle>
-        <CardDescription>Revisa el estado y el historial de tus pedidos.</CardDescription>
+        <CardTitle>Historial de Pedidos</CardTitle>
+        <CardDescription>Revisa el estado y los detalles de tus pedidos anteriores.</CardDescription>
       </CardHeader>
       <CardContent>
         {orders.length === 0 ? (
-          <p className="text-gray-500">No tienes pedidos realizados aún.</p>
+          <p className="text-center text-muted-foreground py-8">No tienes pedidos aún.</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Pedido #</TableHead>
+                <TableHead>ID de Pedido</TableHead>
                 <TableHead>Fecha</TableHead>
-                <TableHead>Total</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead>
-                  <span className="sr-only">Acciones</span>
-                </TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Artículos</TableHead>
+                <TableHead>Dirección de Envío</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm')}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      order.status === 'Entregado' ? 'bg-green-100 text-green-800' :
+                      order.status === 'Enviado' ? 'bg-blue-100 text-blue-800' :
+                      order.status === 'Procesando' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </TableCell>
                   <TableCell>${order.total.toFixed(2)}</TableCell>
                   <TableCell>
-                    <Badge variant={getStatusBadgeVariant(order.status)}>{order.status}</Badge>
+                    <ul className="list-disc list-inside text-sm">
+                      {order.items.map((item, index) => (
+                        <li key={index}>{item.name} (x{item.quantity})</li>
+                      ))}
+                    </ul>
                   </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
-                        <DropdownMenuItem>Rastrear Envío</DropdownMenuItem>
-                        {order.status === "Pendiente" && <DropdownMenuItem>Cancelar Pedido</DropdownMenuItem>}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <TableCell className="text-sm">
+                    {order.shippingAddress.fullName}, {order.shippingAddress.address1}, {order.shippingAddress.city}
                   </TableCell>
                 </TableRow>
               ))}

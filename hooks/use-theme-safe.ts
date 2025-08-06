@@ -1,11 +1,19 @@
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+'use client'
+
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 export function useThemeSafe() {
-  const [mounted, setMounted] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  return { mounted, theme, setTheme, resolvedTheme }
+  if (!mounted) {
+    return { theme: 'light', setTheme: () => {}, resolvedTheme: 'light' } as const
+  }
+
+  return { theme, setTheme, resolvedTheme }
 }

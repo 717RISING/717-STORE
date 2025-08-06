@@ -1,14 +1,12 @@
-import { cn } from "@/lib/utils"
-import { Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface ImageLoaderProps {
-  className?: string
+  className?: string;
 }
 
 export function ImageLoader({ className }: ImageLoaderProps) {
   return (
-    <div className={cn("flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-md", className)}>
-      <Loader2 className="h-8 w-8 animate-spin text-gray-500 dark:text-gray-400" />
-    </div>
+    <Skeleton className={cn("w-full h-48 rounded-md", className)} />
   )
 }

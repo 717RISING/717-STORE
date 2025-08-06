@@ -1,14 +1,17 @@
-import { AdminDashboard } from "@/components/admin/admin-dashboard"
-import { AdminLogin } from "@/components/admin/admin-login"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth-context" // Assuming authOptions are defined here
+import { AdminDashboard } from '@/components/admin/admin-dashboard'
+import { redirect } from 'next/navigation'
+import { validateUserSession } from '@/app/actions'
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions)
+  const session = await validateUserSession()
 
-  if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
-    return <AdminLogin />
+  if (!session.success || session.data?.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    redirect('/login?redirect=/admin')
   }
 
-  return <AdminDashboard />
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8">
+      <AdminDashboard />
+    </div>
+  )
 }

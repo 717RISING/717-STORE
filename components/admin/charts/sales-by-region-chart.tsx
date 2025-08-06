@@ -1,14 +1,14 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts'
 
 const data = [
-  { name: "Bogotá", sales: 4000 },
-  { name: "Medellín", sales: 3000 },
-  { name: "Cali", sales: 2000 },
-  { name: "Barranquilla", sales: 2780 },
-  { name: "Cartagena", sales: 1890 },
+  { name: 'Bogotá', ventas: 12000 },
+  { name: 'Medellín', ventas: 9000 },
+  { name: 'Cali', ventas: 7500 },
+  { name: 'Barranquilla', ventas: 6000 },
+  { name: 'Cartagena', ventas: 4000 },
 ]
 
 export function SalesByRegionChart() {
@@ -16,11 +16,10 @@ export function SalesByRegionChart() {
     <Card>
       <CardHeader>
         <CardTitle>Ventas por Región</CardTitle>
-        <CardDescription>Distribución de ventas por ciudades principales.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={data} layout="vertical" margin={{ left: 50, right: 20 }}>
+          <BarChart data={data} layout="vertical">
             <YAxis
               dataKey="name"
               type="category"
@@ -37,9 +36,9 @@ export function SalesByRegionChart() {
               axisLine={false}
               tickFormatter={(value) => `$${value}`}
             />
-            <Tooltip formatter={(value: number) => `$${value}`} />
+            <Tooltip cursor={{ fill: 'transparent' }} />
             <Legend />
-            <Bar dataKey="sales" fill="currentColor" className="fill-blue-500" />
+            <Bar dataKey="ventas" fill="#4A1518" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

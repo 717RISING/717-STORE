@@ -1,59 +1,71 @@
-import { useState, useCallback } from 'react'
-import { Message } from 'ai'
-import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+'use client'
 
-export function useChat() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
+import { useState, useEffect, useCallback } from 'react'
+import { ChatMessage } from '@/lib/types'
+import { getChatSession, sendMessage as sendChatMessage, createChatSession } from '@/lib/chat-service'
+import { v4 as uuidv4 } from 'uuid'
+
+export function useChat(userId: string = 'guest_user') { // Default to guest user
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value)
-  }
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
-
-    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input }
-    setMessages(prevMessages => [...prevMessages, userMessage])
-    setInput('')
+  const fetchSession = useCallback(async () => {
     setIsLoading(true)
-
     try {
-      const result = await streamText({
-        model: openai('gpt-4o'),
-        messages: [...messages, userMessage],
-      })
+      let currentSessionId = localStorage.getItem('chatSessionId')
+      let sessionData
 
-      let fullResponse = ''
-      for await (const chunk of result.fullStream) {
-        if (chunk.type === 'text-delta') {
-          fullResponse += chunk.text
-          setMessages(prevMessages => {
-            const lastMessage = prevMessages[prevMessages.length - 1]
-            if (lastMessage && lastMessage.role === 'assistant') {
-              return prevMessages.map((msg, index) =>
-                index === prevMessages.length - 1 ? { ...msg, content: fullResponse } : msg
-              )
-            } else {
-              return [...prevMessages, { id: Date.now().toString(), role: 'assistant', content: fullResponse }]
-            }
-          })
-        }
+      if (currentSessionId) {
+        sessionData = await getChatSession(currentSessionId)
       }
+
+      if (!sessionData) {
+        currentSessionId = uuidv4()
+        sessionData = await createChatSession(currentSessionId, userId)
+        localStorage.setItem('chatSessionId', currentSessionId)
+      }
+
+      setSessionId(currentSessionId)
+      setMessages(sessionData?.messages || [])
     } catch (error) {
-      console.error('Error generating text:', error)
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { id: Date.now().toString(), role: 'assistant', content: 'Lo siento, hubo un error al procesar tu solicitud.' },
-      ])
+      console.error('Error fetching/creating chat session:', error)
+      setMessages([{ id: uuidv4(), sender: 'agent', text: 'Lo siento, no pude cargar el chat. Por favor, inténtalo de nuevo más tarde.', timestamp: new Date() }])
     } finally {
       setIsLoading(false)
     }
-  }, [input, messages])
+  }, [userId])
 
-  return { messages, input, handleInputChange, handleSubmit, isLoading }
+  useEffect(() => {
+    fetchSession()
+  }, [fetchSession])
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!sessionId) return
+
+    const newUserMessage: ChatMessage = {
+      id: uuidv4(),
+      sender: 'user',
+      text,
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, newUserMessage])
+    setIsLoading(true)
+
+    try {
+      const response = await sendChatMessage(sessionId, newUserMessage)
+      if (response) {
+        setMessages((prev) => [...prev, response])
+      } else {
+        setMessages((prev) => [...prev, { id: uuidv4(), sender: 'agent', text: 'Lo siento, no pude obtener una respuesta. Por favor, inténtalo de nuevo.', timestamp: new Date() }])
+      }
+    } catch (error) {
+      console.error('Error sending message:', error)
+      setMessages((prev) => [...prev, { id: uuidv4(), sender: 'agent', text: 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo.', timestamp: new Date() }])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [sessionId])
+
+  return { messages, sendMessage, isLoading }
 }

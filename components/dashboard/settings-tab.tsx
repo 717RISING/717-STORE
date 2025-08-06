@@ -24,15 +24,14 @@ export function SettingsTab() {
     }
 
     setIsSaving(true)
+    // Assuming updateUser returns { success: boolean, message?: string, user?: User }
     const result = await updateUser(user.id, { name, email })
     setIsSaving(false)
 
-    if (result.success) {
+    if (result.success && result.user) {
       toast.success("Perfil actualizado exitosamente.")
       // Update context with new user data
-      if (user) {
-        login({ ...user, name, email })
-      }
+      login(result.user)
     } else {
       toast.error(result.message || "Error al actualizar el perfil.")
     }

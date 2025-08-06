@@ -1,15 +1,15 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts'
 
 const data = [
-  { name: "Ene", newCustomers: 50 },
-  { name: "Feb", newCustomers: 60 },
-  { name: "Mar", newCustomers: 75 },
-  { name: "Abr", newCustomers: 80 },
-  { name: "May", newCustomers: 90 },
-  { name: "Jun", newCustomers: 100 },
+  { name: 'Ene', nuevosClientes: 50 },
+  { name: 'Feb', nuevosClientes: 70 },
+  { name: 'Mar', nuevosClientes: 60 },
+  { name: 'Abr', nuevosClientes: 90 },
+  { name: 'May', nuevosClientes: 80 },
+  { name: 'Jun', nuevosClientes: 110 },
 ]
 
 export function CustomerAcquisitionChart() {
@@ -17,7 +17,6 @@ export function CustomerAcquisitionChart() {
     <Card>
       <CardHeader>
         <CardTitle>Adquisición de Clientes</CardTitle>
-        <CardDescription>Nuevos clientes por mes.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
@@ -37,7 +36,7 @@ export function CustomerAcquisitionChart() {
             />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="newCustomers" stroke="currentColor" className="stroke-purple-500" />
+            <Line type="monotone" dataKey="nuevosClientes" stroke="#4A1518" activeDot={{ r: 8 }} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

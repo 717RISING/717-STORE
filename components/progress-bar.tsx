@@ -1,22 +1,19 @@
 'use client'
 
-import { motion } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { motion, useScroll, useSpring } from 'framer-motion'
 
-interface ProgressBarProps {
-  progress: number;
-  className?: string;
-}
+export function ProgressBar() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
 
-export function ProgressBar({ progress, className }: ProgressBarProps) {
   return (
-    <div className={cn("w-full max-w-md h-2 bg-gray-200 rounded-full overflow-hidden", className)}>
-      <motion.div
-        className="h-full bg-primary rounded-full"
-        initial={{ width: 0 }}
-        animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.1, ease: "linear" }}
-      />
-    </div>
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-1 bg-primary origin-[0%] z-50"
+      style={{ scaleX }}
+    />
   )
 }
