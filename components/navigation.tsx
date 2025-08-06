@@ -1,107 +1,96 @@
-'use client'
+"use client"
 
-import Link from 'next/link'
-import Image from 'next/image'
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { ShoppingCart, User, Search, Menu } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useCart } from '@/lib/cart-context'
-import { useThemeSafe } from '@/hooks/use-theme-safe'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { useMobileDetection } from '@/hooks/use-mobile-detection'
-import MobileMenu from '@/components/mobile-menu'
-import ProductSearch from '@/components/product-search'
-import { useState } from 'react'
-import CartSidebar from '@/components/cart-sidebar'
+import { useCart } from "@/lib/cart-context"
+import { CartSidebar } from "./cart-sidebar"
+import { useState } from "react"
+import { ProductSearch } from "./product-search"
+import { MobileMenu } from "./mobile-menu"
+import { ThemeToggle } from "./theme-toggle"
+import { useTheme } from "next-themes"
+import { cn } from "@/lib/utils"
 
-export default function Navigation() {
-  const { cartItemCount } = useCart()
-  const { theme } = useThemeSafe()
-  const { isMobile } = useMobileDetection()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+export function Navigation() {
+  const { cartItems } = useCart()
+  const [isCartOpen, setIsCartOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isCartSidebarOpen, setIsCartSidebarOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { theme } = useTheme()
+
+  const cartItemCount = cartItems.reduce((count, item) => count + item.quantity, 0)
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md dark:bg-gray-900/80 dark:border-gray-700">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="717 Store Logo"
-            width={40}
-            height={40}
-            className="dark:invert"
-          />
-          <span className="text-xl font-bold text-gray-900 dark:text-white">717 Store</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        {!isMobile && (
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/productos" className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-              Productos
-            </Link>
-            <Link href="/tallas" className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-              Guía de Tallas
-            </Link>
-            <Link href="/contacto" className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-              Contacto
-            </Link>
-            <Link href="/envios-devoluciones" className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
-              Envíos y Devoluciones
-            </Link>
-          </nav>
-        )}
-
-        {/* Right-aligned Icons */}
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Search Icon (always visible) */}
-          <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)} className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700]">
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Buscar</span>
-          </Button>
-
-          {/* User Icon */}
-          <Link href="/cuenta">
-            <Button variant="ghost" size="icon" className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700]">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Cuenta</span>
-            </Button>
-          </Link>
-
-          {/* Cart Icon */}
-          <Button variant="ghost" size="icon" onClick={() => setIsCartSidebarOpen(true)} className="relative text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700]">
-            <ShoppingCart className="h-5 w-5" />
-            {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#4A1518] text-xs text-white dark:bg-[#FFD700] dark:text-gray-900">
-                {cartItemCount}
-              </span>
-            )}
-            <span className="sr-only">Carrito de Compras</span>
-          </Button>
-
-          {/* Theme Toggle */}
-          <ThemeToggle />
-
-          {/* Mobile Menu Toggle */}
-          {isMobile && (
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700]">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Abrir Menú</span>
-            </Button>
-          )}
-        </div>
+    <header className={cn(
+      "sticky top-0 z-40 w-full border-b py-3 px-4 md:px-6 flex items-center justify-between",
+      theme === "dark" ? "bg-gray-950 border-gray-800" : "bg-white border-gray-200"
+    )}>
+      {/* Mobile Menu Trigger */}
+      <div className="md:hidden">
+        <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} className="text-gray-900 dark:text-white">
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Abrir menú</span>
+        </Button>
       </div>
 
-      {/* Mobile Menu Sidebar */}
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      {/* Logo */}
+      <Link href="/" className="flex items-center justify-center md:justify-start flex-1 md:flex-none">
+        <span className="text-2xl font-bold text-[#4A1518] dark:text-[#FFD700] brand-font">717 STORE</span>
+      </Link>
 
-      {/* Product Search Overlay */}
-      <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      {/* Desktop Navigation */}
+      <nav className="hidden md:flex items-center space-x-6 mx-auto">
+        <Link href="/" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
+          Inicio
+        </Link>
+        <Link href="/productos" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
+          Productos
+        </Link>
+        <Link href="/tallas" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
+          Guía de Tallas
+        </Link>
+        <Link href="/contacto" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
+          Contacto
+        </Link>
+        <Link href="/envios-devoluciones" className="text-sm font-medium text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700] transition-colors">
+          Envíos y Devoluciones
+        </Link>
+      </nav>
 
-      {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartSidebarOpen} onClose={() => setIsCartSidebarOpen(false)} />
+      {/* Right-aligned Icons */}
+      <div className="flex items-center space-x-2 md:space-x-4 ml-auto">
+        {/* Search Icon (Desktop) */}
+        <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex text-gray-900 dark:text-white">
+          <Search className="h-5 w-5" />
+          <span className="sr-only">Buscar</span>
+        </Button>
+        <ProductSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+        {/* User Account */}
+        <Link href="/cuenta" passHref>
+          <Button variant="ghost" size="icon" className="text-gray-900 dark:text-white">
+            <User className="h-5 w-5" />
+            <span className="sr-only">Mi Cuenta</span>
+          </Button>
+        </Link>
+
+        {/* Cart Icon */}
+        <Button variant="ghost" size="icon" onClick={() => setIsCartOpen(true)} className="relative text-gray-900 dark:text-white">
+          <ShoppingCart className="h-5 w-5" />
+          {cartItemCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-[#4A1518] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              {cartItemCount}
+            </span>
+          )}
+          <span className="sr-only">Carrito de compras</span>
+        </Button>
+        <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

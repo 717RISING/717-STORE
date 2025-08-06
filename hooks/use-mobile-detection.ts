@@ -1,37 +1,51 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
 
-export function useMobileDetection() {
+interface MobileDetectionResult {
+  isMobile: boolean
+  isTablet: boolean
+  isDesktop: boolean
+}
+
+export function useMobileDetection(): MobileDetectionResult {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  const [hasMounted, setHasMounted] = useState(false)
+
+  const checkDeviceType = () => {
+    if (typeof window === "undefined") {
+      // Default to desktop on server-side rendering
+      setIsMobile(false)
+      setIsTablet(false)
+      setIsDesktop(true)
+      return
+    }
+
+    const width = window.innerWidth
+    const mobileBreakpoint = 768 // Tailwind's 'md' breakpoint
+    const tabletBreakpoint = 1024 // Tailwind's 'lg' breakpoint
+
+    setIsMobile(width < mobileBreakpoint)
+    setIsTablet(width >= mobileBreakpoint && width < tabletBreakpoint)
+    setIsDesktop(width >= tabletBreakpoint)
+  }
 
   useEffect(() => {
-    const checkDevice = () => {
-      const userAgent = typeof window.navigator === 'undefined' ? '' : navigator.userAgent
-      const mobileRegex = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|rim)|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
-      const tabletRegex = /android|ipad|playbook|silk/i
+    setHasMounted(true)
+    checkDeviceType() // Initial check
 
-      const isMobileDevice = mobileRegex.test(userAgent) || (window.innerWidth <= 768 && window.innerHeight <= 1024)
-      const isTabletDevice = tabletRegex.test(userAgent) || (window.innerWidth > 768 && window.innerWidth <= 1024)
-
-      setIsMobile(isMobileDevice)
-      setIsTablet(isTabletDevice && !isMobileDevice) // Ensure tablet isn't also classified as mobile
-      setIsDesktop(!isMobileDevice && !isTabletDevice)
-    }
-
-    // Initial check
-    checkDevice()
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkDevice)
-
-    // Cleanup
+    window.addEventListener("resize", checkDeviceType)
     return () => {
-      window.removeEventListener('resize', checkDevice)
+      window.removeEventListener("resize", checkDeviceType)
     }
   }, [])
+
+  // Return default values until mounted on client to prevent hydration mismatch
+  if (!hasMounted) {
+    return { isMobile: false, isTablet: false, isDesktop: true }
+  }
 
   return { isMobile, isTablet, isDesktop }
 }

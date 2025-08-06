@@ -1,80 +1,84 @@
-'use client'
+"use client"
 
-import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
-import { X, Home, ShoppingBag, Ruler, Mail, Truck, User, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { usePathname } from 'next/navigation'
-import { useThemeSafe } from '@/hooks/use-theme-safe'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Menu, X, Home, Shirt, Mail, User, LogIn, Search } from 'lucide-react'
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
-interface MobileMenuProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+export default function MobileMenu() {
+  const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const { theme } = useThemeSafe()
+  const { theme, setTheme } = useTheme()
 
-  const menuVariants = {
-    hidden: { x: '100%' },
-    visible: { x: 0 },
-    exit: { x: '100%' },
-  }
+  const navItems = [
+    { name: "Inicio", href: "/", icon: Home },
+    { name: "Productos", href: "/productos", icon: Shirt },
+    { name: "Contacto", href: "/contacto", icon: Mail },
+    { name: "Mi Cuenta", href: "/cuenta", icon: User },
+    { name: "Iniciar Sesión", href: "/login", icon: LogIn },
+  ]
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col"
-          variants={menuVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          transition={{ type: 'tween', duration: 0.3 }}
-        >
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Menú</h2>
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-700 hover:text-[#4A1518] dark:text-gray-300 dark:hover:text-[#FFD700]">
-              <X className="h-6 w-6" />
-              <span className="sr-only">Cerrar Menú</span>
-            </Button>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-white">
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Abrir menú móvil</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="flex flex-col w-full sm:max-w-xs bg-black text-white border-r border-gray-800">
+        <SheetHeader className="flex flex-row items-center justify-between pb-4">
+          <SheetTitle className="text-xl font-bold text-white">Menú</SheetTitle>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setIsOpen(false)}>
+            <X className="h-4 w-4" />
+            <span className="sr-only">Cerrar menú</span>
+          </Button>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto space-y-6">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="search"
+              placeholder="Buscar productos..."
+              className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-500 pl-10"
+            />
           </div>
 
-          <nav className="flex-grow flex flex-col p-4 space-y-2">
-            <Link href="/" onClick={onClose} className={`flex items-center gap-3 p-3 rounded-md text-lg font-medium transition-colors ${pathname === '/' ? 'bg-[#4A1518] text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}>
-              <Home className="h-5 w-5" />
-              Inicio
-            </Link>
-            <Link href="/productos" onClick={onClose} className={`flex items-center gap-3 p-3 rounded-md text-lg font-medium transition-colors ${pathname.startsWith('/productos') ? 'bg-[#4A1518] text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}>
-              <ShoppingBag className="h-5 w-5" />
-              Productos
-            </Link>
-            <Link href="/tallas" onClick={onClose} className={`flex items-center gap-3 p-3 rounded-md text-lg font-medium transition-colors ${pathname === '/tallas' ? 'bg-[#4A1518] text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}>
-              <Ruler className="h-5 w-5" />
-              Guía de Tallas
-            </Link>
-            <Link href="/contacto" onClick={onClose} className={`flex items-center gap-3 p-3 rounded-md text-lg font-medium transition-colors ${pathname === '/contacto' ? 'bg-[#4A1518] text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}>
-              <Mail className="h-5 w-5" />
-              Contacto
-            </Link>
-            <Link href="/envios-devoluciones" onClick={onClose} className={`flex items-center gap-3 p-3 rounded-md text-lg font-medium transition-colors ${pathname === '/envios-devoluciones' ? 'bg-[#4A1518] text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}>
-              <Truck className="h-5 w-5" />
-              Envíos y Devoluciones
-            </Link>
-            <Link href="/cuenta" onClick={onClose} className={`flex items-center gap-3 p-3 rounded-md text-lg font-medium transition-colors ${pathname === '/cuenta' ? 'bg-[#4A1518] text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}>
-              <User className="h-5 w-5" />
-              Mi Cuenta
-            </Link>
+          {/* Navigation Links */}
+          <nav className="grid gap-2 text-lg font-medium">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-800 ${
+                  pathname === item.href ? "bg-gray-800 text-red-500" : "text-gray-200"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            ))}
           </nav>
 
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <span className="text-gray-700 dark:text-gray-300">Modo Oscuro/Claro</span>
-            <ThemeToggle />
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-between px-3 py-2">
+            <Label htmlFor="theme-toggle" className="text-lg font-medium">Modo Oscuro</Label>
+            <Switch
+              id="theme-toggle"
+              checked={theme === "dark"}
+              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+            />
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

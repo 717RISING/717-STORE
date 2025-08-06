@@ -1,89 +1,70 @@
-import bcrypt from 'bcryptjs'
+import { User } from './types' // Assuming you have a types file for User
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  role: 'admin' | 'customer'
-  createdAt: Date
-  password?: string // Only include for internal use, not for public API
-}
-
-// Mock users database
+// Mock user data
 const mockUsers: User[] = [
   {
-    id: '1',
-    email: 'admin@717store.com',
-    name: 'Admin User',
-    role: 'admin',
-    createdAt: new Date(),
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' // Hashed 'password'
+    id: 'user1',
+    name: 'Juan Pérez',
+    email: 'juan.perez@example.com',
+    role: 'customer',
+    createdAt: new Date('2023-01-15T10:00:00Z'),
   },
   {
-    id: '2',
-    email: 'user@example.com',
-    name: 'Test User',
+    id: 'user2',
+    name: 'María García',
+    email: 'maria.garcia@example.com',
     role: 'customer',
-    createdAt: new Date(),
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' // Hashed 'password'
-  }
+    createdAt: new Date('2023-02-20T11:30:00Z'),
+  },
+  {
+    id: 'user3',
+    name: 'Carlos Ruiz',
+    email: 'carlos.ruiz@example.com',
+    role: 'admin',
+    createdAt: new Date('2023-03-01T09:00:00Z'),
+  },
 ]
 
 export async function getUsers(): Promise<User[]> {
-  // Return users without their passwords
-  return mockUsers.map(user => {
-    const { password, ...userWithoutPassword } = user
-    return userWithoutPassword as User
-  })
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500))
+  return mockUsers
 }
 
-export async function getUserById(id: string): Promise<User | null> {
-  const user = mockUsers.find(user => user.id === id)
-  if (!user) return null
-  
-  const { password, ...userWithoutPassword } = user
-  return userWithoutPassword as User
+export async function getUserById(id: string): Promise<User | undefined> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 300))
+  return mockUsers.find(user => user.id === id)
 }
 
-export async function verifyUserCredentials(email: string, password: string): Promise<User | null> {
-  const user = mockUsers.find(u => u.email === email)
-  if (!user || !user.password) return null
-  
-  const isValid = await bcrypt.compare(password, user.password)
-  if (!isValid) return null
-  
-  const { password: _, ...userWithoutPassword } = user
-  return userWithoutPassword as User
-}
-
-export async function registerUser(firstName: string, lastName: string, email: string, password: string): Promise<User | null> {
-  // Check if user already exists
-  const existingUser = mockUsers.find(u => u.email === email)
-  if (existingUser) return null
-  
-  const hashedPassword = await bcrypt.hash(password, 10)
+export async function addUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500))
   const newUser: User = {
-    id: Math.random().toString(36).substr(2, 9), // Simple unique ID
-    email,
-    name: `${firstName} ${lastName}`,
-    role: 'customer',
+    id: `user${mockUsers.length + 1}`,
     createdAt: new Date(),
-    password: hashedPassword
+    ...user,
   }
-  
-  mockUsers.push(newUser)
-  
-  const { password: _, ...userWithoutPassword } = newUser
-  return userWithoutPassword as User
-}
-
-export async function createUser(userData: Omit<User, 'id' | 'createdAt'>): Promise<User> {
-  const newUser: User = {
-    ...userData,
-    id: Math.random().toString(36).substr(2, 9),
-    createdAt: new Date()
-  }
-  
   mockUsers.push(newUser)
   return newUser
+}
+
+export async function updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500))
+  const index = mockUsers.findIndex(user => user.id === id)
+  if (index !== -1) {
+    mockUsers[index] = { ...mockUsers[index], ...updates }
+    return mockUsers[index]
+  }
+  return undefined
+}
+
+export async function deleteUser(id: string): Promise<boolean> {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500))
+  const initialLength = mockUsers.length
+  const filteredUsers = mockUsers.filter(user => user.id !== id)
+  mockUsers.splice(0, mockUsers.length, ...filteredUsers) // Update the original array
+  return mockUsers.length < initialLength
 }

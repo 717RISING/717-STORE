@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Search, Filter } from 'lucide-react'
 import { getAllProducts } from "@/lib/database"
-import { Product } from '@/lib/products'
+import { Product } from '@/lib/types' // Assuming you have a types file for Product
 
 interface ProductGridProps {
   products: Product[]
@@ -28,7 +28,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
     setIsLoading(true)
     try {
       const fetchedProducts = await getAllProducts()
-      setProducts(fetchedProducts)
+      setFilteredProducts(fetchedProducts)
     } catch (error) {
       console.error("Error loading products:", error)
     } finally {

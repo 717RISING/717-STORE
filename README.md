@@ -1,164 +1,153 @@
-# 717 Store Clone
+# 717 Store - Streetwear E-commerce
 
-This is a clone of the 717 Store e-commerce website, built with Next.js and designed to showcase modern web development practices, including responsive design, user authentication, product management, and a full checkout flow.
+Welcome to the 717 Store, an authentic streetwear e-commerce platform built with Next.js, React, and Tailwind CSS. This project aims to provide a modern and responsive online shopping experience for streetwear enthusiasts.
 
 ## Features
 
--   **Product Catalog**: Browse a variety of products with detailed descriptions and images.
--   **Shopping Cart**: Add, remove, and update quantities of items in your cart.
--   **User Authentication**: Secure login and registration for customers.
--   **User Dashboard**: Users can view their orders, manage addresses, and update profile information.
--   **Admin Dashboard**:
-    -   **Overview**: Key sales metrics, visitor data, and product performance charts.
-    -   **Product Management**: Add, edit, and delete products.
-    -   **Order Management**: View and update order statuses.
-    -   **Customer Management**: Manage user roles and customer data.
-    -   **Settings**: Configure store-wide settings.
--   **Checkout Process**: Multi-step checkout including shipping and payment forms.
--   **Responsive Design**: Optimized for various screen sizes (desktop, tablet, mobile).
--   **Dark Mode**: Toggle between light and dark themes.
--   **Page Transitions**: Smooth animations between page navigations.
--   **Live Chat (Mock)**: A basic chat widget for immediate customer inquiries.
--   **Supabase Integration (Mock)**: Simulated database operations for products, orders, and users.
+-   **Product Catalog:** Browse a wide range of streetwear products with detailed descriptions and images.
+-   **Shopping Cart:** Add, update, and remove items from your cart.
+-   **User Authentication:** Secure user login and registration.
+-   **User Dashboard:** Manage profile, addresses, orders, and wishlist.
+-   **Admin Dashboard:** (Under development) Manage products, orders, customers, and view sales analytics.
+-   **Responsive Design:** Optimized for various devices (mobile, tablet, desktop).
+-   **Theme Toggle:** Switch between light and dark modes.
+-   **Live Chat Support:** AI-powered chat assistant for customer queries.
+-   **Page Transitions & Loaders:** Smooth navigation and loading indicators.
+-   **Size Calculator:** Tool to help customers find their recommended size.
+-   **Checkout Process:** Multi-step checkout with shipping and payment forms.
 
 ## Technologies Used
 
--   **Next.js**: React framework for building full-stack web applications.
--   **React**: Frontend library for building user interfaces.
--   **Tailwind CSS**: Utility-first CSS framework for rapid styling.
--   **shadcn/ui**: Reusable UI components built with Radix UI and Tailwind CSS.
--   **Framer Motion**: Library for animations.
--   **Lucide React**: Icon library.
--   **Supabase**: (Mocked) Backend-as-a-Service for database and authentication.
--   **Nodemailer**: (Mocked) For sending emails.
--   **Recharts**: For building charts in the admin dashboard.
--   **bcryptjs**: For password hashing (mocked in `lib/users.ts`).
+-   **Next.js 14:** React framework for production.
+-   **React 18:** JavaScript library for building user interfaces.
+-   **Tailwind CSS:** A utility-first CSS framework for rapid UI development.
+-   **shadcn/ui:** Reusable UI components built with Radix UI and Tailwind CSS.
+-   **Framer Motion:** For animations and page transitions.
+-   **Zustand:** (Or similar state management) for global state (e.g., cart).
+-   **NProgress:** For progress bar on page loads.
+-   **Recharts:** For data visualization in admin dashboard.
+-   **AI SDK (`ai`, `@ai-sdk/openai`):** For integrating AI capabilities (e.g., live chat).
+-   **bcryptjs:** For password hashing.
+-   **date-fns:** For date formatting.
 
 ## Getting Started
 
-To run this project locally, follow these steps:
+### Prerequisites
+
+-   Node.js (v18.x or higher)
+-   pnpm (recommended, but npm/yarn also work)
+
+### Installation
 
 1.  **Clone the repository:**
     \`\`\`bash
-    git clone [repository-url]
-    cd 717-store-clone
+    git clone https://github.com/717RISING/717-STORE.git
+    cd 717-STORE
     \`\`\`
+
 2.  **Install dependencies:**
     \`\`\`bash
+    pnpm install
+    # or
     npm install
-    # or yarn install
-    # or pnpm install
+    # or
+    yarn install
     \`\`\`
-3.  **Set up Environment Variables:**
-    Create a `.env.local` file in the root directory and add the following (these are for Supabase, even though it's mocked, the client expects them):
-    \`\`\`
-    NEXT_PUBLIC_SUPABASE_URL="YOUR_SUPABASE_URL"
-    NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
-    SUPABASE_SERVICE_ROLE_KEY="YOUR_SUPABASE_SERVICE_ROLE_KEY"
-    SUPABASE_JWT_SECRET="YOUR_SUPABASE_JWT_SECRET"
 
-    # For email simulation (optional, if you want to integrate a real email service)
-    # SMTP_HOST="your_smtp_host"
-    # SMTP_PORT="587"
-    # SMTP_SECURE="true"
-    # SMTP_USER="your_email_user"
-    # SMTP_PASS="your_email_password"
-    # EMAIL_FROM="no-reply@yourdomain.com"
+3.  **Set up Environment Variables:**
+    Create a `.env.local` file in the root directory and add your environment variables.
+    Example:
+    \`\`\`env
+    # For AI SDK (if using OpenAI)
+    OPENAI_API_KEY=your_openai_api_key
+
+    # For email service (if using Nodemailer, replace with your SMTP details)
+    # SMTP_HOST=smtp.example.com
+    # SMTP_PORT=587
+    # SMTP_SECURE=false
+    # SMTP_USER=your_email@example.com
+    # SMTP_PASS=your_email_password
+    # EMAIL_FROM="717 Store <no-reply@717store.com>"
+
+    # Base URL for emails/links (adjust for production)
+    NEXT_PUBLIC_BASE_URL=http://localhost:3000
     \`\`\`
-    *Note: For this demo, Supabase functions are mocked in `lib/database.ts` and `lib/users.ts`, so you don't strictly need real Supabase credentials to run the app locally, but the environment variables are expected by the `createClient` call.*
+    *Note: This project uses mock data for database interactions and email sending for simplicity. For a production environment, you would integrate with a real database (e.g., PostgreSQL, MongoDB) and a transactional email service.*
 
 4.  **Run the development server:**
     \`\`\`bash
+    pnpm dev
+    # or
     npm run dev
-    # or yarn dev
-    # or pnpm dev
+    # or
+    yarn dev
     \`\`\`
-    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Admin Dashboard Access
-
-To access the admin dashboard:
-
-1.  Navigate to `/admin`.
-2.  Use the following credentials:
-    -   **Email**: `admin@717store.com`
-    -   **Password**: `password`
+    Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
 ## Project Structure
 
 \`\`\`
 .
 ├── app/
-│   ├── admin/
-│   │   ├── page.tsx         # Admin dashboard entry point
-│   │   └── ...
-│   ├── checkout/
-│   │   ├── page.tsx         # Checkout process
-│   │   └── confirmacion/
-│   │       └── page.tsx     # Order confirmation
-│   ├── cuenta/
-│   │   └── page.tsx         # User dashboard
-│   ├── productos/
-│   │   ├── [id]/
-│   │   │   └── page.tsx     # Product detail page
-│   │   └── page.tsx         # Product listing page
-│   │   └── loading.tsx      # Loading state for products
-│   ├── actions.ts           # Server Actions for forms and data mutations
-│   ├── globals.css          # Global styles
-│   ├── layout.tsx           # Root layout
-│   └── page.tsx             # Home page
+│   ├── admin/             # Admin dashboard pages
+│   ├── checkout/          # Checkout process pages
+│   ├── cuenta/            # User dashboard pages
+│   ├── productos/         # Product listing and detail pages
+│   ├── contacto/          # Contact page
+│   ├── envios-devoluciones/ # Shipping & Returns policy page
+│   ├── privacidad/        # Privacy Policy page
+│   ├── tallas/            # Size Guide page
+│   ├── terminos/          # Terms & Conditions page
+│   ├── layout.tsx         # Root layout for the application
+│   ├── page.tsx           # Home page
+│   └── globals.css        # Global styles
 ├── components/
-│   ├── admin/
-│   │   ├── admin-dashboard.tsx # Main admin dashboard component
-│   │   ├── admin-login.tsx     # Admin login form
-│   │   └── charts/             # Chart components for admin dashboard
-│   │   └── tabs/               # Tab components for admin dashboard
-│   ├── checkout/               # Checkout related components
-│   ├── dashboard/              # User dashboard tabs
-│   ├── loaders/                # Loading skeleton components
-│   │   └── mobile/             # Mobile specific loaders
-│   ├── live-chat/              # Live chat components
-│   ├── ui/                     # shadcn/ui components (not included in repo, but assumed)
-│   ├── animated-card.tsx
-│   ├── cart-sidebar.tsx
-│   ├── client-layout.tsx       # Client-side layout wrapper
-│   ├── device-testing-suite.tsx
-│   ├── enhanced-button.tsx
-│   ├── hero-slider.tsx
-│   ├── image-with-fallback.tsx
-│   ├── interactive-product-card.tsx
-│   ├── loading-spinner.tsx
-│   ├── mobile-debug-panel.tsx
-│   ├── mobile-menu.tsx
-│   ├── navigation.tsx
-│   ├── page-loader.tsx
-│   ├── page-transition.tsx
-│   ├── product-detail.tsx
-│   ├── product-grid.tsx
-│   ├── product-search.tsx
-│   ├── progress-bar.tsx
-│   ├── responsive-test.tsx
-│   ├── size-calculator.tsx
-│   └── theme-toggle.tsx
-├── hooks/
-│   ├── use-chat.ts
-│   ├── use-mobile-detection.ts
-│   ├── use-theme-safe.ts
-│   └── use-toast.ts (assumed)
-├── lib/
-│   ├── cart-context.tsx        # Shopping cart context
-│   ├── chat-service.ts
-│   ├── database.ts             # Mock database functions (Supabase integration)
-│   ├── email.ts                # Email sending utilities (mocked)
-│   ├── orders.ts
-│   ├── page-transition-context.tsx
-│   ├── products.ts             # Product data types and mock data
-│   ├── size-calculator.ts
-│   ├── theme-context.tsx
-│   └── users.ts                # User management functions (mocked)
-├── public/                     # Static assets (images, etc.)
-├── scripts/                    # Utility scripts (e.g., database setup)
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
+│   ├── admin/             # Admin specific components (dashboard, charts, tabs)
+│   ├── checkout/          # Checkout specific components (forms, summary)
+│   ├── dashboard/         # User dashboard tabs
+│   ├── loaders/           # Loading components
+│   ├── live-chat/         # Live chat widget components
+│   ├── ui/                # shadcn/ui components (generated by CLI)
+│   ├── *.tsx              # General reusable components (e.g., Navigation, ProductCard)
+├── hooks/                 # Custom React hooks
+├── lib/                   # Utility functions, contexts, data mocks
+├── public/                # Static assets (images, fonts)
+├── scripts/               # Backend scripts (e.g., database setup, order updates)
 └── ...
+\`\`\`
+
+## Usage
+
+### Home Page (`/`)
+Features a hero slider, product highlights, and a newsletter signup.
+
+### Products Page (`/productos`)
+Displays all available products with filtering and sorting options.
+
+### Product Detail Page (`/productos/[id]`)
+Shows detailed information for a single product, including size and color selection, and add-to-cart functionality.
+
+### Shopping Cart
+Accessible via a floating button and a sidebar.
+
+### Checkout (`/checkout`)
+A multi-step process for shipping and payment.
+
+### User Account (`/cuenta`)
+A dashboard for authenticated users to manage their profile, orders, addresses, and wishlist.
+
+### Admin Dashboard (`/admin`)
+(Requires `admin@717store.com` with password `adminpassword` for mock login)
+Provides an overview of sales, product performance, customer data, and order management.
+
+### Responsive Testing (`/test-responsive`, `/device-test`)
+Pages to help visualize and test the responsiveness of the application on different screen sizes and device types.
+
+## Contributing
+
+Contributions are welcome! Please feel free to fork the repository, make your changes, and submit a pull request.
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).

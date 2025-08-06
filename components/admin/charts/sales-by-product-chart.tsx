@@ -1,49 +1,37 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-const data = [
-  { product: "Camisetas", sales: 4000 },
-  { product: "Hoodies", sales: 3000 },
-  { product: "Jeans", sales: 2000 },
-  { product: "Accesorios", sales: 2780 },
-  { product: "Zapatos", sales: 1890 },
+const salesByProductData = [
+  { product: "Camisetas", sales: 8000 },
+  { product: "Pantalones", sales: 6000 },
+  { product: "Chaquetas", sales: 4500 },
+  { product: "Accesorios", sales: 3000 },
+  { product: "Sudaderas", sales: 5500 },
 ]
 
 export function SalesByProductChart() {
   return (
-    <CardHeader>
-      <CardTitle className="text-white">Ventas por Producto</CardTitle>
-      <CardContent className="pt-2">
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={data}>
-            <XAxis 
-              dataKey="product" 
-              stroke="#888888" 
-              fontSize={12}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis stroke="#888888" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1f2937', 
-                border: '1px solid #374151',
-                borderRadius: '8px'
-              }}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="sales" 
-              stroke="#4A1518" 
-              fill="#4A1518" 
-              fillOpacity={0.6}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </CardHeader>
+    <ChartContainer
+      config={{
+        sales: {
+          label: "Ventas",
+          color: "hsl(var(--primary))",
+        },
+      }}
+      className="h-[300px] w-full"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={salesByProductData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis type="number" />
+          <YAxis type="category" dataKey="product" />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Legend />
+          <Bar dataKey="sales" fill="var(--color-sales)" name="Ventas por Producto" />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartContainer>
   )
 }

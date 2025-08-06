@@ -1,139 +1,198 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUsers, updateUserRole, deleteUser } from "@/lib/database"
-import { Edit, Trash2 } from 'lucide-react'
-
-interface User {
-  id: string
-  email: string
-  role: "admin" | "customer"
-  name?: string
-  createdAt?: string
-}
+import { useState, useEffect } from 'react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Plus, Edit, Trash, Loader2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { getUsers, addUser, updateUser, deleteUser } from '@/lib/users'
+import { User } from '@/lib/types' // Assuming you have a types file for User
 
 export function CustomersTab() {
-  const [users, setUsers] = useState<User[]>([])
+  const [customers, setCustomers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [newRole, setNewRole] = useState<User["role"]>("customer")
+  const [currentCustomer, setCurrentCustomer] = useState<User | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
-    fetchUsers()
+    fetchCustomers()
   }, [])
 
-  const fetchUsers = async () => {
-    const fetchedUsers = await getUsers()
-    setUsers(fetchedUsers)
-  }
-
-  const openDialogForEdit = (user: User) => {
-    setCurrentUser(user)
-    setNewRole(user.role)
-    setIsDialogOpen(true)
-  }
-
-  const handleRoleChange = async () => {
-    if (currentUser) {
-      await updateUserRole(currentUser.id, newRole)
-      fetchUsers()
-      setIsDialogOpen(false)
+  const fetchCustomers = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const fetchedUsers = await getUsers()
+      // Filter for customers if your User type has a 'role'
+      setCustomers(fetchedUsers.filter(user => user.role === 'customer'))
+    } catch (err) {
+      setError('Failed to fetch customers.')
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleDeleteUser = async (id: string) => {
-    await deleteUser(id)
-    fetchUsers()
+  const handleAddCustomer = () => {
+    setCurrentCustomer(null)
+    setIsDialogOpen(true)
+  }
+
+  const handleEditCustomer = (customer: User) => {
+    setCurrentCustomer(customer)
+    setIsDialogOpen(true)
+  }
+
+  const handleDeleteCustomer = async (id: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
+      try {
+        await deleteUser(id)
+        toast({
+          title: "Cliente Eliminado",
+          description: "El cliente ha sido eliminado exitosamente.",
+          variant: "default",
+        })
+        fetchCustomers()
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar el cliente.",
+          variant: "destructive",
+        })
+        console.error(err)
+      }
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const formData = new FormData(e.currentTarget)
+    const customerData: Partial<User> = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      role: 'customer', // Ensure new users are customers by default
+    }
+
+    try {
+      if (currentCustomer) {
+        await updateUser(currentCustomer.id, customerData)
+        toast({
+          title: "Cliente Actualizado",
+          description: "El cliente ha sido actualizado exitosamente.",
+          variant: "default",
+        })
+      } else {
+        await addUser(customerData as Omit<User, 'id' | 'createdAt'>)
+        toast({
+          title: "Cliente Añadido",
+          description: "El nuevo cliente ha sido añadido exitosamente.",
+          variant: "default",
+        })
+      }
+      setIsDialogOpen(false)
+      fetchCustomers()
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "No se pudo guardar el cliente.",
+        variant: "destructive",
+      })
+      console.error(err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>
   }
 
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Clientes</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID Cliente</TableHead>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Fecha de Registro</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium text-gray-900 dark:text-white">{user.id}</TableCell>
-                <TableCell className="text-gray-700 dark:text-gray-300">{user.name || "N/A"}</TableCell>
-                <TableCell className="text-gray-700 dark:text-gray-300">{user.email}</TableCell>
-                <TableCell className="text-gray-700 dark:text-gray-300">{user.role}</TableCell>
-                <TableCell className="text-gray-700 dark:text-gray-300">
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => openDialogForEdit(user)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(user.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={handleAddCustomer}>
+          <Plus className="mr-2 h-4 w-4" /> Añadir Cliente
+        </Button>
+      </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 border-gray-700">
-            <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-white">Editar Cliente #{currentUser?.id}</DialogTitle>
-            </DialogHeader>
-            {currentUser && (
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right text-gray-700 dark:text-gray-300">Email:</Label>
-                  <Input id="email" value={currentUser.email} readOnly className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 cursor-not-allowed" />
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Fecha de Registro</TableHead>
+            <TableHead>Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {customers.map((customer) => (
+            <TableRow key={customer.id}>
+              <TableCell className="font-medium">{customer.id}</TableCell>
+              <TableCell>{customer.name}</TableCell>
+              <TableCell>{customer.email}</TableCell>
+              <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" onClick={() => handleEditCustomer(customer)}>
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
+                  </Button>
+                  <Button variant="destructive" size="icon" onClick={() => handleDeleteCustomer(customer.id)}>
+                    <Trash className="h-4 w-4" />
+                    <span className="sr-only">Eliminar</span>
+                  </Button>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="role" className="text-right text-gray-700 dark:text-gray-300">
-                    Rol:
-                  </Label>
-                  <Select value={newRole} onValueChange={(value: User["role"]) => setNewRole(value)}>
-                    <SelectTrigger className="col-span-3 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                      <SelectValue placeholder="Seleccionar rol" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-700 text-gray-900 dark:text-white">
-                      <SelectItem value="customer">Cliente</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{currentCustomer ? 'Editar Cliente' : 'Añadir Nuevo Cliente'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Nombre
+              </Label>
+              <Input id="name" name="name" defaultValue={currentCustomer?.name || ''} className="col-span-3" required />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input id="email" name="email" type="email" defaultValue={currentCustomer?.email || ''} className="col-span-3" required />
+            </div>
             <DialogFooter>
-              <Button
-                type="submit"
-                onClick={handleRoleChange}
-                className="bg-[#4A1518] hover:bg-[#6B1E22] text-white"
-              >
-                Actualizar Rol
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  'Guardar Cambios'
+                )}
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
-
-export default CustomersTab

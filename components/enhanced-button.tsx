@@ -1,47 +1,59 @@
-'use client'
+"use client"
 
-import { Button } from '@/components/ui/button'
-import { motion } from 'framer-motion'
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 import { Loader2 } from 'lucide-react'
-import { ButtonProps } from '@/components/ui/button'
 
-interface EnhancedButtonProps extends ButtonProps {
-  loading?: boolean
+interface EnhancedButtonProps extends React.ComponentProps<typeof Button> {
+  isLoading?: boolean
   loadingText?: string
-  children: React.ReactNode
+  icon?: React.ElementType // For Lucide React icons
+  iconPlacement?: "left" | "right"
 }
 
-export default function EnhancedButton({
-  loading = false,
-  loadingText = 'Cargando...',
+export function EnhancedButton({
   children,
+  className,
+  isLoading = false,
+  loadingText,
+  icon: Icon,
+  iconPlacement = "left",
+  disabled,
   ...props
 }: EnhancedButtonProps) {
   return (
-    <Button {...props} disabled={props.disabled || loading}>
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.span
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center"
-          >
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {loadingText}
-          </motion.span>
-        ) : (
-          <motion.span
-            key="content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {children}
-          </motion.span>
-        )}
-      </AnimatePresence>
+    <Button
+      className={cn(
+        "relative overflow-hidden",
+        isLoading && "cursor-not-allowed opacity-80",
+        className
+      )}
+      disabled={isLoading || disabled}
+      {...props}
+    >
+      <motion.span
+        initial={{ opacity: 1, y: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1, y: isLoading ? -20 : 0 }}
+        transition={{ duration: 0.2 }}
+        className={cn("flex items-center justify-center", isLoading && "invisible")}
+      >
+        {Icon && iconPlacement === "left" && <Icon className="mr-2 h-4 w-4" />}
+        {children}
+        {Icon && iconPlacement === "right" && <Icon className="ml-2 h-4 w-4" />}
+      </motion.span>
+
+      {isLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="absolute inset-0 flex items-center justify-center"
+        >
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {loadingText || "Cargando..."}
+        </motion.div>
+      )}
     </Button>
   )
 }

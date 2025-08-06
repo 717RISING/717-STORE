@@ -1,57 +1,114 @@
-import { CheckCircle } from 'lucide-react'
+"use client"
+
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CheckCircle2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getOrderById } from '@/lib/database' // Assuming this function exists
-import { notFound } from 'next/navigation'
+import { OrderSummary } from '@/components/checkout/order-summary'
+import { useCart } from '@/lib/cart-context'
+import { CheckoutLoader } from '@/components/loaders/checkout-loader'
 
-interface ConfirmationPageProps {
-  searchParams: {
-    orderId?: string
-  }
-}
+export default function CheckoutConfirmationPage() {
+  const searchParams = useSearchParams()
+  const status = searchParams.get('status')
+  const orderId = searchParams.get('orderId')
+  const [loading, setLoading] = useState(true)
+  const [order, setOrder] = useState<any>(null) // Replace 'any' with your Order type
+  const { clearCart } = useCart()
 
-export default async function ConfirmationPage({ searchParams }: ConfirmationPageProps) {
-  const orderId = searchParams.orderId
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      if (orderId) {
+        // Simulate API call to fetch order details
+        setLoading(true)
+        await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate network delay
+        const mockOrder = {
+          id: orderId,
+          items: [
+            { id: 'prod1', name: 'Camiseta Oversized', price: 35.00, quantity: 1, image: '/products/camisetas/oversized-tee.png' },
+            { id: 'prod2', name: 'Graphic Tee "Blood"', price: 40.00, quantity: 1, image: '/products/camisetas/graphic-tee-blood.png' },
+          ],
+          subtotal: 75.00,
+          shipping: 5.00,
+          total: 80.00,
+          status: status === 'success' ? 'Completado' : 'Fallido',
+          shippingAddress: {
+            name: 'Juan Pérez',
+            address: 'Calle Falsa 123',
+            city: 'Springfield',
+            zip: '12345',
+            country: 'USA',
+          },
+          paymentMethod: 'Tarjeta de Crédito',
+        }
+        setOrder(mockOrder)
+        setLoading(false)
+        if (status === 'success') {
+          clearCart() // Clear cart only on successful order
+        }
+      } else {
+        setLoading(false)
+      }
+    }
 
-  if (!orderId) {
-    notFound() // Or redirect to an error page
-  }
+    fetchOrderDetails()
+  }, [orderId, status, clearCart])
 
-  const order = await getOrderById(orderId)
-
-  if (!order) {
-    notFound() // Order not found
+  if (loading) {
+    return <CheckoutLoader />
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-64px)]">
-      <Card className="w-full max-w-md text-center bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader className="flex flex-col items-center justify-center space-y-4">
-          <CheckCircle className="h-20 w-20 text-green-500" />
-          <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white">¡Pedido Confirmado!</CardTitle>
+    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))] flex items-center justify-center">
+      <Card className="w-full max-w-3xl">
+        <CardHeader className="text-center">
+          {status === 'success' ? (
+            <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
+          ) : (
+            <XCircle className="mx-auto h-16 w-16 text-red-500" />
+          )}
+          <CardTitle className="mt-4 text-2xl">
+            {status === 'success' ? '¡Pedido Confirmado!' : 'Error en el Pedido'}
+          </CardTitle>
+          <p className="text-muted-foreground mt-2">
+            {status === 'success'
+              ? `Gracias por tu compra. Tu pedido #${orderId} ha sido procesado exitosamente.`
+              : `Hubo un problema al procesar tu pedido #${orderId}. Por favor, inténtalo de nuevo.`}
+          </p>
         </CardHeader>
-        <CardContent className="space-y-6 text-gray-700 dark:text-gray-300">
-          <p className="text-lg">
-            Gracias por tu compra. Tu pedido ha sido realizado con éxito.
-          </p>
-          <p className="text-xl font-semibold">
-            Número de Pedido: <span className="text-[#4A1518] dark:text-[#FFD700]">{order.id}</span>
-          </p>
-          <p>
-            Recibirás un correo electrónico de confirmación con los detalles de tu pedido en breve.
-          </p>
-          <div className="flex flex-col gap-4">
-            <Link href="/productos" passHref>
-              <Button className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white py-3 text-lg font-semibold">
-                Continuar Comprando
+        <CardContent className="space-y-6">
+          {order && (
+            <>
+              <OrderSummary order={order} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Dirección de Envío</h3>
+                  <p>{order.shippingAddress.name}</p>
+                  <p>{order.shippingAddress.address}</p>
+                  <p>{order.shippingAddress.city}, {order.shippingAddress.zip}</p>
+                  <p>{order.shippingAddress.country}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Método de Pago</h3>
+                  <p>{order.paymentMethod}</p>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+            <Button asChild>
+              <Link href="/productos">Continuar Comprando</Link>
+            </Button>
+            {status !== 'success' && (
+              <Button variant="outline" asChild>
+                <Link href="/checkout">Reintentar Pago</Link>
               </Button>
-            </Link>
-            <Link href="/cuenta?tab=orders" passHref>
-              <Button variant="outline" className="w-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 py-3 text-lg font-semibold">
-                Ver Mis Pedidos
-              </Button>
-            </Link>
+            )}
+            <Button variant="ghost" asChild>
+              <Link href="/cuenta/pedidos">Ver Mis Pedidos</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

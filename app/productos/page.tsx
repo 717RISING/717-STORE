@@ -1,338 +1,176 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { User, Grid, List, Filter } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { getAllProducts, formatPrice } from "@/lib/database"
-import CartSidebar from "@/components/cart-sidebar"
-import MobileMenu from "@/components/mobile-menu"
-import ProductSearch from "@/components/product-search"
-import InteractiveProductCard from "@/components/interactive-product-card"
-import ProductLoader from "@/components/loaders/product-loader"
-import MobileProductLoader from "@/components/loaders/mobile/mobile-product-loader"
-import { useThemeSafe } from "@/hooks/use-theme-safe"
-import ThemeToggle from "@/components/theme-toggle"
-import { ProductGrid } from "@/components/product-grid"
-import { Suspense } from "react"
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { ProductGrid } from '@/components/product-grid'
+import { ProductLoader } from '@/components/loaders/product-loader'
+import { MobileProductLoader } from '@/components/loaders/mobile/mobile-product-loader'
 import { useMobileDetection } from '@/hooks/use-mobile-detection'
+import { getProducts } from '@/lib/products'
+import { Product } from '@/lib/types' // Assuming you have a types file for Product
+import { ProductSearch } from '@/components/product-search'
+import { Separator } from '@/components/ui/separator'
+import { Filter, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Slider } from '@/components/ui/slider'
 
-export default async function ProductsPage() {
-  const { isMobile } = useMobileDetection()
-  const products = await getAllProducts()
-  const [userName, setUserName] = useState<string | null>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 600000])
-  const [filteredProducts, setFilteredProducts] = useState(products)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const { theme, mounted } = useThemeSafe()
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const isMobile = useMobileDetection()
+  const searchParams = useSearchParams()
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(searchParams.get('categories')?.split(',') || [])
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    Number(searchParams.get('minPrice')) || 0,
+    Number(searchParams.get('maxPrice')) || 1000
+  ])
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+
+  const categories = ['Camisetas', 'Pantalones', 'Chaquetas', 'Accesorios'] // Example categories
+  const maxPrice = 1000 // Example max price
 
   useEffect(() => {
-    // Verificar si el usuario está autenticado
-    const userAuth = localStorage.getItem("userAuth")
-    const userInfo = localStorage.getItem("userInfo")
+    const fetchProducts = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const allProducts = await getProducts() // Fetch all products
+        let filtered = allProducts
 
-    if (userAuth === "authenticated" && userInfo) {
-      setIsAuthenticated(true)
-      const user = JSON.parse(userInfo)
-      setUserName(user.name)
+        // Apply search term filter
+        if (searchTerm) {
+          filtered = filtered.filter(product =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.description.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        }
+
+        // Apply category filter
+        if (selectedCategories.length > 0) {
+          filtered = filtered.filter(product =>
+            selectedCategories.includes(product.category)
+          )
+        }
+
+        // Apply price range filter
+        filtered = filtered.filter(product =>
+          product.price >= priceRange[0] && product.price <= priceRange[1]
+        )
+
+        setProducts(filtered)
+      } catch (err) {
+        setError('Failed to fetch products. Please try again later.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    // Simular carga
-    setTimeout(() => setIsLoading(false), 1000)
-  }, [])
+    fetchProducts()
+  }, [searchTerm, selectedCategories, priceRange, searchParams])
 
-  useEffect(() => {
-    let result = products
-
-    // Filtrar por categoría
-    if (selectedCategories.length > 0) {
-      result = result.filter((product) => selectedCategories.includes(product.category))
-    }
-
-    // Filtrar por precio
-    result = result.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
-
-    // Filtrar por término de búsqueda
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      result = result.filter(
-        (product) => product.name.toLowerCase().includes(term) || product.description.toLowerCase().includes(term),
-      )
-    }
-
-    setFilteredProducts(result)
-  }, [selectedCategories, priceRange, searchTerm])
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    setSelectedCategories(prev =>
+      checked ? [...prev, category] : prev.filter(c => c !== category)
     )
   }
 
-  const handlePriceChange = (min: number, max: number) => {
-    setPriceRange([min, max])
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setSelectedCategories([])
+    setPriceRange([0, maxPrice])
   }
 
-  const categories = Array.from(new Set(products.map((product) => product.category)))
-
-  if (isLoading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}>
-        {isMobile ? <MobileProductLoader size="lg" message="Cargando productos exclusivos..." /> : <ProductLoader size="lg" message="Cargando productos exclusivos..." />}
+  const renderFilters = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-semibold text-lg mb-3">Categorías</h3>
+        <div className="space-y-2">
+          {categories.map(category => (
+            <div key={category} className="flex items-center space-x-2">
+              <Checkbox
+                id={`category-${category}`}
+                checked={selectedCategories.includes(category)}
+                onCheckedChange={(checked) => handleCategoryChange(category, !!checked)}
+              />
+              <Label htmlFor={`category-${category}`}>{category}</Label>
+            </div>
+          ))}
+        </div>
       </div>
-    )
-  }
+
+      <div>
+        <h3 className="font-semibold text-lg mb-3">Rango de Precio</h3>
+        <div className="px-2">
+          <Slider
+            min={0}
+            max={maxPrice}
+            step={10}
+            value={priceRange}
+            onValueChange={(value: [number, number]) => setPriceRange(value)}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm mt-2">
+            <span>${priceRange[0]}</span>
+            <span>${priceRange[1]}</span>
+          </div>
+        </div>
+      </div>
+
+      <Button variant="outline" className="w-full" onClick={handleClearFilters}>
+        <X className="mr-2 h-4 w-4" /> Limpiar Filtros
+      </Button>
+    </div>
+  )
 
   return (
-    <div
-      className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900"} theme-transition`}
-    >
-      {/* Navigation */}
-      <header
-        className={`px-4 py-6 border-b animate-fade-in ${theme === "dark" ? "border-gray-800" : "border-gray-200"}`}
-      >
-        <nav className="max-w-7xl mx-auto">
-          {/* Top Row - Icons and Theme Toggle */}
-          <div className="flex justify-between items-center mb-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 relative">
-                <Image
-                  src="/logo.png"
-                  alt="717 Logo"
-                  fill
-                  className={`object-contain ${theme === "dark" ? "filter invert" : ""} transition-all duration-300`}
-                  priority
-                />
-              </div>
-              <span className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                717 Store
-              </span>
-            </Link>
+    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
+      <h1 className="text-4xl font-bold text-center mb-8">Nuestros Productos</h1>
 
-            <div className="flex items-center space-x-4">
-              {mounted && <ThemeToggle />}
-              {isAuthenticated ? (
-                <Link
-                  href="/cuenta"
-                  className={`hover-lift ${
-                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
-                  } transition-colors`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <User className="w-6 h-6" />
-                    {userName && <span className="hidden md:inline text-sm">{userName}</span>}
-                  </div>
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className={`hover-lift ${
-                    theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
-                  } transition-colors`}
-                >
-                  <User className="w-6 h-6" />
-                </Link>
-              )}
-              <CartSidebar />
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
+        <div className="w-full md:w-1/4">
+          {isMobile ? (
+            <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                  <Filter className="h-4 w-4" /> Filtrar Productos
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px] p-6">
+                <SheetHeader className="mb-6">
+                  <SheetTitle>Filtros</SheetTitle>
+                </SheetHeader>
+                {renderFilters()}
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <div className="hidden md:block sticky top-[calc(var(--navigation-height)+1rem)] p-4 border rounded-lg shadow-sm">
+              {renderFilters()}
             </div>
-          </div>
-
-          {/* Bottom Row - Navigation Links */}
-          <div className="flex justify-center">
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                href="/"
-                className={`hover-lift font-medium ${
-                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
-                } transition-colors`}
-              >
-                INICIO
-              </Link>
-              <Link
-                href="/productos"
-                className={`hover-lift font-medium ${
-                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
-                } transition-colors`}
-              >
-                PRODUCTOS
-              </Link>
-              <Link
-                href="/contacto"
-                className={`hover-lift font-medium ${
-                  theme === "dark" ? "text-white hover:text-[#4A1518]" : "text-gray-900 hover:text-[#4A1518]"
-                } transition-colors`}
-              >
-                CONTACTO
-              </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <MobileMenu />
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      {/* Products Section */}
-      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8 animate-slide-up">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-8">
-            Nuestros Productos
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Descubre nuestra colección exclusiva de ropa urbana
-          </p>
+          )}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="w-full md:w-64 space-y-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            <div>
-              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                Buscar
-              </h3>
-              <ProductSearch onSearch={setSearchTerm} />
-            </div>
-
-            <div>
-              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                Categorías
-              </h3>
-              <div className="space-y-2">
-                {categories.map((category, index) => (
-                  <div
-                    key={category}
-                    className="flex items-center space-x-2 animate-fade-in"
-                    style={{ animationDelay: `${300 + index * 100}ms` }}
-                  >
-                    <Checkbox
-                      id={`category-${category}`}
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => toggleCategory(category)}
-                      className="border-[#4A1518] data-[state=checked]:bg-[#4A1518] data-[state=checked]:text-white transition-all duration-300"
-                    />
-                    <Label
-                      htmlFor={`category-${category}`}
-                      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-[#4A1518] transition-colors cursor-pointer ${
-                        theme === "dark" ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {category}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className={`text-lg font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                Precio
-              </h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    [0, 150000],
-                    [150000, 300000],
-                    [300000, 450000],
-                    [450000, 600000],
-                  ].map(([min, max], index) => (
-                    <Button
-                      key={`${min}-${max}`}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePriceChange(min, max)}
-                      className={`text-xs px-2 py-1 h-8 border-[#4A1518] transition-all duration-300 ${
-                        priceRange[0] === min && priceRange[1] === max
-                          ? "bg-[#4A1518] text-white border-[#4A1518]"
-                          : theme === "dark"
-                            ? "text-white hover:bg-[#4A1518] hover:text-white border-[#4A1518]"
-                            : "text-gray-900 hover:bg-[#4A1518] hover:text-white border-[#4A1518]"
-                      }`}
-                      style={{ animationDelay: `${500 + index * 100}ms` }}
-                    >
-                      {formatPrice(min)} - {formatPrice(max)}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <Button
-              onClick={() => {
-                setSelectedCategories([])
-                setPriceRange([0, 600000])
-                setSearchTerm("")
-              }}
-              className="w-full bg-[#4A1518] text-white hover:bg-[#3A1014] transition-all duration-300 animate-fade-in"
-              style={{ animationDelay: "900ms" }}
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              Limpiar filtros
-            </Button>
+        <div className="w-full md:w-3/4">
+          <div className="mb-6">
+            <ProductSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
           </div>
+          <Separator className="my-6" />
 
-          {/* Products Grid */}
-          <div className="flex-1">
-            <div className="flex justify-between items-center mb-6 animate-fade-in" style={{ animationDelay: "300ms" }}>
-              <h2 className={`text-2xl font-bold text-glow ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                Productos ({filteredProducts.length})
-              </h2>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setViewMode("grid")}
-                  className={`border-[#4A1518] hover-glow button-press ${
-                    viewMode === "grid"
-                      ? "bg-[#4A1518] text-white"
-                      : `${theme === "dark" ? "text-white" : "text-gray-900"} hover:bg-[#4A1518] hover:text-white`
-                  }`}
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                  className={`border-[#4A1518] hover-glow button-press ${
-                    viewMode === "list"
-                      ? "bg-[#4A1518] text-white"
-                      : `${theme === "dark" ? "text-white" : "text-gray-900"} hover:bg-[#4A1518] hover:text-white`
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            {filteredProducts.length === 0 ? (
-              <div className="text-center py-12 animate-fade-in">
-                <p className={theme === "dark" ? "text-gray-400 text-lg" : "text-gray-600 text-lg"}>
-                  No se encontraron productos que coincidan con tu búsqueda.
-                </p>
-              </div>
-            ) : viewMode === "grid" ? (
-              <Suspense fallback={isMobile ? <MobileProductLoader /> : <ProductLoader />}>
-                <ProductGrid products={filteredProducts} />
-              </Suspense>
-            ) : (
-              <div className="space-y-6">
-                {filteredProducts.map((product, index) => (
-                  <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                    <InteractiveProductCard product={product} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {loading ? (
+            isMobile ? <MobileProductLoader /> : <ProductLoader />
+          ) : error ? (
+            <div className="text-center text-red-500 text-lg">{error}</div>
+          ) : products.length === 0 ? (
+            <div className="text-center text-muted-foreground text-lg">No se encontraron productos que coincidan con tu búsqueda.</div>
+          ) : (
+            <ProductGrid products={products} />
+          )}
         </div>
       </div>
     </div>

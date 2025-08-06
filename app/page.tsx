@@ -17,19 +17,38 @@ import { Suspense } from "react"
 import ProductLoader from "@/components/loaders/product-loader"
 import MobileProductLoader from "@/components/loaders/mobile/mobile-product-loader"
 import { useMobileDetection } from '@/hooks/use-mobile-detection' // Client component hook
+import { getProducts } from "@/lib/products"; // Fetch products on the server
+import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RefreshCw, ShieldCheck } from 'lucide-react'
+import { Product } from '@/lib/types'
 
-export default async function HomePage() {
-  const allProducts = await getAllProducts()
-  const featuredProducts = await getFeaturedProducts()
+export default function HomePage() {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const isMobile = useMobileDetection()
   const [userName, setUserName] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [email, setEmail] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const isMobile = useMobileDetection() // Use the hook to detect mobile
 
   useEffect(() => {
-    // Verificar si el usuario está autenticado
+    const fetchFeaturedProducts = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const products = await getFeaturedProducts()
+        setFeaturedProducts(products)
+      } catch (err) {
+        setError('Failed to load featured products.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     const userAuth = localStorage.getItem("userAuth")
     const userInfo = localStorage.getItem("userInfo")
 
@@ -38,6 +57,8 @@ export default async function HomePage() {
       const user = JSON.parse(userInfo)
       setUserName(user.name)
     }
+
+    fetchFeaturedProducts()
   }, [])
 
   const features = [
@@ -65,6 +86,12 @@ export default async function HomePage() {
       description: "Productos de la más alta calidad",
       delay: 600,
     },
+  ]
+
+  const heroImages = [
+    { src: "/slider-1.png", alt: "Colección de verano 717 Store" },
+    { src: "/slider-2.png", alt: "Nueva llegada de streetwear" },
+    { src: "/slider-3.png", alt: "Ofertas especiales 717 Store" },
   ]
 
   return (
@@ -124,7 +151,7 @@ export default async function HomePage() {
 
       {/* Hero Section con Slider */}
       <section className="relative h-[70vh] overflow-hidden">
-        <HeroSlider />
+        <HeroSlider images={heroImages} />
 
         {/* Overlay con contenido */}
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
@@ -171,36 +198,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="text-center space-y-4 animate-fade-in card-modern p-6 rounded-modern-lg hover-lift-modern"
-                style={{ animationDelay: `${feature.delay}ms` }}
-              >
-                <div className="w-16 h-16 mx-auto bg-gradient-to-r from-red-600 to-red-700 rounded-modern-xl flex items-center justify-center hover-glow-modern">
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-glow">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Featured Products */}
-      <section className="py-12 md:py-20 bg-gray-100 dark:bg-gray-900">
-        <div className="container mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">
-            Productos Destacados
-          </h2>
-          <Suspense fallback={isMobile ? <MobileProductLoader /> : <ProductLoader />}>
+      <section className="py-12 md:py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Productos Destacados</h2>
+          {loading ? (
+            isMobile ? <MobileProductLoader /> : <ProductLoader />
+          ) : error ? (
+            <div className="text-center text-red-500 text-lg">{error}</div>
+          ) : (
             <ProductGrid products={featuredProducts} />
-          </Suspense>
+          )}
+          <div className="text-center mt-12">
+            <Button asChild size="lg">
+              <Link href="/productos">Ver Todos los Productos</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -244,6 +257,38 @@ export default async function HomePage() {
                 {isSubmitting ? "Suscribiendo..." : "Suscribirse"}
               </Button>
             </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Separator */}
+      <Separator className="my-12" />
+
+      {/* Additional Features Section */}
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        <div className="container px-4 md:px-6">
+          <div className="grid gap-8 md:grid-cols-3 text-center">
+            <Card className="flex flex-col items-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <Truck className="h-12 w-12 text-[#4A1518] mb-4" />
+              <CardTitle className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Envíos Rápidos</CardTitle>
+              <CardContent className="text-gray-600 dark:text-gray-400">
+                Entregamos tus pedidos en tiempo récord, directamente a tu puerta.
+              </CardContent>
+            </Card>
+            <Card className="flex flex-col items-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <RefreshCw className="h-12 w-12 text-[#4A1518] mb-4" />
+              <CardTitle className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Devoluciones Fáciles</CardTitle>
+              <CardContent className="text-gray-600 dark:text-gray-400">
+                Proceso de devolución sencillo y sin complicaciones para tu tranquilidad.
+              </CardContent>
+            </Card>
+            <Card className="flex flex-col items-center p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <ShieldCheck className="h-12 w-12 text-[#4A1518] mb-4" />
+              <CardTitle className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Compra Segura</CardTitle>
+              <CardContent className="text-gray-600 dark:text-gray-400">
+                Tus datos y pagos están protegidos con la más alta tecnología de seguridad.
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

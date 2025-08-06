@@ -1,28 +1,49 @@
-// This script would typically run on a server or a background process
-// to simulate real-time order status updates.
-// For a client-side only demo, this is illustrative.
+// This script simulates real-time order updates.
+// In a real application, this would be handled by a backend service
+// pushing updates to a WebSocket or similar.
 
 const orders = [
-  { id: "ORD-001", status: "pending" },
-  { id: "ORD-002", status: "processing" },
-  { id: "ORD-003", status: "shipped" },
+  { id: 'ORD001', status: 'Pendiente' },
+  { id: 'ORD002', status: 'Completado' },
+  { id: 'ORD003', status: 'Pendiente' },
 ];
 
 function updateOrderStatus(orderId, newStatus) {
   const order = orders.find(o => o.id === orderId);
   if (order) {
     order.status = newStatus;
-    console.log(`Order ${orderId} updated to status: ${newStatus}`);
-    // In a real application, you would update a database here
-    // and potentially notify the user via webhooks or real-time channels.
-  } else {
-    console.log(`Order ${orderId} not found.`);
+    console.log(`Order ${orderId} updated to: ${newStatus}`);
+    return true;
   }
+  console.log(`Order ${orderId} not found.`);
+  return false;
 }
 
-// Simulate updates after some time
-setTimeout(() => updateOrderStatus("ORD-001", "processing"), 5000);
-setTimeout(() => updateOrderStatus("ORD-002", "shipped"), 10000);
-setTimeout(() => updateOrderStatus("ORD-003", "delivered"), 15000);
+function simulateUpdates() {
+  console.log('Starting order update simulation...');
 
-console.log("Order update simulation started.");
+  // Simulate a few updates over time
+  setTimeout(() => {
+    updateOrderStatus('ORD001', 'Enviado');
+  }, 3000); // After 3 seconds
+
+  setTimeout(() => {
+    updateOrderStatus('ORD003', 'Completado');
+  }, 7000); // After 7 seconds
+
+  setTimeout(() => {
+    updateOrderStatus('ORD002', 'Entregado'); // New status
+  }, 10000); // After 10 seconds
+
+  console.log('Simulation scheduled.');
+}
+
+// To run this script:
+// 1. Make sure you have Node.js installed.
+// 2. Save this file as simulate-order-updates.js
+// 3. Run in your terminal: node simulate-order-updates.js
+
+// You can also integrate this into a larger Node.js backend
+// or a serverless function that triggers these updates.
+
+simulateUpdates();

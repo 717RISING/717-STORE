@@ -1,219 +1,75 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Truck, Package, RotateCcw, Shield, Clock, MapPin } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Truck, RefreshCw, Mail } from 'lucide-react'
 
-export default function EnviosDevolucionesPage() {
+export default function ShippingReturnsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Envíos y Devoluciones
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400">
-              Toda la información sobre nuestros servicios de envío y política de devoluciones
+    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
+      <h1 className="text-4xl font-bold text-center mb-8">Envíos y Devoluciones</h1>
+      <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+        Aquí encontrarás toda la información sobre nuestras políticas de envío y cómo gestionar tus devoluciones.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center space-x-4">
+            <Truck className="h-8 w-8 text-primary" />
+            <CardTitle className="text-xl">Política de Envíos</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p>
+              Nos esforzamos por procesar y enviar todos los pedidos lo más rápido posible. Los pedidos suelen ser procesados dentro de <strong>1-2 días hábiles</strong>.
             </p>
-          </div>
+            <h3 className="font-semibold">Tiempos de Entrega Estimados:</h3>
+            <ul className="list-disc list-inside text-muted-foreground">
+              <li><strong>Nacional:</strong> 3-7 días hábiles</li>
+              <li><strong>Internacional:</strong> 7-20 días hábiles (puede variar según el destino)</li>
+            </ul>
+            <p>
+              Recibirás un email de confirmación con un número de seguimiento una vez que tu pedido haya sido enviado.
+            </p>
+          </CardContent>
+        </Card>
 
-          <div className="space-y-8">
-            {/* Shipping Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Truck className="h-6 w-6 text-primary" />
-                  Información de Envíos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-3">
-                      <Clock className="h-5 w-5 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold">Tiempos de Entrega</h3>
-                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                          <li>• Bogotá: 1-2 días hábiles</li>
-                          <li>• Ciudades principales: 3-5 días hábiles</li>
-                          <li>• Resto del país: 5-7 días hábiles</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <Package className="h-5 w-5 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold">Empaque</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Todos nuestros productos se envían en empaques ecológicos y seguros.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-3">
-                      <MapPin className="h-5 w-5 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold">Cobertura</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Realizamos envíos a todo Colombia. Consulta disponibilidad en tu ciudad.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <Shield className="h-5 w-5 text-primary mt-1" />
-                      <div>
-                        <h3 className="font-semibold">Seguimiento</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Recibirás un código de seguimiento para rastrear tu pedido en tiempo real.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center space-x-4">
+            <RefreshCw className="h-8 w-8 text-primary" />
+            <CardTitle className="text-xl">Política de Devoluciones</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p>
+              Queremos que estés completamente satisfecho con tu compra. Si no es así, puedes devolver los artículos dentro de los <strong>30 días</strong> posteriores a la recepción.
+            </p>
+            <h3 className="font-semibold">Condiciones para Devolución:</h3>
+            <ul className="list-disc list-inside text-muted-foreground">
+              <li>Los artículos deben estar sin usar, sin lavar y en su estado original.</li>
+              <li>Deben incluir todas las etiquetas y el embalaje original.</li>
+              <li>Se requiere el comprobante de compra.</li>
+            </ul>
+            <p>
+              Los reembolsos se procesarán a la forma de pago original dentro de 5-10 días hábiles después de que recibamos y verifiquemos el artículo devuelto.
+            </p>
+          </CardContent>
+        </Card>
 
-            {/* Shipping Costs */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Costos de Envío</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div>
-                      <h3 className="font-semibold text-green-800 dark:text-green-400">
-                        Envío Gratis
-                      </h3>
-                      <p className="text-sm text-green-600 dark:text-green-500">
-                        En compras superiores a $200.000 COP
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      $0
-                    </Badge>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">Bogotá</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">1-2 días hábiles</p>
-                      </div>
-                      <Badge variant="outline">$8.000</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">Ciudades Principales</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">3-5 días hábiles</p>
-                      </div>
-                      <Badge variant="outline">$12.000</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">Resto del País</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">5-7 días hábiles</p>
-                      </div>
-                      <Badge variant="outline">$15.000</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">Express</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">24-48 horas</p>
-                      </div>
-                      <Badge variant="outline">$25.000</Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Returns Policy */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <RotateCcw className="h-6 w-6 text-primary" />
-                  Política de Devoluciones
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 dark:text-blue-400 mb-2">
-                    30 Días para Devoluciones
-                  </h3>
-                  <p className="text-sm text-blue-600 dark:text-blue-500">
-                    Tienes 30 días calendario desde la fecha de entrega para solicitar una devolución.
-                  </p>
-                </div>
-                
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Condiciones para Devoluciones:</h3>
-                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span>El producto debe estar sin usar y con etiquetas originales</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span>Debe incluir el empaque original</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span>No debe tener olores, manchas o daños</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span>Debe incluir la factura de compra</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Proceso de Devolución:</h3>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="text-center p-4 border rounded-lg">
-                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2">
-                        1
-                      </div>
-                      <h4 className="font-semibold text-sm">Solicita</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Contacta nuestro servicio al cliente
-                      </p>
-                    </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2">
-                        2
-                      </div>
-                      <h4 className="font-semibold text-sm">Envía</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Empaca y envía el producto
-                      </p>
-                    </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2">
-                        3
-                      </div>
-                      <h4 className="font-semibold text-sm">Recibe</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Reembolso en 5-10 días hábiles
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-                  <h3 className="font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
-                    Productos No Retornables
-                  </h3>
-                  <ul className="text-sm text-yellow-600 dark:text-yellow-500 space-y-1">
-                    <li>• Productos personalizados o hechos a medida</li>
-                    <li>• Ropa interior y productos de higiene personal</li>
-                    <li>• Productos en oferta o liquidación (salvo defecto de fábrica)</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center space-x-4">
+            <Mail className="h-8 w-8 text-primary" />
+            <CardTitle className="text-xl">Cómo Iniciar una Devolución</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p>
+              Para iniciar una devolución, por favor sigue estos pasos:
+            </p>
+            <ol className="list-decimal list-inside text-muted-foreground">
+              <li>Envía un email a <a href="mailto:devoluciones@717store.com" className="text-primary hover:underline">devoluciones@717store.com</a> con tu número de pedido y el motivo de la devolución.</li>
+              <li>Nuestro equipo de soporte te proporcionará instrucciones detalladas y una etiqueta de envío si aplica.</li>
+              <li>Empaqueta los artículos de forma segura y envíalos de vuelta.</li>
+            </ol>
+            <p>
+              Si tienes alguna pregunta adicional, no dudes en contactarnos.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

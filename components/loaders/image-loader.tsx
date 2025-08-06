@@ -1,11 +1,15 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 
-export function ImageLoader() {
+interface ImageLoaderProps {
+  className?: string
+}
+
+export function ImageLoader({ className }: ImageLoaderProps) {
   return (
-    <div className="relative w-full h-64 overflow-hidden rounded-lg">
-      <Skeleton className="h-full w-full bg-gray-200 dark:bg-gray-700" />
+    <div className={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md", className)}>
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <span className="sr-only">Cargando imagen...</span>
     </div>
   )
 }
-
-export default ImageLoader

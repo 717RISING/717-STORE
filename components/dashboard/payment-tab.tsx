@@ -1,230 +1,199 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { PlusCircle, Edit, Trash2, CreditCard } from 'lucide-react'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
+import { CreditCard, PlusCircle, Trash2 } from 'lucide-react'
 
 interface PaymentMethod {
   id: string
-  type: "credit-card" | "paypal" | "bank-transfer"
-  details: string // e.g., last 4 digits of card, PayPal email
-  isDefault: boolean
+  last4: string
+  brand: string
+  expiry: string
 }
 
-const initialPaymentMethods: PaymentMethod[] = [
-  { id: "1", type: "credit-card", details: "Visa **** 1234", isDefault: true },
-  { id: "2", type: "paypal", details: "user@example.com", isDefault: false },
-]
-
 export function PaymentTab() {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(initialPaymentMethods)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [currentMethod, setCurrentMethod] = useState<PaymentMethod | null>(null)
-  const [formState, setFormState] = useState<Omit<PaymentMethod, 'id'>>({
-    type: "credit-card",
-    details: "",
-    isDefault: false,
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
+    { id: "card1", last4: "4242", brand: "Visa", expiry: "12/25" },
+    { id: "card2", last4: "1234", brand: "MasterCard", expiry: "08/24" },
+  ])
+  const [isAddingNew, setIsAddingNew] = useState(false)
+  const [newCard, setNewCard] = useState({
+    cardNumber: "",
+    cardName: "",
+    expiryDate: "",
+    cvv: "",
   })
-  const [errors, setErrors] = useState<any>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
-  const validateForm = () => {
-    const newErrors: any = {}
-    if (!formState.details) newErrors.details = "Los detalles son requeridos."
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  const handleNewCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setNewCard((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormState((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }))
-  }
-
-  const handleTypeChange = (value: "credit-card" | "paypal" | "bank-transfer") => {
-    setFormState((prev) => ({
-      ...prev,
-      type: value,
-      details: "", // Clear details when type changes
-    }))
-  }
-
-  const handleSaveMethod = () => {
-    if (!validateForm()) return
-
-    if (currentMethod) {
-      // Update existing method
-      setPaymentMethods((prev) =>
-        prev.map((method) => (method.id === currentMethod.id ? { ...formState, id: method.id } : method))
-      )
-    } else {
-      // Add new method
-      const newMethod: PaymentMethod = {
-        ...formState,
-        id: Date.now().toString(), // Simple unique ID
-      }
-      setPaymentMethods((prev) => [...prev, newMethod])
+  const handleAddCard = async () => {
+    setIsLoading(true)
+    // Basic validation
+    if (!newCard.cardNumber || !newCard.cardName || !newCard.expiryDate || !newCard.cvv) {
+      toast({
+        title: "Error",
+        description: "Por favor, completa todos los campos de la tarjeta.",
+        variant: "destructive",
+      })
+      setIsLoading(false)
+      return
     }
-    setIsDialogOpen(false)
-    resetForm()
-  }
 
-  const handleDeleteMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.filter((method) => method.id !== id))
-  }
+    // Simulate API call to add card
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  const handleSetDefault = (id: string) => {
-    setPaymentMethods((prev) =>
-      prev.map((method) => ({
-        ...method,
-        isDefault: method.id === id,
-      }))
-    )
-  }
-
-  const openAddDialog = () => {
-    setCurrentMethod(null)
-    resetForm()
-    setIsDialogOpen(true)
-  }
-
-  const openEditDialog = (method: PaymentMethod) => {
-    setCurrentMethod(method)
-    setFormState({
-      type: method.type,
-      details: method.details,
-      isDefault: method.isDefault,
+    const last4 = newCard.cardNumber.slice(-4)
+    const brand = "Visa" // In a real app, detect card brand
+    const newPaymentMethod: PaymentMethod = {
+      id: `card${paymentMethods.length + 1}`,
+      last4,
+      brand,
+      expiry: newCard.expiryDate,
+    }
+    setPaymentMethods((prev) => [...prev, newPaymentMethod])
+    setNewCard({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" })
+    setIsAddingNew(false)
+    setIsLoading(false)
+    toast({
+      title: "Método de pago añadido",
+      description: `Tarjeta ${brand} terminada en ${last4} ha sido añadida.`,
     })
-    setIsDialogOpen(true)
   }
 
-  const resetForm = () => {
-    setFormState({
-      type: "credit-card",
-      details: "",
-      isDefault: false,
+  const handleDeleteCard = async (id: string) => {
+    setIsLoading(true)
+    // Simulate API call to delete card
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    setPaymentMethods((prev) => prev.filter((method) => method.id !== id))
+    setIsLoading(false)
+    toast({
+      title: "Método de pago eliminado",
+      description: "La tarjeta ha sido eliminada correctamente.",
+      variant: "destructive",
     })
-    setErrors({})
   }
 
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Métodos de Pago</CardTitle>
-        <Button onClick={openAddDialog} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Añadir Método
-        </Button>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">Métodos de Pago</CardTitle>
+        <CardDescription>Gestiona tus tarjetas de crédito y débito.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {paymentMethods.length === 0 ? (
-          <p className="text-gray-700 dark:text-gray-300">No tienes métodos de pago guardados.</p>
-        ) : (
-          <div className="grid gap-4">
-            {paymentMethods.map((method) => (
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          {paymentMethods.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No tienes métodos de pago guardados.</p>
+          ) : (
+            paymentMethods.map((method) => (
               <div
                 key={method.id}
-                className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700"
+                className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 dark:bg-gray-900"
               >
-                <div className="flex-grow text-gray-900 dark:text-white">
-                  <p className="font-semibold">
-                    {method.type === "credit-card" && "Tarjeta de Crédito"}
-                    {method.type === "paypal" && "PayPal"}
-                    {method.type === "bank-transfer" && "Transferencia Bancaria"}
-                  </p>
-                  <p className="text-gray-700 dark:text-gray-300">{method.details}</p>
-                  {method.isDefault && (
-                    <span className="text-sm font-medium text-[#4A1518] dark:text-[#FFD700]">
-                      (Predeterminado)
-                    </span>
-                  )}
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-6 w-6 text-[#4A1518] dark:text-[#FFD700]" />
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {method.brand} **** {method.last4}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Expira: {method.expiry}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2 mt-4 md:mt-0">
-                  {!method.isDefault && (
-                    <Button variant="outline" size="sm" onClick={() => handleSetDefault(method.id)} className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
-                      Establecer como Predeterminado
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(method)} className="text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Editar</span>
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteMethod(method.id)} className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20">
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Eliminar</span>
-                  </Button>
-                </div>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleDeleteCard(method.id)}
+                  disabled={isLoading}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Eliminar tarjeta</span>
+                </Button>
               </div>
-            ))}
-          </div>
+            ))
+          )}
+        </div>
+
+        {!isAddingNew && (
+          <Button onClick={() => setIsAddingNew(true)} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
+            <PlusCircle className="h-5 w-5 mr-2" />
+            Añadir Nueva Tarjeta
+          </Button>
         )}
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 border-gray-700">
-            <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-white">
-                {currentMethod ? "Editar Método de Pago" : "Añadir Nuevo Método de Pago"}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
+        {isAddingNew && (
+          <Card className="border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Nueva Tarjeta</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="type" className="text-gray-700 dark:text-gray-300">Tipo de Pago</Label>
-                <RadioGroup value={formState.type} onValueChange={handleTypeChange} className="flex space-x-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="credit-card" id="type-credit-card" />
-                    <Label htmlFor="type-credit-card" className="text-gray-700 dark:text-gray-300">Tarjeta de Crédito</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="paypal" id="type-paypal" />
-                    <Label htmlFor="type-paypal" className="text-gray-700 dark:text-gray-300">PayPal</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="bank-transfer" id="type-bank-transfer" />
-                    <Label htmlFor="type-bank-transfer" className="text-gray-700 dark:text-gray-300">Transferencia</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="details" className="text-gray-700 dark:text-gray-300">Detalles</Label>
+                <Label htmlFor="cardNumber">Número de Tarjeta</Label>
                 <Input
-                  id="details"
-                  name="details"
-                  value={formState.details}
-                  onChange={handleInputChange}
-                  placeholder={
-                    formState.type === "credit-card" ? "Últimos 4 dígitos (ej: 1234)" :
-                    formState.type === "paypal" ? "Email de PayPal" :
-                    "Número de cuenta bancaria"
-                  }
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  id="cardNumber"
+                  type="text"
+                  placeholder="XXXX XXXX XXXX XXXX"
+                  value={newCard.cardNumber}
+                  onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })}
+                  maxLength={16}
+                  disabled={isLoading}
                 />
-                {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
               </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isDefault"
-                  name="isDefault"
-                  checked={formState.isDefault}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-[#4A1518] focus:ring-[#4A1518] border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700"
+              <div className="space-y-2">
+                <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
+                <Input
+                  id="cardName"
+                  type="text"
+                  placeholder="Nombre Apellido"
+                  value={newCard.cardName}
+                  onChange={(e) => setNewCard({ ...newCard, cardName: e.target.value })}
+                  disabled={isLoading}
                 />
-                <Label htmlFor="isDefault" className="text-gray-700 dark:text-gray-300">Establecer como predeterminado</Label>
               </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSaveMethod} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-                Guardar Método
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="expiryDate">Fecha de Vencimiento (MM/AA)</Label>
+                  <Input
+                    id="expiryDate"
+                    type="text"
+                    placeholder="MM/AA"
+                    value={newCard.expiryDate}
+                    onChange={(e) => setNewCard({ ...newCard, expiryDate: e.target.value })}
+                    maxLength={5}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cvv">CVV</Label>
+                  <Input
+                    id="cvv"
+                    type="text"
+                    placeholder="XXX"
+                    value={newCard.cvv}
+                    onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
+                    maxLength={4}
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setIsAddingNew(false)} disabled={isLoading}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleAddCard} disabled={isLoading}>
+                  {isLoading ? "Añadiendo..." : "Guardar Tarjeta"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </CardContent>
     </Card>
   )

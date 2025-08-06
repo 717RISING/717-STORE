@@ -1,64 +1,61 @@
 "use client"
 
-import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { OverviewTab } from "@/components/admin/tabs/overview-tab"
-import { ProductsTab } from "@/components/admin/tabs/products-tab"
-import { OrdersTab } from "@/components/admin/tabs/orders-tab"
-import { CustomersTab } from "@/components/admin/tabs/customers-tab"
-import { SettingsTab } from "@/components/admin/tabs/settings-tab"
-import { Button } from "@/components/ui/button"
-import { LogOut } from 'lucide-react'
-import { handleLogout } from "@/app/actions" // Import the server action
+import { useState } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { OverviewTab } from './tabs/overview-tab'
+import { ProductsTab } from './tabs/products-tab'
+import { OrdersTab } from './tabs/orders-tab'
+import { CustomersTab } from './tabs/customers-tab'
+import { SettingsTab } from './tabs/settings-tab'
+import { useAuth } from '@/lib/auth-context' // Import useAuth
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
+export function AdminDashboard() {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || user?.role !== 'admin')) {
+      router.push('/admin/login') // Redirect to admin login if not authenticated or not admin
+    }
+  }, [isAuthenticated, isLoading, user, router])
+
+  if (isLoading || !isAuthenticated || user?.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <span className="ml-3 text-lg">Cargando panel de administración...</span>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Panel de Administración</h1>
-        <form action={handleLogout}>
-          <Button variant="destructive" type="submit">
-            <LogOut className="mr-2 h-4 w-4" />
-            Cerrar Sesión
-          </Button>
-        </form>
-      </div>
+    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navigation-height)-var(--footer-height))]">
+      <h1 className="text-4xl font-bold text-center mb-8">Panel de Administración</h1>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 mb-6 bg-gray-800 border border-gray-700">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white">
-            Resumen
-          </TabsTrigger>
-          <TabsTrigger value="products" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white">
-            Productos
-          </TabsTrigger>
-          <TabsTrigger value="orders" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white">
-            Pedidos
-          </TabsTrigger>
-          <TabsTrigger value="customers" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white">
-            Clientes
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="data-[state=active]:bg-[#4A1518] data-[state=active]:text-white">
-            Configuración
-          </TabsTrigger>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+          <TabsTrigger value="overview">Resumen</TabsTrigger>
+          <TabsTrigger value="products">Productos</TabsTrigger>
+          <TabsTrigger value="orders">Pedidos</TabsTrigger>
+          <TabsTrigger value="customers">Clientes</TabsTrigger>
+          <TabsTrigger value="settings">Configuración</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="overview">
+        <TabsContent value="overview" className="mt-6">
           <OverviewTab />
         </TabsContent>
-        <TabsContent value="products">
+        <TabsContent value="products" className="mt-6">
           <ProductsTab />
         </TabsContent>
-        <TabsContent value="orders">
+        <TabsContent value="orders" className="mt-6">
           <OrdersTab />
         </TabsContent>
-        <TabsContent value="customers">
+        <TabsContent value="customers" className="mt-6">
           <CustomersTab />
         </TabsContent>
-        <TabsContent value="settings">
+        <TabsContent value="settings" className="mt-6">
           <SettingsTab />
         </TabsContent>
       </Tabs>

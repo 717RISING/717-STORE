@@ -1,33 +1,48 @@
-'use client'
+"use client"
 
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
-interface AnimatedCardProps {
-  title: string
-  description?: string
-  children: React.ReactNode
+interface AnimatedCardProps extends React.ComponentProps<typeof Card> {
   delay?: number
+  duration?: number
+  animation?: 'fade-in' | 'slide-up' | 'scale-in'
 }
 
-export default function AnimatedCard({ title, description, children, delay = 0 }: AnimatedCardProps) {
+export function AnimatedCard({
+  children,
+  className,
+  delay = 0,
+  duration = 0.5,
+  animation = 'fade-in',
+  ...props
+}: AnimatedCardProps) {
+  const variants = {
+    'fade-in': {
+      hidden: { opacity: 0 },
+      visible: { opacity: 1 },
+    },
+    'slide-up': {
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
+    },
+    'scale-in': {
+      hidden: { opacity: 0, scale: 0.95 },
+      visible: { opacity: 1, scale: 1 },
+    },
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: delay }}
-      className="h-full"
+      initial="hidden"
+      animate="visible"
+      variants={variants[animation]}
+      transition={{ duration, delay }}
+      className={cn("h-full", className)}
     >
-      <Card className="h-full flex flex-col bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">{title}</CardTitle>
-          {description && (
-            <CardDescription className="text-gray-600 dark:text-gray-400">{description}</CardDescription>
-          )}
-        </CardHeader>
-        <CardContent className="flex-grow text-gray-700 dark:text-gray-300">
-          {children}
-        </CardContent>
+      <Card className={cn("h-full", className)} {...props}>
+        {children}
       </Card>
     </motion.div>
   )

@@ -1,137 +1,90 @@
-'use server'
+"use server"
 
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { verifyUserCredentials, registerUser } from '@/lib/users'
-import { addOrder } from '@/lib/database'
+import { Resend } from 'resend'
+import { EmailTemplate } from '@/components/email-template' // Assuming you have this component
+import { sendEmail } from '@/lib/email' // Assuming this function exists
 
-export async function handleLogin(prevState: any, formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
+const resend = new Resend(process.env.RESEND_API_KEY) // Ensure RESEND_API_KEY is set in your environment variables
 
-  if (!email || !password) {
-    return { error: 'Email y contraseña son requeridos' }
-  }
+interface ContactFormData {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
 
+export async function submitContactForm(formData: ContactFormData) {
   try {
-    const user = await verifyUserCredentials(email, password)
-    
-    if (!user) {
-      return { error: 'Credenciales inválidas' }
-    }
+    // Simulate a delay for API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
-    // Set user session cookie
-    const cookieStore = cookies()
-    cookieStore.set('user_session', JSON.stringify(user), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+    // Send email using Resend (or your preferred email service)
+    // For demonstration, we'll use the mock sendEmail function
+    const { success, error } = await sendEmail({
+      from: 'onboarding@resend.dev', // Replace with your verified sender email
+      to: 'delivered@resend.dev', // Replace with your recipient email
+      subject: `Nuevo mensaje de contacto: ${formData.subject}`,
+      react: EmailTemplate({
+        userName: formData.name,
+        userEmail: formData.email,
+        message: formData.message,
+        subject: formData.subject,
+      }),
     })
 
-    // Redirect based on user role
-    if (user.role === 'admin') {
-      redirect('/admin')
+    if (success) {
+      return { success: true, message: "Mensaje enviado exitosamente." }
     } else {
-      redirect('/cuenta')
-    }
-  } catch (error) {
-    console.error('Login error:', error)
-    return { error: 'Error interno del servidor' }
-  }
-}
-
-export async function handleRegister(prevState: any, formData: FormData) {
-  const firstName = formData.get('firstName') as string
-  const lastName = formData.get('lastName') as string
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const confirmPassword = formData.get('confirmPassword') as string
-
-  if (!firstName || !lastName || !email || !password || !confirmPassword) {
-    return { error: 'Todos los campos son requeridos' }
-  }
-
-  if (password !== confirmPassword) {
-    return { error: 'Las contraseñas no coinciden' }
-  }
-
-  if (password.length < 6) {
-    return { error: 'La contraseña debe tener al menos 6 caracteres' }
-  }
-
-  try {
-    const user = await registerUser(firstName, lastName, email, password)
-    
-    if (!user) {
-      return { error: 'El usuario ya existe' }
+      console.error("Error sending email:", error)
+      return { success: false, error: error || "Error al enviar el email." }
     }
 
-    // Set user session cookie
-    const cookieStore = cookies()
-    cookieStore.set('user_session', JSON.stringify(user), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    })
-
-    redirect('/cuenta')
   } catch (error) {
-    console.error('Registration error:', error)
-    return { error: 'Error interno del servidor' }
+    console.error("Error in submitContactForm:", error)
+    return { success: false, error: "Ocurrió un error inesperado en el servidor." }
   }
 }
 
-export async function handleLogout() {
-  const cookieStore = cookies()
-  cookieStore.delete('user_session')
-  redirect('/')
+// Example of a server action for product search (can be expanded)
+export async function searchProducts(query: string) {
+  // In a real app, you'd query your database
+  console.log(`Searching for products with query: ${query}`)
+  await new Promise(resolve => setTimeout(resolve, 500)) // Simulate delay
+  return { success: true, results: [] } // Return mock results
 }
 
-export async function createOrderAction(orderData: any) {
-  try {
-    const order = await addOrder({
-      id: `ORD-${Date.now()}`,
-      ...orderData,
-      orderDate: new Date().toISOString(),
-      status: 'pending',
-      paymentStatus: 'pending'
-    })
-    
-    return { success: true, orderId: order.id }
-  } catch (error) {
-    console.error('Order creation error:', error)
-    return { success: false, error: 'Error al crear el pedido' }
+// Example of a server action for user login (can be expanded)
+export async function loginUser(credentials: { email: string; password: string }) {
+  console.log(`Attempting login for: ${credentials.email}`)
+  await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate delay
+
+  if (credentials.email === 'test@example.com' && credentials.password === 'password') {
+    return { success: true, message: 'Login successful!', user: { id: '123', name: 'Test User', email: 'test@example.com', role: 'customer' } }
+  } else if (credentials.email === 'admin@717store.com' && credentials.password === 'adminpassword') {
+    return { success: true, message: 'Admin login successful!', user: { id: 'admin1', name: 'Admin User', email: 'admin@717store.com', role: 'admin' } }
+  } else {
+    return { success: false, error: 'Invalid credentials.' }
   }
 }
 
-export async function updateProfile(prevState: any, formData: FormData) {
-  // Simulate profile update
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  return { success: true, message: 'Perfil actualizado correctamente' }
+// Example of a server action for user registration (can be expanded)
+export async function registerUser(userData: { name: string; email: string; password: string }) {
+  console.log(`Attempting registration for: ${userData.email}`)
+  await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate delay
+
+  // In a real app, you'd hash the password and save to DB
+  if (userData.email.includes('@')) {
+    return { success: true, message: 'Registration successful!', user: { id: 'newuser', name: userData.name, email: userData.email, role: 'customer' } }
+  } else {
+    return { success: false, error: 'Invalid email format.' }
+  }
 }
 
-export async function changePassword(prevState: any, formData: FormData) {
-  const currentPassword = formData.get('currentPassword') as string
-  const newPassword = formData.get('newPassword') as string
-  const confirmPassword = formData.get('confirmPassword') as string
+// Example of a server action for updating user profile
+export async function updateProfile(userId: string, updates: { name?: string; email?: string }) {
+  console.log(`Updating profile for user ${userId} with:`, updates)
+  await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate delay
 
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    return { error: 'Todos los campos son requeridos' }
-  }
-
-  if (newPassword !== confirmPassword) {
-    return { error: 'Las contraseñas no coinciden' }
-  }
-
-  if (newPassword.length < 6) {
-    return { error: 'La contraseña debe tener al menos 6 caracteres' }
-  }
-
-  // Simulate password change
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  return { success: true, message: 'Contraseña cambiada correctamente' }
+  // In a real app, you'd update the user in your database
+  return { success: true, message: 'Profile updated successfully!' }
 }

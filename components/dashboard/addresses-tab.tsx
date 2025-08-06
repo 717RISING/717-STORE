@@ -1,78 +1,154 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { PlusCircle, Edit, Trash2, MapPin } from 'lucide-react'
+import { useToast } from "@/hooks/use-toast"
 
 interface Address {
   id: string
-  street: string
+  name: string
+  addressLine1: string
+  addressLine2?: string
   city: string
-  zip: string
+  state: string
+  zipCode: string
   country: string
   isDefault: boolean
 }
 
-export default function AddressesTab() {
-  const [addresses, setAddresses] = useState<Address[]>([
-    { id: '1', street: 'Calle 123 #45-67', city: 'Bogotá', zip: '110111', country: 'Colombia', isDefault: true },
-    { id: '2', street: 'Carrera 8 #10-20', city: 'Medellín', zip: '050001', country: 'Colombia', isDefault: false },
-  ])
+// Dummy data for addresses
+const dummyAddresses: Address[] = [
+  {
+    id: "addr-1",
+    name: "Casa Principal",
+    addressLine1: "Calle 123 #45-67",
+    city: "Bogotá",
+    state: "Cundinamarca",
+    zipCode: "110111",
+    country: "Colombia",
+    isDefault: true,
+  },
+  {
+    id: "addr-2",
+    name: "Oficina",
+    addressLine1: "Carrera 7 #20-30",
+    addressLine2: "Piso 5, Oficina 501",
+    city: "Medellín",
+    state: "Antioquia",
+    zipCode: "050010",
+    country: "Colombia",
+    isDefault: false,
+  },
+]
+
+export function AddressesTab() {
+  const [addresses, setAddresses] = useState<Address[]>(dummyAddresses)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [currentAddress, setCurrentAddress] = useState<Address | null>(null)
   const [formState, setFormState] = useState<Omit<Address, 'id'>>({
-    street: '',
-    city: '',
-    zip: '',
-    country: '',
+    name: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
     isDefault: false,
   })
-  const [errors, setErrors] = useState<any>({})
+  const { toast } = useToast()
 
-  const validateForm = () => {
-    const newErrors: any = {}
-    if (!formState.street) newErrors.street = 'La calle es requerida.'
-    if (!formState.city) newErrors.city = 'La ciudad es requerida.'
-    if (!formState.zip) newErrors.zip = 'El código postal es requerido.'
-    if (!formState.country) newErrors.country = 'El país es requerido.'
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  const handleOpenDialog = (address?: Address) => {
+    if (address) {
+      setCurrentAddress(address)
+      setFormState({ ...address })
+    } else {
+      setCurrentAddress(null)
+      setFormState({
+        name: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+        isDefault: false,
+      })
+    }
+    setIsDialogOpen(true)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false)
+    setCurrentAddress(null)
+    setFormState({
+      name: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "",
+      isDefault: false,
+    })
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value, type, checked } = e.target
     setFormState((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [id]: type === "checkbox" ? checked : value,
     }))
   }
 
-  const handleSaveAddress = () => {
-    if (!validateForm()) return
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!formState.name || !formState.addressLine1 || !formState.city || !formState.state || !formState.zipCode || !formState.country) {
+      toast({
+        title: "Campos Incompletos",
+        description: "Por favor, rellena todos los campos obligatorios.",
+        variant: "destructive",
+      })
+      return
+    }
 
     if (currentAddress) {
       // Update existing address
       setAddresses((prev) =>
-        prev.map((addr) => (addr.id === currentAddress.id ? { ...formState, id: addr.id } : addr))
+        prev.map((addr) => (addr.id === currentAddress.id ? { ...formState, id: currentAddress.id } : addr))
       )
+      toast({
+        title: "Dirección Actualizada",
+        description: "La dirección se ha actualizado correctamente.",
+      })
     } else {
       // Add new address
       const newAddress: Address = {
         ...formState,
-        id: Date.now().toString(), // Simple unique ID
+        id: `addr-${Date.now()}`, // Simple unique ID
       }
       setAddresses((prev) => [...prev, newAddress])
+      toast({
+        title: "Dirección Añadida",
+        description: "Nueva dirección guardada correctamente.",
+      })
     }
-    setIsDialogOpen(false)
-    resetForm()
+    handleCloseDialog()
   }
 
   const handleDeleteAddress = (id: string) => {
-    setAddresses((prev) => prev.filter((addr) => addr.id !== id))
+    if (window.confirm("¿Estás seguro de que quieres eliminar esta dirección?")) {
+      setAddresses((prev) => prev.filter((addr) => addr.id !== id))
+      toast({
+        title: "Dirección Eliminada",
+        description: "La dirección ha sido eliminada.",
+      })
+    }
   }
 
   const handleSetDefault = (id: string) => {
@@ -82,155 +158,110 @@ export default function AddressesTab() {
         isDefault: addr.id === id,
       }))
     )
-  }
-
-  const openAddDialog = () => {
-    setCurrentAddress(null)
-    resetForm()
-    setIsDialogOpen(true)
-  }
-
-  const openEditDialog = (address: Address) => {
-    setCurrentAddress(address)
-    setFormState({
-      street: address.street,
-      city: address.city,
-      zip: address.zip,
-      country: address.country,
-      isDefault: address.isDefault,
+    toast({
+      title: "Dirección Predeterminada",
+      description: "La dirección se ha establecido como predeterminada.",
     })
-    setIsDialogOpen(true)
-  }
-
-  const resetForm = () => {
-    setFormState({
-      street: '',
-      city: '',
-      zip: '',
-      country: '',
-      isDefault: false,
-    })
-    setErrors({})
   }
 
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Mis Direcciones</CardTitle>
-        <Button onClick={openAddDialog} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-          <Plus className="mr-2 h-4 w-4" />
-          Añadir Dirección
+        <CardTitle className="text-2xl font-bold">Mis Direcciones</CardTitle>
+        <Button onClick={() => handleOpenDialog()}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Añadir Dirección
         </Button>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         {addresses.length === 0 ? (
-          <p className="text-gray-700 dark:text-gray-300">No tienes direcciones guardadas.</p>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <MapPin className="mx-auto h-12 w-12 mb-4" />
+            <p className="text-lg font-semibold">Aún no tienes direcciones guardadas.</p>
+            <p className="mt-2">Añade una dirección para agilizar tus futuras compras.</p>
+          </div>
         ) : (
           <div className="grid gap-4">
             {addresses.map((address) => (
-              <div
-                key={address.id}
-                className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700"
-              >
-                <div className="flex-grow text-gray-900 dark:text-white">
-                  <p className="font-semibold">{address.street}</p>
-                  <p>{address.city}, {address.zip}</p>
-                  <p>{address.country}</p>
-                  {address.isDefault && (
-                    <span className="text-sm font-medium text-[#4A1518] dark:text-[#FFD700]">
-                      (Predeterminada)
-                    </span>
-                  )}
+              <Card key={address.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-gray-200 dark:border-gray-700">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{address.name} {address.isDefault && <span className="text-xs bg-[#4A1518] text-white px-2 py-0.5 rounded-full ml-2">Predeterminada</span>}</h3>
+                  <p className="text-gray-700 dark:text-gray-300">{address.addressLine1}</p>
+                  {address.addressLine2 && <p className="text-gray-700 dark:text-gray-300">{address.addressLine2}</p>}
+                  <p className="text-gray-700 dark:text-gray-300">{address.city}, {address.state} {address.zipCode}</p>
+                  <p className="text-gray-700 dark:text-gray-300">{address.country}</p>
                 </div>
-                <div className="flex gap-2 mt-4 md:mt-0">
+                <div className="flex gap-2 mt-4 sm:mt-0">
                   {!address.isDefault && (
-                    <Button variant="outline" size="sm" onClick={() => handleSetDefault(address.id)} className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600">
-                      Establecer como Predeterminada
+                    <Button variant="outline" size="sm" onClick={() => handleSetDefault(address.id)}>
+                      Establecer Predeterminada
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(address)} className="text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(address)}>
                     <Edit className="h-4 w-4" />
                     <span className="sr-only">Editar</span>
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteAddress(address.id)} className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20">
+                  <Button variant="destructive" size="icon" onClick={() => handleDeleteAddress(address.id)}>
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Eliminar</span>
                   </Button>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 border-gray-700">
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-white">
-                {currentAddress ? 'Editar Dirección' : 'Añadir Nueva Dirección'}
-              </DialogTitle>
+              <DialogTitle>{currentAddress ? "Editar Dirección" : "Añadir Nueva Dirección"}</DialogTitle>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="street" className="text-gray-700 dark:text-gray-300">Calle y Número</Label>
-                <Input
-                  id="street"
-                  name="street"
-                  value={formState.street}
-                  onChange={handleInputChange}
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.street && <p className="text-red-500 text-sm">{errors.street}</p>}
+            <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nombre de la Dirección</Label>
+                <Input id="name" value={formState.name} onChange={handleChange} required />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="city" className="text-gray-700 dark:text-gray-300">Ciudad</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={formState.city}
-                  onChange={handleInputChange}
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
+              <div className="grid gap-2">
+                <Label htmlFor="addressLine1">Dirección Línea 1</Label>
+                <Input id="addressLine1" value={formState.addressLine1} onChange={handleChange} required />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="zip" className="text-gray-700 dark:text-gray-300">Código Postal</Label>
-                <Input
-                  id="zip"
-                  name="zip"
-                  value={formState.zip}
-                  onChange={handleInputChange}
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.zip && <p className="text-red-500 text-sm">{errors.zip}</p>}
+              <div className="grid gap-2">
+                <Label htmlFor="addressLine2">Dirección Línea 2 (Opcional)</Label>
+                <Input id="addressLine2" value={formState.addressLine2} onChange={handleChange} />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="country" className="text-gray-700 dark:text-gray-300">País</Label>
-                <Input
-                  id="country"
-                  name="country"
-                  value={formState.country}
-                  onChange={handleInputChange}
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.country && <p className="text-red-500 text-sm">{errors.country}</p>}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="city">Ciudad</Label>
+                  <Input id="city" value={formState.city} onChange={handleChange} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="state">Departamento/Estado</Label>
+                  <Input id="state" value={formState.state} onChange={handleChange} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="zipCode">Código Postal</Label>
+                  <Input id="zipCode" value={formState.zipCode} onChange={handleChange} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="country">País</Label>
+                  <Input id="country" value={formState.country} onChange={handleChange} required />
+                </div>
               </div>
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Input
                   id="isDefault"
-                  name="isDefault"
+                  type="checkbox"
                   checked={formState.isDefault}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-[#4A1518] focus:ring-[#4A1518] border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700"
+                  onChange={handleChange}
+                  className="h-4 w-4"
                 />
-                <Label htmlFor="isDefault" className="text-gray-700 dark:text-gray-300">Establecer como predeterminada</Label>
+                <Label htmlFor="isDefault">Establecer como predeterminada</Label>
               </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSaveAddress} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-                Guardar Dirección
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="submit">Guardar Dirección</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </CardContent>

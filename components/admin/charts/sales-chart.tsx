@@ -1,56 +1,44 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-const data = [
-  { name: "Ene", total: 1200000 },
-  { name: "Feb", total: 1900000 },
-  { name: "Mar", total: 1600000 },
-  { name: "Abr", total: 2100000 },
-  { name: "May", total: 1800000 },
-  { name: "Jun", total: 2400000 },
+const salesData = [
+  { month: "Ene", sales: 12000 },
+  { month: "Feb", sales: 15000 },
+  { month: "Mar", sales: 13000 },
+  { month: "Abr", sales: 17000 },
+  { month: "May", sales: 19000 },
+  { month: "Jun", sales: 22000 },
+  { month: "Jul", sales: 20000 },
+  { month: "Ago", sales: 24000 },
+  { month: "Sep", sales: 23000 },
+  { month: "Oct", sales: 26000 },
+  { month: "Nov", sales: 28000 },
+  { month: "Dic", sales: 30000 },
 ]
 
-export default function SalesChart() {
+export function SalesChart() {
   return (
-    <CardHeader>
-      <CardTitle className="text-white">Ventas Mensuales</CardTitle>
-      <CardContent className="pt-2">
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={data}>
-            <XAxis 
-              dataKey="name" 
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => `$${value}`}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1f2937', 
-                border: '1px solid #374151',
-                borderRadius: '8px'
-              }}
-              labelStyle={{ color: '#f9fafb' }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="total" 
-              stroke="#4A1518" 
-              strokeWidth={2}
-              dot={{ fill: '#4A1518' }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </CardHeader>
+    <ChartContainer
+      config={{
+        sales: {
+          label: "Ventas",
+          color: "hsl(var(--primary))",
+        },
+      }}
+      className="h-[300px] w-full"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={salesData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="month" />
+          <YAxis />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Legend />
+          <Line type="monotone" dataKey="sales" stroke="var(--color-sales)" name="Ventas Totales" />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartContainer>
   )
 }

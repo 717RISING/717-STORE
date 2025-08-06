@@ -1,93 +1,88 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-
-interface UserProfile {
-  firstName: string
-  lastName: string
-  email: string
-}
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Loader2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/lib/auth-context' // Import useAuth
 
 export function ProfileTab() {
-  const [profile, setProfile] = useState<UserProfile>({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-  })
-  const [isEditing, setIsEditing] = useState(false)
+  const { user, updateUserProfile, isLoading: isAuthLoading } = useAuth()
+  const [name, setName] = useState(user?.name || '')
+  const [email, setEmail] = useState(user?.email || '')
+  const [isSaving, setIsSaving] = useState(false)
   const { toast } = useToast()
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setProfile((prev) => ({ ...prev, [id]: value }))
-  }
-
-  const handleSave = () => {
-    // Simulate API call to save profile
-    console.log("Saving profile:", profile)
-    setIsEditing(false)
-    toast({
-      title: "Perfil Actualizado",
-      description: "Tu información de perfil ha sido guardada.",
-      variant: "success",
-    })
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSaving(true)
+    try {
+      if (user) {
+        await updateUserProfile(user.id, { name, email })
+        toast({
+          title: "Perfil Actualizado",
+          description: "Tu información de perfil ha sido guardada exitosamente.",
+          variant: "default",
+        })
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error)
+      toast({
+        title: "Error al Actualizar",
+        description: "Hubo un problema al guardar tu perfil. Inténtalo de nuevo.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Mi Perfil</CardTitle>
-        <Button onClick={() => setIsEditing(!isEditing)} className="bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-          {isEditing ? "Cancelar" : "Editar Perfil"}
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Nombre
-          </Label>
-          <Input
-            id="firstName"
-            value={profile.firstName}
-            onChange={handleInputChange}
-            readOnly={!isEditing}
-            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-          />
-        </div>
-        <div>
-          <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Apellido
-          </Label>
-          <Input
-            id="lastName"
-            value={profile.lastName}
-            onChange={handleInputChange}
-            readOnly={!isEditing}
-            className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-          />
-        </div>
-        <div>
-          <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Correo Electrónico
-          </Label>
-          <Input
-            id="email"
-            value={profile.email}
-            readOnly
-            className="bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 cursor-not-allowed"
-          />
-        </div>
-        {isEditing && (
-          <Button onClick={handleSave} className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-            Guardar Cambios
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Información de Perfil</CardTitle>
+          <CardDescription>Actualiza tu información personal y dirección de correo electrónico.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-4 mb-6">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={user?.avatar || "/placeholder-avatar.jpg"} alt={user?.name || "User"} />
+              <AvatarFallback>{user?.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="text-xl font-semibold">{user?.name || 'Usuario'}</h3>
+              <p className="text-muted-foreground">{user?.email}</p>
+            </div>
+          </div>
+          <form className="space-y-4" onSubmit={handleSaveProfile}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nombre</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} disabled={isAuthLoading || isSaving} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isAuthLoading || isSaving} />
+              </div>
+            </div>
+            <Button type="submit" disabled={isAuthLoading || isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                'Guardar Cambios'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

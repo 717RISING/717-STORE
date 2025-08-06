@@ -1,67 +1,91 @@
-'use client'
+"use client"
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { ShoppingCart, Heart, Eye } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
-import { Product } from '@/lib/products' // Assuming Product interface is defined here
-import { motion } from 'framer-motion'
-import { ShoppingCart } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { Product } from '@/lib/types' // Assuming you have a types file for Product
 
 interface InteractiveProductCardProps {
   product: Product
 }
 
-export default function InteractiveProductCard({ product }: InteractiveProductCardProps) {
+export function InteractiveProductCard({ product }: InteractiveProductCardProps) {
   const { addToCart } = useCart()
+  const { toast } = useToast()
 
-  const handleAddToCart = () => {
-    // For simplicity, adding default size 'M' and quantity 1
-    addToCart({ ...product, quantity: 1, size: 'M' })
-    alert(`${product.name} añadido al carrito!`)
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent navigating to product detail page
+    addToCart({ ...product, quantity: 1 })
+    toast({
+      title: "Añadido al carrito",
+      description: `${product.name} ha sido añadido a tu carrito.`,
+      variant: "default",
+    })
+  }
+
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent navigating to product detail page
+    // Implement wishlist logic here
+    toast({
+      title: "Añadido a la lista de deseos",
+      description: `${product.name} ha sido añadido a tu lista de deseos.`,
+      variant: "default",
+    })
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="h-full"
-    >
-      <Card className="h-full flex flex-col bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <Link href={`/productos/${product.id}`} className="block relative w-full h-60 overflow-hidden rounded-t-lg">
+    <Link href={`/productos/${product.id}`} className="group block">
+      <Card className="relative overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-in-out">
+        <div className="relative w-full h-60 bg-gray-100 dark:bg-gray-800 overflow-hidden">
           <Image
             src={product.image || "/placeholder.svg"}
             alt={product.name}
-            layout="fill"
-            objectFit="cover"
-            className="transition-transform duration-300 hover:scale-105"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            style={{ objectFit: 'cover' }}
+            className="transition-transform duration-300 group-hover:scale-105"
           />
-        </Link>
-        <CardContent className="flex-grow p-4 space-y-2">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            <Link href={`/productos/${product.id}`} className="hover:text-[#4A1518] dark:hover:text-[#FFD700] transition-colors">
-              {product.name}
-            </Link>
-          </h3>
-          <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-2">
-            {product.description}
-          </p>
-          <p className="text-2xl font-bold text-[#4A1518] dark:text-[#FFD700]">
-            ${product.price.toLocaleString('es-CO')} COP
-          </p>
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+            <div className="flex space-x-2">
+              <Button
+                size="icon"
+                className="rounded-full bg-white text-gray-800 hover:bg-gray-100 transition-all duration-200 scale-0 group-hover:scale-100"
+                onClick={handleAddToCart}
+                aria-label="Añadir al carrito"
+              >
+                <ShoppingCart className="h-5 w-5" />
+              </Button>
+              <Button
+                size="icon"
+                className="rounded-full bg-white text-gray-800 hover:bg-gray-100 transition-all duration-200 delay-100 scale-0 group-hover:scale-100"
+                onClick={handleAddToWishlist}
+                aria-label="Añadir a la lista de deseos"
+              >
+                <Heart className="h-5 w-5" />
+              </Button>
+              <Button
+                size="icon"
+                className="rounded-full bg-white text-gray-800 hover:bg-gray-100 transition-all duration-200 delay-200 scale-0 group-hover:scale-100"
+                asChild
+                aria-label="Ver detalles del producto"
+              >
+                <Link href={`/productos/${product.id}`}>
+                  <Eye className="h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        <CardContent className="p-4 text-center">
+          <h3 className="text-lg font-semibold truncate">{product.name}</h3>
+          <p className="text-muted-foreground text-sm">{product.category}</p>
+          <p className="text-xl font-bold mt-2">${product.price.toFixed(2)}</p>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
-          <Button
-            onClick={handleAddToCart}
-            className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white"
-          >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Añadir al Carrito
-          </Button>
-        </CardFooter>
       </Card>
-    </motion.div>
+    </Link>
   )
 }

@@ -1,29 +1,18 @@
-"use client"
-
-import { Loader2 } from 'lucide-react'
 import { cn } from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 
 interface LoadingSpinnerProps {
-  message?: string
-  size?: "sm" | "md" | "lg"
   className?: string
+  size?: "sm" | "md" | "lg"
 }
 
-export function LoadingSpinner({ message, size = "md", className }: LoadingSpinnerProps) {
-  const spinnerSizeClass = {
-    sm: "h-6 w-6",
-    md: "h-8 w-8",
-    lg: "h-12 w-12",
-  }[size]
-
+export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) {
+  const sizeClasses = {
+    sm: "h-4 w-4",
+    md: "h-6 w-6",
+    lg: "h-8 w-8",
+  }
   return (
-    <div className={cn("flex flex-col items-center justify-center", className)}>
-      <Loader2 className={cn("animate-spin text-[#5D1A1D]", spinnerSizeClass)} />
-      {message && (
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {message}
-        </p>
-      )}
-    </div>
+    <Loader2 className={cn("animate-spin text-primary", sizeClasses[size], className)} />
   )
 }

@@ -1,74 +1,89 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
-import { handleLogin } from '@/app/actions'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useToast } from '@/hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
-function LoginButton() {
-  const { pending } = useFormStatus()
+export function AdminLogin() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoggingIn(true)
+
+    // Simulate API call for admin login
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    if (email === 'admin@717store.com' && password === 'adminpassword') {
+      toast({
+        title: "Inicio de Sesión Exitoso",
+        description: "Bienvenido al panel de administración.",
+        variant: "default",
+      })
+      router.push('/admin') // Redirect to admin dashboard
+    } else {
+      toast({
+        title: "Error de Inicio de Sesión",
+        description: "Credenciales incorrectas. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      })
+    }
+    setIsLoggingIn(false)
+  }
+
   return (
-    <Button type="submit" className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white" disabled={pending}>
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Iniciando Sesión...
-        </>
-      ) : (
-        "Iniciar Sesión"
-      )}
-    </Button>
-  )
-}
-
-export function AdminLogin({ onLogin }: { onLogin: () => void }) {
-  const [state, formAction] = useFormState(handleLogin, null)
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <Card className="w-full max-w-md bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center text-white">
-            Admin Login
-          </CardTitle>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-950">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold">Acceso de Administrador</CardTitle>
+          <CardDescription>Ingresa tus credenciales para acceder al panel de administración.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-gray-700 border-gray-600 text-white"
-                placeholder="admin@717store.com"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">Contraseña</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-gray-700 border-gray-600 text-white"
-                placeholder="••••••••"
               />
             </div>
-            {state?.error && (
-              <div className="text-red-400 text-sm">{state.error}</div>
-            )}
-            <LoginButton />
+            <Button type="submit" className="w-full" disabled={isLoggingIn}>
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Iniciando Sesión...
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </Button>
           </form>
         </CardContent>
       </Card>
     </div>
   )
 }
-
-export default AdminLogin

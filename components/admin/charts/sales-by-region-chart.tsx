@@ -1,42 +1,37 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-const data = [
-  { region: "Bogotá", sales: 2400 },
-  { region: "Medellín", sales: 1398 },
-  { region: "Cali", sales: 9800 },
-  { region: "Barranquilla", sales: 3908 },
-  { region: "Cartagena", sales: 4800 },
+const salesByRegionData = [
+  { region: "Norte", sales: 15000 },
+  { region: "Centro", sales: 22000 },
+  { region: "Sur", sales: 18000 },
+  { region: "Este", sales: 10000 },
+  { region: "Oeste", sales: 13000 },
 ]
 
 export function SalesByRegionChart() {
   return (
-    <CardHeader>
-      <CardTitle className="text-white">Ventas por Región</CardTitle>
-      <CardContent className="pt-2">
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} layout="horizontal">
-            <XAxis type="number" stroke="#888888" fontSize={12} />
-            <YAxis 
-              dataKey="region" 
-              type="category" 
-              stroke="#888888" 
-              fontSize={12}
-              width={80}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1f2937', 
-                border: '1px solid #374151',
-                borderRadius: '8px'
-              }}
-            />
-            <Bar dataKey="sales" fill="#4A1518" radius={[0, 4, 4, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </CardHeader>
+    <ChartContainer
+      config={{
+        sales: {
+          label: "Ventas",
+          color: "hsl(var(--primary))",
+        },
+      }}
+      className="h-[300px] w-full"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={salesByRegionData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="region" />
+          <YAxis />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Legend />
+          <Bar dataKey="sales" fill="var(--color-sales)" name="Ventas por Región" />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartContainer>
   )
 }

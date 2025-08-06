@@ -1,18 +1,19 @@
-'use client'
+"use client"
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
-import { Product } from './products' // Assuming Product interface is defined here
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { useToast } from '@/hooks/use-toast'
+import { Product } from './types' // Assuming you have a types file for Product
 
 interface CartItem extends Product {
   quantity: number
-  size: string
+  selectedSize?: string
 }
 
 interface CartContextType {
   cartItems: CartItem[]
-  addToCart: (item: Omit<CartItem, 'id'> & { id: string }) => void
-  removeFromCart: (productId: string, size: string) => void
-  updateQuantity: (productId: string, size: string, newQuantity: number) => void
+  addToCart: (product: Product, quantity?: number, selectedSize?: string) => void
+  removeFromCart: (productId: string, selectedSize?: string) => void
+  updateQuantity: (productId: string, newQuantity: number, selectedSize?: string) => void
   clearCart: () => void
   cartTotal: number
   cartItemCount: number
@@ -20,73 +21,112 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const { toast } = useToast()
 
   // Load cart from localStorage on initial mount
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart')
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart))
+    try {
+      const storedCart = localStorage.getItem('717_cart')
+      if (storedCart) {
+        setCartItems(JSON.parse(storedCart))
+      }
+    } catch (error) {
+      console.error("Failed to load cart from localStorage:", error)
+      // Optionally clear corrupted cart or show an error to the user
     }
   }, [])
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems))
-  }, [cartItems])
+    try {
+      localStorage.setItem('717_cart', JSON.stringify(cartItems))
+    } catch (error) {
+      console.error("Failed to save cart to localStorage:", error)
+      toast({
+        title: "Error en el Carrito",
+        description: "No se pudo guardar el carrito. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      })
+    }
+  }, [cartItems, toast])
 
-  const addToCart = useCallback((item: Omit<CartItem, 'id'> & { id: string }) => {
-    setCartItems((prevItems) => {
+  const addToCart = useCallback((product: Product, quantityToAdd: number = 1, selectedSize?: string) => {
+    setCartItems(prevItems => {
       const existingItemIndex = prevItems.findIndex(
-        (i) => i.id === item.id && i.size === item.size
+        item => item.id === product.id && item.selectedSize === selectedSize
       )
 
       if (existingItemIndex > -1) {
         const updatedItems = [...prevItems]
-        updatedItems[existingItemIndex].quantity += item.quantity
+        updatedItems[existingItemIndex].quantity += quantityToAdd
         return updatedItems
       } else {
-        return [...prevItems, { ...item, quantity: item.quantity }]
+        return [...prevItems, { ...product, quantity: quantityToAdd, selectedSize }]
       }
     })
-  }, [])
+    toast({
+      title: "Producto Añadido",
+      description: `${product.name} ha sido añadido al carrito.`,
+      variant: "default",
+    })
+  }, [toast])
 
-  const removeFromCart = useCallback((productId: string, size: string) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => !(item.id === productId && item.size === size))
-    )
-  }, [])
+  const removeFromCart = useCallback((productId: string, selectedSize?: string) => {
+    setCartItems(prevItems => {
+      const updatedItems = prevItems.filter(
+        item => !(item.id === productId && item.selectedSize === selectedSize)
+      )
+      toast({
+        title: "Producto Eliminado",
+        description: "El producto ha sido eliminado del carrito.",
+        variant: "default",
+      })
+      return updatedItems
+    })
+  }, [toast])
 
-  const updateQuantity = useCallback((productId: string, size: string, newQuantity: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === productId && item.size === size
-          ? { ...item, quantity: newQuantity > 0 ? newQuantity : 1 }
+  const updateQuantity = useCallback((productId: string, newQuantity: number, selectedSize?: string) => {
+    setCartItems(prevItems => {
+      const updatedItems = prevItems.map(item =>
+        (item.id === productId && item.selectedSize === selectedSize)
+          ? { ...item, quantity: Math.max(1, newQuantity) } // Ensure quantity is at least 1
           : item
       )
-    )
+      return updatedItems
+    })
   }, [])
 
   const clearCart = useCallback(() => {
     setCartItems([])
-  }, [])
+    toast({
+      title: "Carrito Vaciado",
+      description: "Todos los productos han sido eliminados del carrito.",
+      variant: "default",
+    })
+  }, [toast])
 
-  const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
-  const cartItemCount = cartItems.reduce((count, item) => count + item.quantity, 0)
+  const cartTotal = React.useMemo(() => {
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+  }, [cartItems])
+
+  const cartItemCount = React.useMemo(() => {
+    return cartItems.reduce((count, item) => count + item.quantity, 0)
+  }, [cartItems])
+
+  const value = React.useMemo(() => ({
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartTotal,
+    cartItemCount,
+  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartItemCount])
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        cartTotal,
-        cartItemCount,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   )

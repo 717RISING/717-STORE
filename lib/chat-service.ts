@@ -3,6 +3,9 @@
 
 'use server'
 
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
+
 interface ChatMessage {
   id: string
   text: string
@@ -38,7 +41,7 @@ export class ChatService {
 
     const botResponse: ChatMessage = {
       id: (Date.now() + 1).toString(),
-      text: this.generateBotResponse(text),
+      text: await this.generateBotResponse(text),
       sender: 'bot',
       timestamp: new Date()
     }
@@ -47,23 +50,17 @@ export class ChatService {
     return botResponse
   }
 
-  private generateBotResponse(userInput: string): string {
-    const input = userInput.toLowerCase()
-    
-    if (input.includes('envío') || input.includes('envio')) {
-      return 'Los envíos nacionales tardan entre 3-7 días hábiles. ¡Envío gratis en compras superiores a $200.000!'
+  private async generateBotResponse(userInput: string): Promise<string> {
+    try {
+      const { text } = await generateText({
+        model: openai("gpt-4o"), // Using GPT-4o model
+        prompt: `El usuario dice: "${userInput}". Responde como un asistente de soporte amigable para una tienda de streetwear llamada "717 Store". Sé conciso y útil.`,
+      })
+      return text
+    } catch (error) {
+      console.error("Error generating text with AI SDK:", error)
+      return 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto. ¿Hay algo más en lo que pueda ayudarte?'
     }
-    if (input.includes('devolución') || input.includes('devolucion')) {
-      return 'Aceptamos devoluciones dentro de 30 días. El producto debe estar sin usar y con etiquetas originales.'
-    }
-    if (input.includes('talla') || input.includes('size')) {
-      return 'Tenemos tallas desde S hasta XXL. Puedes consultar nuestra guía de tallas en cada producto.'
-    }
-    if (input.includes('precio') || input.includes('costo')) {
-      return 'Nuestros precios van desde $89.000. ¿Hay algún producto específico que te interese?'
-    }
-    
-    return 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto. ¿Hay algo más en lo que pueda ayudarte?'
   }
 
   getMessages(): ChatMessage[] {
@@ -154,7 +151,6 @@ Si estás entre dos tallas, elige la mayor para mayor comodidad.`
 
 💰 **Otros:**
 • Efecty, Baloto
-• Consignación bancaria
 • Contra entrega (+$5.000)
 
 🔒 **100% Seguro** - Transacciones encriptadas`

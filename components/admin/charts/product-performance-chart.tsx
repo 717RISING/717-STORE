@@ -1,45 +1,46 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
+import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-const data = [
-  { name: "Camisetas", value: 400, color: "#4A1518" },
-  { name: "Hoodies", value: 300, color: "#6B1E22" },
-  { name: "Accesorios", value: 200, color: "#8B2635" },
-  { name: "Otros", value: 100, color: "#AB2E48" },
+const productPerformanceData = [
+  { name: "Camisetas", value: 40000 },
+  { name: "Pantalones", value: 30000 },
+  { name: "Chaquetas", value: 20000 },
+  { name: "Accesorios", value: 10000 },
 ]
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'] // Example colors
 
 export function ProductPerformanceChart() {
   return (
-    <CardHeader>
-      <CardTitle className="text-white">Rendimiento por Categoría</CardTitle>
-      <CardContent className="pt-2">
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={120}
-              paddingAngle={5}
-              dataKey="value"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1f2937', 
-                border: '1px solid #374151',
-                borderRadius: '8px'
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </CardHeader>
+    <ChartContainer
+      config={{
+        value: {
+          label: "Ingresos",
+        },
+      }}
+      className="h-[300px] w-full"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={productPerformanceData}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={100}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {productPerformanceData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </ChartContainer>
   )
 }

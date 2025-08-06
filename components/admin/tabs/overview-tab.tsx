@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, Users, Package, TrendingUp } from 'lucide-react'
 import { SalesChart } from '@/components/admin/charts/sales-chart'
 import { VisitorsChart } from '@/components/admin/charts/visitors-chart'
@@ -13,121 +13,124 @@ import { CustomerRetentionChart } from '@/components/admin/charts/customer-reten
 
 export function OverviewTab() {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Ventas Totales</CardTitle>
-          <DollarSign className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">$45,231.89</div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">+20.1% desde el mes pasado</p>
-        </CardContent>
-      </Card>
-      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Clientes</CardTitle>
-          <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">+2350</div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">+180.1% desde el mes pasado</p>
-        </CardContent>
-      </Card>
-      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Productos Vendidos</CardTitle>
-          <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">12,234</div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">+19% desde el mes pasado</p>
-        </CardContent>
-      </Card>
-      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Tasa de Conversión</CardTitle>
-          <TrendingUp className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">+3.5%</div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">+0.5% desde el mes pasado</p>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">+20.1% desde el mes pasado</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Clientes</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+2350</div>
+            <p className="text-xs text-muted-foreground">+180.1% desde el mes pasado</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Productos Vendidos</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12,234</div>
+            <p className="text-xs text-muted-foreground">+19% desde el mes pasado</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Rendimiento</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+5.7%</div>
+            <p className="text-xs text-muted-foreground">Aumento en la tasa de conversión</p>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ventas (Últimos 6 meses)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Visitantes del Sitio</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <VisitorsChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Rendimiento de Productos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductPerformanceChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ventas por Región</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesByRegionChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ventas por Producto</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesByProductChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ventas por Canal</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesByChannelChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Adquisición de Clientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CustomerAcquisitionChart />
-        </CardContent>
-      </Card>
-
-      <Card className="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Retención de Clientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CustomerRetentionChart />
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas por Mes</CardTitle>
+            <CardDescription>Un resumen de las ventas totales por mes.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SalesChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Visitantes del Sitio</CardTitle>
+            <CardDescription>Número de visitantes únicos y vistas de página.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <VisitorsChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Rendimiento de Productos</CardTitle>
+            <CardDescription>Los productos más vendidos y su contribución a los ingresos.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProductPerformanceChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas por Región</CardTitle>
+            <CardDescription>Distribución geográfica de las ventas.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SalesByRegionChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas por Producto</CardTitle>
+            <CardDescription>Desglose de ventas por categoría de producto.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SalesByProductChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas por Canal</CardTitle>
+            <CardDescription>Rendimiento de ventas a través de diferentes canales.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SalesByChannelChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Adquisición de Clientes</CardTitle>
+            <CardDescription>Cómo se adquieren nuevos clientes.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CustomerAcquisitionChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Retención de Clientes</CardTitle>
+            <CardDescription>Tasa de retención de clientes a lo largo del tiempo.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CustomerRetentionChart />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
-
-export default OverviewTab

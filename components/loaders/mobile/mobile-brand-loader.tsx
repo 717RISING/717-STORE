@@ -1,21 +1,22 @@
-import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function MobileBrandLoader() {
   return (
-    <Card className="w-full mx-auto bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 p-4">
-      <div className="flex flex-col items-center space-y-3">
-        <Skeleton className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700" />
-        <Skeleton className="h-7 w-2/3 bg-gray-200 dark:bg-gray-700" />
-        <Skeleton className="h-4 w-full bg-gray-200 dark:bg-gray-700" />
-        <Skeleton className="h-4 w-5/6 bg-gray-200 dark:bg-gray-700" />
-        <div className="flex gap-3 pt-3">
-          <Skeleton className="h-9 w-20 bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-9 w-20 bg-gray-200 dark:bg-gray-700" />
-        </div>
+    <div className="flex flex-col items-center p-4 space-y-6">
+      <Skeleton className="h-24 w-24 rounded-full" />
+      <Skeleton className="h-8 w-2/3" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-[90%]" />
+      <Skeleton className="h-4 w-[80%]" />
+      <div className="grid grid-cols-2 gap-4 w-full">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex flex-col space-y-2">
+            <Skeleton className="h-[150px] w-full rounded-md" />
+            <Skeleton className="h-4 w-[80%]" />
+            <Skeleton className="h-4 w-[60%]" />
+          </div>
+        ))}
       </div>
-    </Card>
+    </div>
   )
 }
-
-export default MobileBrandLoader

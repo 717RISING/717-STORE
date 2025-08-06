@@ -1,59 +1,72 @@
-'use client'
+"use client"
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css' // Import NProgress CSS
 
 interface PageTransitionContextType {
-  startTransition: (url: string) => void
-  isTransitioning: boolean
+  isTransitioning: boolean;
+  startTransition: () => void;
+  endTransition: () => void;
 }
 
 const PageTransitionContext = createContext<PageTransitionContextType | undefined>(undefined)
 
-export function PageTransitionProvider({ children }: { children: ReactNode }) {
-  const router = useRouter()
+export function PageTransitionProvider({ children }: { children: React.ReactNode }) {
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [currentPath, setCurrentPath] = useState('')
+  const pathname = usePathname()
+  const router = useRouter()
 
-  const startTransition = useCallback((url: string) => {
+  const startTransition = useCallback(() => {
     setIsTransitioning(true)
-    setCurrentPath(window.location.pathname) // Store current path before navigation
-    router.push(url)
-  }, [router])
+    NProgress.start()
+  }, [])
 
-  // Listen for route changes to end the transition
-  React.useEffect(() => {
+  const endTransition = useCallback(() => {
+    setIsTransitioning(false)
+    NProgress.done()
+  }, [])
+
+  useEffect(() => {
+    // This effect handles route changes initiated by Next.js Link or router.push/replace
+    const handleRouteChangeStart = (url: string) => {
+      if (url !== pathname) {
+        startTransition()
+      }
+    }
+
     const handleRouteChangeComplete = () => {
-      setIsTransitioning(false)
+      endTransition()
     }
 
-    // Next.js 13+ App Router doesn't have router.events
-    // We rely on the component unmount/mount or a global state change
-    // For a simple example, we'll just set it to false after a short delay
-    // In a real app, you might use a custom loading indicator or a more sophisticated state management
-    if (isTransitioning) {
-      const timer = setTimeout(() => {
-        setIsTransitioning(false)
-      }, 500) // Simulate transition duration
-      return () => clearTimeout(timer)
+    const handleRouteChangeError = () => {
+      endTransition()
     }
-  }, [isTransitioning])
+
+    // NProgress configuration (optional, can be moved to a separate file)
+    NProgress.configure({ showSpinner: false, trickleSpeed: 200, minimum: 0.1 });
+
+    // Attach event listeners for Next.js router events
+    // Note: In App Router, these events are not directly exposed as in Pages Router.
+    // We simulate it by tracking pathname changes and using a global loading indicator.
+    // For a more robust solution, consider a custom router wrapper or a library.
+
+    // For now, we'll rely on the pathname change to trigger the transition state.
+    // The actual NProgress start/done will be managed by the ProgressBar component
+    // which listens to router events (if available) or simply by the PageLoader.
+
+    // This context primarily manages the `isTransitioning` state for child components.
+    // The ProgressBar component will handle the visual progress bar.
+
+    return () => {
+      // Clean up if necessary, though for App Router, direct router events are less common.
+    }
+  }, [pathname, startTransition, endTransition])
 
   return (
-    <PageTransitionContext.Provider value={{ startTransition, isTransitioning }}>
-      <AnimatePresence mode="wait" onExitComplete={() => setIsTransitioning(false)}>
-        <motion.div
-          key={currentPath} // Use currentPath as key to trigger exit/enter animations
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="min-h-screen flex flex-col" // Ensure it takes full height
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+    <PageTransitionContext.Provider value={{ isTransitioning, startTransition, endTransition }}>
+      {children}
     </PageTransitionContext.Provider>
   )
 }

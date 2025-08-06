@@ -1,24 +1,58 @@
-export function calculateSize(chest: number, waist: number, hip: number): string {
-  // Define size ranges (example values, adjust as needed)
-  const sizes = [
-    { name: 'XS', chest: [80, 85], waist: [65, 70], hip: [85, 90] },
-    { name: 'S', chest: [86, 91], waist: [71, 76], hip: [91, 96] },
-    { name: 'M', chest: [92, 97], waist: [77, 82], hip: [97, 102] },
-    { name: 'L', chest: [98, 103], waist: [83, 88], hip: [103, 108] },
-    { name: 'XL', chest: [104, 109], waist: [89, 94], hip: [109, 114] },
-  ]
+interface Measurements {
+  chest: number;
+  waist: number;
+  hips: number;
+  inseam: number;
+}
 
-  for (const size of sizes) {
-    const isChestMatch = chest >= size.chest[0] && chest <= size.chest[1]
-    const isWaistMatch = waist >= size.waist[0] && waist <= size.waist[1]
-    const isHipMatch = hip >= size.hip[0] && hip <= size.hip[1]
+// This is a simplified mock for demonstration.
+// Real size calculation would involve more complex logic and data.
+export function calculateSize(
+  gender: 'male' | 'female',
+  itemType: 'tshirt' | 'pants' | 'jacket',
+  measurements: Measurements
+): string {
+  const { chest, waist, hips, inseam } = measurements;
 
-    if (isChestMatch && isWaistMatch && isHipMatch) {
-      return size.name
+  if (isNaN(chest) || isNaN(waist) || isNaN(hips) || isNaN(inseam)) {
+    return "Medidas inválidas";
+  }
+
+  if (gender === 'male') {
+    if (itemType === 'tshirt') {
+      if (chest < 90) return 'S';
+      if (chest >= 90 && chest < 100) return 'M';
+      if (chest >= 100 && chest < 110) return 'L';
+      return 'XL';
+    } else if (itemType === 'pants') {
+      if (waist < 75) return 'S';
+      if (waist >= 75 && waist < 85) return 'M';
+      if (waist >= 85 && waist < 95) return 'L';
+      return 'XL';
+    } else if (itemType === 'jacket') {
+      if (chest < 95) return 'S';
+      if (chest >= 95 && chest < 105) return 'M';
+      if (chest >= 105 && chest < 115) return 'L';
+      return 'XL';
+    }
+  } else if (gender === 'female') {
+    if (itemType === 'tshirt') {
+      if (chest < 85) return 'S';
+      if (chest >= 85 && chest < 95) return 'M';
+      if (chest >= 95 && chest < 105) return 'L';
+      return 'XL';
+    } else if (itemType === 'pants') {
+      if (waist < 65) return 'S';
+      if (waist >= 65 && waist < 75) return 'M';
+      if (waist >= 75 && waist < 85) return 'L';
+      return 'XL';
+    } else if (itemType === 'jacket') {
+      if (chest < 90) return 'S';
+      if (chest >= 90 && chest < 100) return 'M';
+      if (chest >= 100 && chest < 110) return 'L';
+      return 'XL';
     }
   }
 
-  // If no exact match, find the closest one or suggest custom
-  // For simplicity, we'll just return a generic message if no match
-  return 'No se encontró una talla exacta. Considera una talla personalizada o consulta la tabla.'
+  return 'N/A'; // No recommendation found
 }

@@ -1,50 +1,37 @@
-"use client"
-
 import { useState, useCallback } from 'react'
+import { generateChatResponse } from '@/lib/chat-service' // Assuming this function exists
 
 interface Message {
-  id: string
-  text: string
-  sender: 'user' | 'bot'
-  timestamp: Date
+  role: 'user' | 'assistant'
+  content: string
 }
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [isTyping, setIsTyping] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const sendMessage = useCallback(async (text: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      sender: 'user',
-      timestamp: new Date()
+    const newUserMessage: Message = { role: 'user', content: text }
+    setMessages((prevMessages) => [...prevMessages, newUserMessage])
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const assistantResponse = await generateChatResponse(text)
+      const newAssistantMessage: Message = { role: 'assistant', content: assistantResponse }
+      setMessages((prevMessages) => [...prevMessages, newAssistantMessage])
+    } catch (err) {
+      console.error("Error sending message:", err)
+      setError("Lo siento, no pude procesar tu solicitud en este momento. Por favor, inténtalo de nuevo más tarde.")
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: 'assistant', content: "Lo siento, hubo un error al procesar tu mensaje." }
+      ])
+    } finally {
+      setIsLoading(false)
     }
-
-    setMessages(prev => [...prev, userMessage])
-    setIsTyping(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto.',
-        sender: 'bot',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, botMessage])
-      setIsTyping(false)
-    }, 1000)
   }, [])
 
-  const clearMessages = useCallback(() => {
-    setMessages([])
-  }, [])
-
-  return {
-    messages,
-    isTyping,
-    sendMessage,
-    clearMessages
-  }
+  return { messages, sendMessage, isLoading, error }
 }

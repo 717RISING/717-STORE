@@ -1,124 +1,128 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Card, CardContent } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Loader2 } from 'lucide-react'
 
 interface PaymentFormProps {
-  onSubmit: (data: any) => void
-  initialData?: any
+  onSubmit: (data: any) => void // Replace 'any' with your PaymentDetails type
 }
 
-export default function PaymentForm({ onSubmit, initialData }: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || 'credit-card')
-  const [cardNumber, setCardNumber] = useState(initialData?.cardNumber || '')
-  const [cardName, setCardName] = useState(initialData?.cardName || '')
-  const [expiryDate, setExpiryDate] = useState(initialData?.expiryDate || '')
-  const [cvv, setCvv] = useState(initialData?.cvv || '')
-  const [errors, setErrors] = useState<any>({})
+export function PaymentForm({ onSubmit }: PaymentFormProps) {
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardName, setCardName] = useState('')
+  const [expiryMonth, setExpiryMonth] = useState('')
+  const [expiryYear, setExpiryYear] = useState('')
+  const [cvc, setCvc] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const validate = () => {
-    const newErrors: any = {}
-    if (paymentMethod === 'credit-card') {
-      if (!cardNumber) newErrors.cardNumber = 'Número de tarjeta es requerido.'
-      else if (!/^\d{16}$/.test(cardNumber)) newErrors.cardNumber = 'Número de tarjeta inválido (16 dígitos).'
-      if (!cardName) newErrors.cardName = 'Nombre en la tarjeta es requerido.'
-      if (!expiryDate) newErrors.expiryDate = 'Fecha de vencimiento es requerida.'
-      else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryDate)) newErrors.expiryDate = 'Formato de fecha inválido (MM/AA).'
-      if (!cvv) newErrors.cvv = 'CVV es requerido.'
-      else if (!/^\d{3,4}$/.test(cvv)) newErrors.cvv = 'CVV inválido (3 o 4 dígitos).'
-    }
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 10 }, (_, i) => (currentYear + i).toString())
+  const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (validate()) {
-      onSubmit({ paymentMethod, cardNumber, cardName, expiryDate, cvv })
+    setIsSubmitting(true)
+
+    // Basic validation
+    if (!cardNumber || !cardName || !expiryMonth || !expiryYear || !cvc) {
+      alert('Por favor, completa todos los campos de pago.')
+      setIsSubmitting(false)
+      return
     }
+
+    // Simulate payment tokenization/API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    onSubmit({
+      cardNumber: cardNumber.replace(/\s/g, ''), // Remove spaces
+      cardName,
+      expiryMonth,
+      expiryYear,
+      cvc,
+    })
+    setIsSubmitting(false)
   }
 
   return (
-    <Card className="p-6 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-      <CardContent className="space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col space-y-2">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="credit-card" id="credit-card" />
-              <Label htmlFor="credit-card" className="text-gray-700 dark:text-gray-300">Tarjeta de Crédito</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="paypal" id="paypal" />
-              <Label htmlFor="paypal" className="text-gray-700 dark:text-gray-300">PayPal</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="bank-transfer" id="bank-transfer" />
-              <Label htmlFor="bank-transfer" className="text-gray-700 dark:text-gray-300">Transferencia Bancaria</Label>
-            </div>
-          </RadioGroup>
-
-          {paymentMethod === 'credit-card' && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber" className="text-gray-700 dark:text-gray-300">Número de Tarjeta</Label>
-                <Input
-                  id="cardNumber"
-                  type="text"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="XXXX XXXX XXXX XXXX"
-                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.cardNumber && <p className="text-red-500 text-sm">{errors.cardNumber}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardName" className="text-gray-700 dark:text-gray-300">Nombre en la Tarjeta</Label>
-                <Input
-                  id="cardName"
-                  type="text"
-                  value={cardName}
-                  onChange={(e) => setCardName(e.target.value)}
-                  placeholder="Nombre Apellido"
-                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.cardName && <p className="text-red-500 text-sm">{errors.cardName}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate" className="text-gray-700 dark:text-gray-300">Fecha de Vencimiento (MM/AA)</Label>
-                <Input
-                  id="expiryDate"
-                  type="text"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  placeholder="MM/AA"
-                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cvv" className="text-gray-700 dark:text-gray-300">CVV</Label>
-                <Input
-                  id="cvv"
-                  type="text"
-                  value={cvv}
-                  onChange={(e) => setCvv(e.target.value)}
-                  placeholder="XXX"
-                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-                {errors.cvv && <p className="text-red-500 text-sm">{errors.cvv}</p>}
-              </div>
-            </div>
-          )}
-
-          <Button type="submit" className="w-full bg-[#4A1518] hover:bg-[#6B1E22] text-white">
-            Continuar al Resumen
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="cardNumber">Número de Tarjeta</Label>
+        <Input
+          id="cardNumber"
+          type="text"
+          placeholder="XXXX XXXX XXXX XXXX"
+          value={cardNumber}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, '').substring(0, 16)
+            setCardNumber(value.replace(/(\d{4})(?=\d)/g, '$1 '))
+          }}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
+        <Input
+          id="cardName"
+          type="text"
+          placeholder="Nombre Completo"
+          value={cardName}
+          onChange={(e) => setCardName(e.target.value)}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="expiryMonth">Mes</Label>
+          <Select value={expiryMonth} onValueChange={setExpiryMonth} required>
+            <SelectTrigger id="expiryMonth">
+              <SelectValue placeholder="MM" />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map(month => (
+                <SelectItem key={month} value={month}>{month}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="expiryYear">Año</Label>
+          <Select value={expiryYear} onValueChange={setExpiryYear} required>
+            <SelectTrigger id="expiryYear">
+              <SelectValue placeholder="AAAA" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map(year => (
+                <SelectItem key={year} value={year}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="cvc">CVC</Label>
+          <Input
+            id="cvc"
+            type="text"
+            placeholder="XXX"
+            value={cvc}
+            onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').substring(0, 4))}
+            required
+          />
+        </div>
+      </div>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Procesando Pago...
+          </>
+        ) : (
+          'Pagar Ahora'
+        )}
+      </Button>
+    </form>
   )
 }

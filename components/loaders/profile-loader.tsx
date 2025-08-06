@@ -1,36 +1,28 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export function DesktopProfileLoader() {
+export function ProfileLoader() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Sidebar */}
-      <Card className="bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 h-64">
-        <CardHeader>
-          <Skeleton className="h-6 w-1/2 bg-gray-200 dark:bg-gray-700" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-8 w-full bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-8 w-full bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-8 w-full bg-gray-200 dark:bg-gray-700" />
-        </CardContent>
-      </Card>
+    <div className="space-y-6 p-4">
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-16 w-16 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-[200px]" />
+          <Skeleton className="h-4 w-[150px]" />
+        </div>
+      </div>
 
-      {/* Main Content */}
-      <Card className="lg:col-span-2 bg-white dark:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-700 h-[500px]">
-        <CardHeader>
-          <Skeleton className="h-8 w-1/3 bg-gray-200 dark:bg-gray-700" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-10 w-full bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-10 w-full bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-10 w-full bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-10 w-full bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="h-12 w-1/2 bg-gray-200 dark:bg-gray-700" />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-[150px]" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-[180px]" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
     </div>
   )
 }
-
-export default DesktopProfileLoader
